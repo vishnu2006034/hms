@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Patients{% endblock %}
+{% block page_title %}Patients <span class="badge bg-primary">{{ total }}</span>{% endblock %}
+
+{% block page_actions %}
+<form class="d-flex me-2" method="GET">
+    <div class="input-group input-group-sm">
+        <input type="text" class="form-control" name="search" placeholder="Search patients..." value="{{ search }}">
+        <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+        {% if search %}<a href="{{ url_for('modules.patients_list') }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></a>{% endif %}
+    </div>
+</form>
+<a href="{{ url_for('modules.patients_create') }}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg"></i> New Patient
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Patient ID</th>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Phone</th>
+                    <th>Blood Group</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in patients %}
+                <tr>
+                    <td><code>PAT-{{ p.id[:8] | upper }}</code></td>
+                    <td><strong>{{ p.data.get('first_name', '') }} {{ p.data.get('last_name', '') }}</strong></td>
+                    <td>{{ p.data.get('gender', '-') }}</td>
+                    <td>{{ p.data.get('phone', '-') }}</td>
+                    <td><span class="badge bg-danger">{{ p.data.get('blood_group', '-') }}</span></td>
+                    <td>
+                        {% set status = p.data.get('status', 'Active') %}
+                        <span class="badge {% if status == 'Active' %}bg-success{% elif status == 'Discharged' %}bg-secondary{% elif status == 'Transferred' %}bg-warning{% else %}bg-dark{% endif %}">
+                            {{ status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('modules.patients_detail', record_id=p.id) }}" class="btn btn-sm btn-outline-primary" title="View">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{{ url_for('modules.patients_edit', record_id=p.id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-muted py-4">No patients found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% include 'components/pagination.html' %}
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Visit Detail{% endblock %}
+{% block page_title %}Visit Detail{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('modules.visits_edit', record_id=visit.id) }}" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i> Edit</a>
+<form method="POST" action="{{ url_for('modules.visits_delete', record_id=visit.id) }}" class="d-inline" data-confirm="Delete this visit?">
+    <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button>
+</form>
+<a href="{{ url_for('modules.visits_list') }}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Visit {{ visit.data.get('visit_id', 'N/A') }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6"><strong>Patient:</strong> {{ visit.data.get('patient_lookup', '-') }}</div>
+                    <div class="col-md-6"><strong>Doctor:</strong> {{ visit.data.get('doctor_lookup', '-') }}</div>
+                    <div class="col-md-6"><strong>Date:</strong> {{ visit.data.get('visit_date', '-') }}</div>
+                    <div class="col-md-6"><strong>Department:</strong> <span class="badge bg-info">{{ visit.data.get('department', '-') }}</span></div>
+                    <div class="col-md-6">
+                        <strong>Status:</strong>
+                        {% set status = visit.data.get('status', 'Scheduled') %}
+                        <span class="badge {% if status == 'Completed' %}bg-success{% elif status == 'In-Progress' %}bg-warning{% elif status == 'Cancelled' %}bg-danger{% else %}bg-primary{% endif %}">{{ status }}</span>
+                    </div>
+                    <div class="col-12"><strong>Chief Complaint:</strong> {{ visit.data.get('chief_complaint', '-') }}</div>
+                    <div class="col-12"><strong>Diagnosis:</strong> {{ visit.data.get('diagnosis', '-') }}</div>
+                    <div class="col-12"><strong>Treatment:</strong> {{ visit.data.get('treatment', '-') }}</div>
+                    <div class="col-12"><strong>Notes:</strong> {{ visit.data.get('notes', '-') }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header"><strong>Vitals</strong></div>
+            <div class="card-body">
+                <p><strong>Blood Pressure:</strong> {{ visit.data.get('vitals_bp', '-') }}</p>
+                <p><strong>Temperature:</strong> {{ visit.data.get('vitals_temp', '-') }}</p>
+                <p><strong>Pulse Rate:</strong> {{ visit.data.get('vitals_pulse', '-') }}</p>
+                <p class="mb-0"><strong>Weight:</strong> {{ visit.data.get('vitals_weight', '-') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

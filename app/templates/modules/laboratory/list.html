@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Laboratory{% endblock %}
+{% block page_title %}Laboratory Tests <span class="badge bg-info">{{ total }}</span>{% endblock %}
+
+{% block page_actions %}
+<form class="d-flex me-2" method="GET">
+    <div class="input-group input-group-sm">
+        <input type="text" class="form-control" name="search" placeholder="Search lab tests..." value="{{ search }}">
+        <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+        {% if search %}<a href="{{ url_for('modules.laboratory_list') }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></a>{% endif %}
+    </div>
+</form>
+<a href="{{ url_for('modules.laboratory_create') }}" class="btn btn-info btn-sm">
+    <i class="bi bi-plus-lg"></i> New Test
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Test ID</th>
+                    <th>Patient</th>
+                    <th>Test Name</th>
+                    <th>Type</th>
+                    <th>Priority</th>
+                    <th>Sample Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tests %}
+                <tr>
+                    <td><code>{{ t.data.get('test_id', 'N/A') }}</code></td>
+                    <td>{{ t.data.get('patient_lookup', '-') }}</td>
+                    <td><strong>{{ t.data.get('test_name', '') }}</strong></td>
+                    <td><span class="badge bg-info">{{ t.data.get('test_type', '-') }}</span></td>
+                    <td>
+                        {% set pri = t.data.get('priority', 'Routine') %}
+                        <span class="badge {% if pri == 'Emergency' %}bg-danger{% elif pri == 'Urgent' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                            {{ pri }}
+                        </span>
+                    </td>
+                    <td>{{ t.data.get('sample_date', '-') }}</td>
+                    <td>
+                        {% set status = t.data.get('status', 'Ordered') %}
+                        <span class="badge {% if status == 'Completed' %}bg-success{% elif status == 'In Progress' %}bg-warning text-dark{% elif status == 'Cancelled' %}bg-danger{% elif status == 'Sample Collected' %}bg-info{% else %}bg-primary{% endif %}">
+                            {{ status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('modules.laboratory_detail', record_id=t.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        <a href="{{ url_for('modules.laboratory_edit', record_id=t.id) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center text-muted py-4">No lab tests found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% include 'components/pagination.html' %}
+{% endblock %}

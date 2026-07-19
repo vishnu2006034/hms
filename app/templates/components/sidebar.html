@@ -1,0 +1,43 @@
+<nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse" style="padding-top: 56px;">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link text-light {% if request.endpoint == 'main.dashboard' %}active{% endif %}" href="{{ url_for('main.dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light {% if 'patients' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('modules.patients_list') }}">
+                    <i class="bi bi-people"></i> Patients
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light {% if 'visits' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('modules.visits_list') }}">
+                    <i class="bi bi-clipboard2-pulse"></i> Visits
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light {% if 'prescriptions' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('modules.prescriptions_list') }}">
+                    <i class="bi bi-capsule"></i> Prescriptions
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light {% if 'laboratory' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('modules.laboratory_list') }}">
+                    <i class="bi bi-lab"></i> Laboratory
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light {% if 'inventory' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('modules.inventory_list') }}">
+                    <i class="bi bi-box-seam"></i> Inventory
+                </a>
+            </li>
+            {% if current_user.role == 'Admin' %}
+            <li class="nav-item">
+                <a class="nav-link text-light {% if 'users' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('modules.users_list') }}">
+                    <i class="bi bi-person-gear"></i> Staff
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>

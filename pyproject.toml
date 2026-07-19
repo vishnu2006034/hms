@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hospital-management-system"
+version = "0.1.0"
+description = "Hospital Management System using hogc-crud-engine."
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.0",
+    "hogc-crud-engine~=0.1",
+    "psycopg2-binary>=2.9",
+    "python-dotenv>=1.0",
+    "flask-wtf>=1.2",
+    "flask-sqlalchemy>=3.1",
+]
+
+[tool.uv.sources]
+hogc-crud-engine = { path = "../platform-crud-engine" }

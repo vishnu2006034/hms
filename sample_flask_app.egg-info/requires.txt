@@ -1,0 +1,5 @@
+flask>=3.0
+hogc-crud-engine~=0.1
+
+[postgres]
+psycopg2-binary>=2.9

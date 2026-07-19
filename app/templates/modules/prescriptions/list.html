@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Prescriptions{% endblock %}
+{% block page_title %}Prescriptions <span class="badge bg-warning text-dark">{{ total }}</span>{% endblock %}
+
+{% block page_actions %}
+<form class="d-flex me-2" method="GET">
+    <div class="input-group input-group-sm">
+        <input type="text" class="form-control" name="search" placeholder="Search prescriptions..." value="{{ search }}">
+        <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+        {% if search %}<a href="{{ url_for('modules.prescriptions_list') }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></a>{% endif %}
+    </div>
+</form>
+<a href="{{ url_for('modules.prescriptions_create') }}" class="btn btn-warning btn-sm">
+    <i class="bi bi-plus-lg"></i> New Prescription
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Rx ID</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Medication</th>
+                    <th>Dosage</th>
+                    <th>Frequency</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rx in prescriptions %}
+                <tr>
+                    <td><code>{{ rx.data.get('prescription_id', 'N/A') }}</code></td>
+                    <td>{{ rx.data.get('patient_lookup', '-') }}</td>
+                    <td>{{ rx.data.get('doctor_lookup', '-') }}</td>
+                    <td><strong>{{ rx.data.get('medication_name', '-') }}</strong></td>
+                    <td>{{ rx.data.get('dosage', '-') }}</td>
+                    <td>{{ rx.data.get('frequency', '-') }}</td>
+                    <td>
+                        {% set status = rx.data.get('status', 'Active') %}
+                        <span class="badge {% if status == 'Active' %}bg-success{% elif status == 'Completed' %}bg-secondary{% elif status == 'Cancelled' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                            {{ status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('modules.prescriptions_detail', record_id=rx.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        <a href="{{ url_for('modules.prescriptions_edit', record_id=rx.id) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center text-muted py-4">No prescriptions found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% include 'components/pagination.html' %}
+{% endblock %}

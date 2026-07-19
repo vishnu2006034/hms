@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if action == 'edit' else 'New' }} Staff{% endblock %}
+{% block page_title %}{{ 'Edit' if action == 'edit' else 'New' }} Staff Member{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Full Name *</label>
+                    <input type="text" class="form-control" name="full_name" required
+                           value="{{ user.data.get('full_name', '') if user else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email *</label>
+                    <input type="email" class="form-control" name="email" required
+                           value="{{ user.data.get('email', '') if user else '' }}">
+                </div>
+                {% if action == 'create' %}
+                <div class="col-md-6">
+                    <label class="form-label">Username *</label>
+                    <input type="text" class="form-control" name="username" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" name="password" value="password123">
+                    <small class="text-muted">Default: password123</small>
+                </div>
+                {% endif %}
+                <div class="col-md-4">
+                    <label class="form-label">Role *</label>
+                    <select class="form-select" name="role" required>
+                        {% for r in ['Admin', 'Doctor', 'Nurse', 'Pharmacist', 'Lab Technician'] %}
+                        <option value="{{ r }}" {{ 'selected' if user and user.data.get('role') == r }}>{{ r }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" class="form-control" name="phone"
+                           value="{{ user.data.get('phone', '') if user else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Department</label>
+                    <input type="text" class="form-control" name="department"
+                           value="{{ user.data.get('department', '') if user else '' }}">
+                </div>
+                {% if action == 'edit' %}
+                <div class="col-md-4">
+                    <label class="form-label">Active</label>
+                    <select class="form-select" name="is_active">
+                        <option value="true" {{ 'selected' if user and user.data.get('is_active') == 'true' }}>Yes</option>
+                        <option value="false" {{ 'selected' if user and user.data.get('is_active') == 'false' }}>No</option>
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> {{ 'Update' if action == 'edit' else 'Create' }} Staff
+                </button>
+                <a href="{{ url_for('modules.users_list') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

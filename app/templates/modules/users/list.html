@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Staff Management{% endblock %}
+{% block page_title %}Staff Management <span class="badge bg-primary">{{ total }}</span>{% endblock %}
+
+{% block page_actions %}
+<form class="d-flex me-2" method="GET">
+    <div class="input-group input-group-sm">
+        <input type="text" class="form-control" name="search" placeholder="Search staff..." value="{{ search }}">
+        <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+        {% if search %}<a href="{{ url_for('modules.users_list') }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></a>{% endif %}
+    </div>
+</form>
+<a href="{{ url_for('modules.users_create') }}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg"></i> New Staff
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td><strong>{{ u.data.get('full_name', '') }}</strong></td>
+                    <td>{{ u.data.get('email', '-') }}</td>
+                    <td>
+                        {% set role = u.data.get('role', '') %}
+                        <span class="badge {% if role == 'Admin' %}bg-danger{% elif role == 'Doctor' %}bg-primary{% elif role == 'Nurse' %}bg-success{% elif role == 'Pharmacist' %}bg-warning text-dark{% else %}bg-info{% endif %}">
+                            {{ role }}
+                        </span>
+                    </td>
+                    <td>{{ u.data.get('department', '-') }}</td>
+                    <td>
+                        {% set active = u.data.get('is_active', 'true') %}
+                        <span class="badge {% if active == 'true' %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ 'Active' if active == 'true' else 'Inactive' }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('modules.users_edit', record_id=u.id) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                        <form method="POST" action="{{ url_for('modules.users_delete', record_id=u.id) }}" class="d-inline"
+                              data-confirm="Delete this staff member?">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No staff found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% include 'components/pagination.html' %}
+{% endblock %}

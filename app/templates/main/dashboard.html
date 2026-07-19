@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card text-white bg-primary shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1 opacity-75">Total Patients</h6>
+                        <h2 class="mb-0">{{ stats.patients }}</h2>
+                    </div>
+                    <i class="bi bi-people fs-1 opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a href="{{ url_for('modules.patients_list') }}" class="text-white text-decoration-none small">
+                    View all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card text-white bg-success shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1 opacity-75">Visits</h6>
+                        <h2 class="mb-0">{{ stats.visits }}</h2>
+                    </div>
+                    <i class="bi bi-clipboard2-pulse fs-1 opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a href="{{ url_for('modules.visits_list') }}" class="text-white text-decoration-none small">
+                    View all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card text-white bg-warning shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1 opacity-75">Prescriptions</h6>
+                        <h2 class="mb-0">{{ stats.prescriptions }}</h2>
+                    </div>
+                    <i class="bi bi-capsule fs-1 opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a href="{{ url_for('modules.prescriptions_list') }}" class="text-white text-decoration-none small">
+                    View all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card text-white bg-info shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase mb-1 opacity-75">Lab Tests</h6>
+                        <h2 class="mb-0">{{ stats.lab }}</h2>
+                    </div>
+                    <i class="bi bi-lab fs-1 opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a href="{{ url_for('modules.laboratory_list') }}" class="text-white text-decoration-none small">
+                    View all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-person-plus text-primary fs-1"></i>
+                <h5 class="mt-2">New Patient</h5>
+                <p class="text-muted small">Register a new patient</p>
+                <a href="{{ url_for('modules.patients_create') }}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-plus-lg"></i> Add Patient
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-clipboard-plus text-success fs-1"></i>
+                <h5 class="mt-2">New Visit</h5>
+                <p class="text-muted small">Schedule a patient visit</p>
+                <a href="{{ url_for('modules.visits_create') }}" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-plus-lg"></i> New Visit
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-capsule text-warning fs-1"></i>
+                <h5 class="mt-2">Prescribe</h5>
+                <p class="text-muted small">Create a prescription</p>
+                <a href="{{ url_for('modules.prescriptions_create') }}" class="btn btn-outline-warning btn-sm">
+                    <i class="bi bi-plus-lg"></i> New Rx
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

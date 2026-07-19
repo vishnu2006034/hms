@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if action == 'edit' else 'New' }} Lab Test{% endblock %}
+{% block page_title %}{{ 'Edit' if action == 'edit' else 'New' }} Lab Test{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Patient *</label>
+                    <select class="form-select" name="patient_lookup" required>
+                        <option value="">Select Patient...</option>
+                        {% for p in patients %}
+                        <option value="{{ p.id }}" {{ 'selected' if test and test.data.get('patient_lookup') == p.id }}>
+                            {{ p.data.get('first_name', '') }} {{ p.data.get('last_name', '') }} — {{ p.data.get('phone', '') }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Doctor *</label>
+                    <select class="form-select" name="doctor_lookup" required>
+                        <option value="">Select Doctor...</option>
+                        {% for d in doctors %}
+                        <option value="{{ d.id }}" {{ 'selected' if test and test.data.get('doctor_lookup') == d.id }}>
+                            {{ d.data.get('full_name', '') }} — {{ d.data.get('department', '') }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Visit</label>
+                    <select class="form-select" name="visit_lookup">
+                        <option value="">Select Visit (optional)...</option>
+                        {% for v in visits %}
+                        <option value="{{ v.id }}" {{ 'selected' if test and test.data.get('visit_lookup') == v.id }}>
+                            {{ v.data.get('visit_date', '')[:10] }} — {{ v.data.get('chief_complaint', '')[:40] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Test Name *</label>
+                    <input type="text" class="form-control" name="test_name" required
+                           placeholder="e.g., Complete Blood Count"
+                           value="{{ test.data.get('test_name', '') if test else '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Test Type *</label>
+                    <select class="form-select" name="test_type" required>
+                        <option value="">Select...</option>
+                        {% for t in ['Blood', 'Urine', 'X-Ray', 'MRI', 'CT Scan', 'Biopsy'] %}
+                        <option value="{{ t }}" {{ 'selected' if test and test.data.get('test_type') == t }}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Priority *</label>
+                    <select class="form-select" name="priority" required>
+                        {% for p in ['Routine', 'Urgent', 'Emergency'] %}
+                        <option value="{{ p }}" {{ 'selected' if test and test.data.get('priority') == p }}>{{ p }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Sample Date *</label>
+                    <input type="datetime-local" class="form-control" name="sample_date" required
+                           value="{{ test.data.get('sample_date', '') if test else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Status *</label>
+                    <select class="form-select" name="status" required>
+                        {% for s in ['Ordered', 'Sample Collected', 'In Progress', 'Completed', 'Cancelled'] %}
+                        <option value="{{ s }}" {{ 'selected' if test and test.data.get('status') == s }}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Result Date</label>
+                    <input type="datetime-local" class="form-control" name="result_date"
+                           value="{{ test.data.get('result_date', '') if test else '' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Technician</label>
+                    <select class="form-select" name="technician_lookup">
+                        <option value="">Select Technician (optional)...</option>
+                        {% for t in technicians %}
+                        <option value="{{ t.id }}" {{ 'selected' if test and test.data.get('technician_lookup') == t.id }}>
+                            {{ t.data.get('full_name', '') }} — {{ t.data.get('role', '') }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Result Value</label>
+                    <textarea class="form-control" name="result_value" rows="2">{{ test.data.get('result_value', '') if test else '' }}</textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Reference Range</label>
+                    <input type="text" class="form-control" name="reference_range"
+                           value="{{ test.data.get('reference_range', '') if test else '' }}">
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" name="notes" rows="2">{{ test.data.get('notes', '') if test else '' }}</textarea>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-info">
+                    <i class="bi bi-check-lg"></i> {{ 'Update' if action == 'edit' else 'Create' }} Lab Test
+                </button>
+                <a href="{{ url_for('modules.laboratory_list') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

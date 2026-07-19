@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: sample-flask-app
+Version: 0.1.0
+Summary: Sample Flask app using hogc-crud-engine as a package.
+Requires-Python: >=3.12
+Requires-Dist: flask>=3.0
+Requires-Dist: hogc-crud-engine~=0.1
+Provides-Extra: postgres
+Requires-Dist: psycopg2-binary>=2.9; extra == "postgres"

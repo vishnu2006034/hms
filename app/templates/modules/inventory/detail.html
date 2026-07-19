@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Inventory Item Detail{% endblock %}
+{% block page_title %}Inventory Item Detail{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for('modules.inventory_edit', record_id=item.id) }}" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i> Edit</a>
+<form method="POST" action="{{ url_for('modules.inventory_delete', record_id=item.id) }}" class="d-inline" data-confirm="Delete this item?">
+    <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button>
+</form>
+<a href="{{ url_for('modules.inventory_list') }}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">{{ item.data.get('item_name', '') }} <span class="badge bg-dark ms-2">{{ item.data.get('item_id', 'N/A') }}</span></h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6"><strong>Category:</strong> <span class="badge bg-info">{{ item.data.get('category', '-') }}</span></div>
+                    <div class="col-md-6">
+                        <strong>Status:</strong>
+                        {% set status = item.data.get('status', 'In-Stock') %}
+                        <span class="badge {% if status == 'In-Stock' %}bg-success{% elif status == 'Low-Stock' %}bg-warning text-dark{% elif status == 'Out-of-Stock' %}bg-danger{% else %}bg-secondary{% endif %}">{{ status }}</span>
+                    </div>
+                    <div class="col-12"><strong>Description:</strong> {{ item.data.get('description', '-') }}</div>
+                    <div class="col-md-3"><strong>Quantity:</strong> {{ item.data.get('quantity', '0') }}</div>
+                    <div class="col-md-3"><strong>Unit:</strong> {{ item.data.get('unit', '-') }}</div>
+                    <div class="col-md-3"><strong>Unit Price:</strong> ${{ item.data.get('unit_price', '0') }}</div>
+                    <div class="col-md-3"><strong>Reorder Level:</strong> {{ item.data.get('reorder_level', '-') }}</div>
+                    <div class="col-md-4"><strong>Supplier:</strong> {{ item.data.get('supplier', '-') }}</div>
+                    <div class="col-md-4"><strong>Expiry Date:</strong> {{ item.data.get('expiry_date', '-') }}</div>
+                    <div class="col-md-4"><strong>Batch Number:</strong> {{ item.data.get('batch_number', '-') }}</div>
+                    <div class="col-md-6"><strong>Location:</strong> {{ item.data.get('location', '-') }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header"><strong>Quick Actions</strong></div>
+            <div class="card-body">
+                <a href="{{ url_for('modules.inventory_edit', record_id=item.id) }}" class="btn btn-outline-warning w-100 mb-2">
+                    <i class="bi bi-pencil"></i> Edit Item
+                </a>
+                <a href="{{ url_for('modules.inventory_list') }}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-left"></i> Back to Inventory
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

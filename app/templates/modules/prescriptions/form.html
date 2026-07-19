@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if action == 'edit' else 'New' }} Prescription{% endblock %}
+{% block page_title %}{{ 'Edit' if action == 'edit' else 'New' }} Prescription{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Patient *</label>
+                    <select class="form-select" name="patient_lookup" required>
+                        <option value="">Select Patient...</option>
+                        {% for p in patients %}
+                        <option value="{{ p.id }}" {{ 'selected' if prescription and prescription.data.get('patient_lookup') == p.id }}>
+                            {{ p.data.get('first_name', '') }} {{ p.data.get('last_name', '') }} — {{ p.data.get('phone', '') }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Doctor *</label>
+                    <select class="form-select" name="doctor_lookup" required>
+                        <option value="">Select Doctor...</option>
+                        {% for d in doctors %}
+                        <option value="{{ d.id }}" {{ 'selected' if prescription and prescription.data.get('doctor_lookup') == d.id }}>
+                            {{ d.data.get('full_name', '') }} — {{ d.data.get('department', '') }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Visit</label>
+                    <select class="form-select" name="visit_lookup">
+                        <option value="">Select Visit (optional)...</option>
+                        {% for v in visits %}
+                        <option value="{{ v.id }}" {{ 'selected' if prescription and prescription.data.get('visit_lookup') == v.id }}>
+                            {{ v.data.get('visit_date', '')[:10] }} — {{ v.data.get('chief_complaint', '')[:40] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Prescribed Date *</label>
+                    <input type="date" class="form-control" name="prescribed_date" required
+                           value="{{ prescription.data.get('prescribed_date', '') if prescription else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Medication Name *</label>
+                    <input type="text" class="form-control" name="medication_name" required
+                           value="{{ prescription.data.get('medication_name', '') if prescription else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Dosage *</label>
+                    <input type="text" class="form-control" name="dosage" required placeholder="e.g., 500mg"
+                           value="{{ prescription.data.get('dosage', '') if prescription else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Frequency *</label>
+                    <select class="form-select" name="frequency" required>
+                        <option value="">Select...</option>
+                        {% for f in ['Once daily', 'Twice daily', 'Three times daily', 'As needed'] %}
+                        <option value="{{ f }}" {{ 'selected' if prescription and prescription.data.get('frequency') == f }}>{{ f }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Duration *</label>
+                    <input type="text" class="form-control" name="duration" required placeholder="e.g., 7 days"
+                           value="{{ prescription.data.get('duration', '') if prescription else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Refills</label>
+                    <input type="number" class="form-control" name="refills"
+                           value="{{ prescription.data.get('refills', '0') if prescription else '0' }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Status *</label>
+                    <select class="form-select" name="status" required>
+                        {% for s in ['Active', 'Completed', 'Cancelled', 'Expired'] %}
+                        <option value="{{ s }}" {{ 'selected' if prescription and prescription.data.get('status') == s }}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Instructions</label>
+                    <textarea class="form-control" name="instructions" rows="2">{{ prescription.data.get('instructions', '') if prescription else '' }}</textarea>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-warning">
+                    <i class="bi bi-check-lg"></i> {{ 'Update' if action == 'edit' else 'Create' }} Prescription
+                </button>
+                <a href="{{ url_for('modules.prescriptions_list') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
