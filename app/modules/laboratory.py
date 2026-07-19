@@ -1,8 +1,9 @@
+from hogc.lib import HOGC
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app.modules.blueprint import modules_bp
 from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records
-from app.extensions import crud
+
 import app.modules.seed as seed
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
 
@@ -51,7 +52,7 @@ def laboratory_create():
             "notes": request.form.get("notes", ""),
             "technician_lookup": request.form.get("technician_lookup", ""),
         }
-        crud.records.create_record(CreateRecordRequest(
+        HOGC.crud.record.create_record(CreateRecordRequest(
             context=_ctx(), module_id=seed.LABORATORY_MODULE_ID, data=data
         ))
         flash("Lab test created successfully!", "success")
@@ -94,7 +95,7 @@ def laboratory_edit(record_id):
             "notes": request.form.get("notes", ""),
             "technician_lookup": request.form.get("technician_lookup", ""),
         }
-        crud.records.update_record(UpdateRecordRequest(
+        HOGC.crud.record.update_record(UpdateRecordRequest(
             context=_ctx(), module_id=seed.LABORATORY_MODULE_ID, record_id=record_id, data=data
         ))
         flash("Lab test updated successfully!", "success")
@@ -107,7 +108,7 @@ def laboratory_edit(record_id):
 @modules_bp.route("/laboratory/<record_id>/delete", methods=["POST"])
 @login_required
 def laboratory_delete(record_id):
-    crud.records.delete_record(DeleteRecordRequest(
+    HOGC.crud.record.delete_record(DeleteRecordRequest(
         context=_ctx(), module_id=seed.LABORATORY_MODULE_ID, record_id=record_id
     ))
     flash("Lab test deleted.", "success")

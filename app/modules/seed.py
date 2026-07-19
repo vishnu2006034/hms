@@ -1,6 +1,7 @@
+from hogc.lib import HOGC
 import uuid
 from flask import current_app
-from app.extensions import crud, SessionLocal, db
+from app.extensions import SessionLocal, db
 from app.config import Config
 from hogc.lib.base import RequestContext
 from hogc.lib.contracts.crud.requests import (
@@ -31,7 +32,7 @@ def _ctx():
 
 
 def _create_module(name, api_name, label, plural_label, description=""):
-    resp = crud.modules.create_module(CreateModuleRequest(
+    resp = HOGC.crud.module.create_module(CreateModuleRequest(
         context=_ctx(),
         name=name,
         api_name=api_name,
@@ -45,7 +46,7 @@ def _create_module(name, api_name, label, plural_label, description=""):
 def _create_field(module_id, field_name, api_name, field_type, label="",
                   is_required=False, is_unique=False, default_value=None,
                   lookup_module_id=None):
-    resp = crud.fields.create_field(CreateFieldRequest(
+    resp = HOGC.crud.field.create_field(CreateFieldRequest(
         context=_ctx(),
         module_id=module_id,
         field_name=field_name,
@@ -62,7 +63,7 @@ def _create_field(module_id, field_name, api_name, field_type, label="",
 
 
 def _add_picklist(field_id, value, label, color=None, is_default=False, order=0):
-    crud.picklists.add_option(AddPicklistOptionRequest(
+    HOGC.crud.picklist.add_option(AddPicklistOptionRequest(
         context=_ctx(),
         field_id=field_id,
         value=value,
@@ -288,7 +289,7 @@ def _create_default_admin():
 
         try:
             ctx = _ctx()
-            record = crud.records.create_record(CreateRecordRequest(
+            record = HOGC.crud.record.create_record(CreateRecordRequest(
                 context=ctx,
                 module_id=USERS_MODULE_ID,
                 data={
@@ -320,7 +321,7 @@ def _drop_all_hogc():
 def _lookup_module_ids():
     global USERS_MODULE_ID, PATIENTS_MODULE_ID, VISITS_MODULE_ID
     global INVENTORY_MODULE_ID, PRESCRIPTIONS_MODULE_ID, LABORATORY_MODULE_ID
-    existing = crud.modules.list_modules(ListModulesRequest(
+    existing = HOGC.crud.module.list_modules(ListModulesRequest(
         context=_ctx(), page=1, page_size=50
     ))
     for m in existing.items:
@@ -374,7 +375,7 @@ def _seed_default_data():
         db.session.add(auth_user)
         db.session.commit()
         # Create CRUD record
-        resp = crud.records.create_record(CreateRecordRequest(
+        resp = HOGC.crud.record.create_record(CreateRecordRequest(
             context=ctx, module_id=USERS_MODULE_ID, data=s
         ))
         auth_user.hogc_record_id = resp.data.id
@@ -435,7 +436,7 @@ def _seed_default_data():
 
     patient_ids = []
     for p in patients_data:
-        resp = crud.records.create_record(CreateRecordRequest(
+        resp = HOGC.crud.record.create_record(CreateRecordRequest(
             context=ctx, module_id=PATIENTS_MODULE_ID, data=p
         ))
         patient_ids.append(resp.data.id)
@@ -465,7 +466,7 @@ def _seed_default_data():
     ]
 
     for item in inventory_data:
-        crud.records.create_record(CreateRecordRequest(
+        HOGC.crud.record.create_record(CreateRecordRequest(
             context=ctx, module_id=INVENTORY_MODULE_ID, data=item
         ))
 
@@ -505,7 +506,7 @@ def _seed_default_data():
 
     visit_ids = []
     for v in visits_data:
-        resp = crud.records.create_record(CreateRecordRequest(
+        resp = HOGC.crud.record.create_record(CreateRecordRequest(
             context=ctx, module_id=VISITS_MODULE_ID, data=v
         ))
         visit_ids.append(resp.data.id)
@@ -533,7 +534,7 @@ def _seed_default_data():
     ]
 
     for rx in prescriptions_data:
-        crud.records.create_record(CreateRecordRequest(
+        HOGC.crud.record.create_record(CreateRecordRequest(
             context=ctx, module_id=PRESCRIPTIONS_MODULE_ID, data=rx
         ))
 
@@ -564,7 +565,7 @@ def _seed_default_data():
     ]
 
     for lab in lab_data:
-        crud.records.create_record(CreateRecordRequest(
+        HOGC.crud.record.create_record(CreateRecordRequest(
             context=ctx, module_id=LABORATORY_MODULE_ID, data=lab
         ))
 
@@ -589,7 +590,7 @@ def seed_modules(app):
         from app.auth.models import AuthUser
         db.create_all()
 
-        existing = crud.modules.list_modules(ListModulesRequest(
+        existing = HOGC.crud.module.list_modules(ListModulesRequest(
             context=_ctx(), page=1, page_size=50
         ))
 
@@ -600,7 +601,7 @@ def seed_modules(app):
             has_fields = False
             for m in existing.items:
                 try:
-                    mod_resp = crud.modules.get_module(
+                    mod_resp = HOGC.crud.module.get_module(
                         _GetReq(context=_ctx(), module_id=m.id)
                     )
                     if mod_resp.data and mod_resp.data.fields:

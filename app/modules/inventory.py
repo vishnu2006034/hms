@@ -1,8 +1,9 @@
+from hogc.lib import HOGC
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app.modules.blueprint import modules_bp
 from app.modules.routes_base import _ctx, _get_records, _get_record
-from app.extensions import crud
+
 import app.modules.seed as seed
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
 
@@ -40,7 +41,7 @@ def inventory_create():
             "location": request.form.get("location", ""),
             "status": request.form.get("status", "In-Stock"),
         }
-        crud.records.create_record(CreateRecordRequest(
+        HOGC.crud.record.create_record(CreateRecordRequest(
             context=_ctx(), module_id=seed.INVENTORY_MODULE_ID, data=data
         ))
         flash("Inventory item created successfully!", "success")
@@ -81,7 +82,7 @@ def inventory_edit(record_id):
             "location": request.form.get("location", ""),
             "status": request.form.get("status", "In-Stock"),
         }
-        crud.records.update_record(UpdateRecordRequest(
+        HOGC.crud.record.update_record(UpdateRecordRequest(
             context=_ctx(), module_id=seed.INVENTORY_MODULE_ID, record_id=record_id, data=data
         ))
         flash("Inventory item updated successfully!", "success")
@@ -93,7 +94,7 @@ def inventory_edit(record_id):
 @modules_bp.route("/inventory/<record_id>/delete", methods=["POST"])
 @login_required
 def inventory_delete(record_id):
-    crud.records.delete_record(DeleteRecordRequest(
+    HOGC.crud.record.delete_record(DeleteRecordRequest(
         context=_ctx(), module_id=seed.INVENTORY_MODULE_ID, record_id=record_id
     ))
     flash("Inventory item deleted.", "success")

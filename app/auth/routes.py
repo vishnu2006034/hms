@@ -1,9 +1,10 @@
+from hogc.lib import HOGC
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app.auth import auth_bp
 from app.auth.forms import LoginForm, RegisterForm
 from app.auth.models import AuthUser
-from app.extensions import db, crud
+from app.extensions import db
 from app.config import Config
 from hogc.lib.base import RequestContext
 from hogc.lib.contracts.crud.requests import CreateRecordRequest
@@ -53,7 +54,7 @@ def register():
         try:
             from app.modules.seed import USERS_MODULE_ID
             ctx = _get_ctx()
-            record = crud.records.create_record(CreateRecordRequest(
+            record = HOGC.crud.record.create_record(CreateRecordRequest(
                 context=ctx,
                 module_id=USERS_MODULE_ID,
                 data={
