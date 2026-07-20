@@ -15,13 +15,23 @@ def create_app(config_name="default"):
 
         from app.auth import auth_bp
         from app.main import main_bp
-        from app.modules import modules_bp
+        from app.modules.patients import patients_bp
+        from app.modules.visits import visits_bp
+        from app.modules.prescriptions import prescriptions_bp
+        from app.modules.laboratory import laboratory_bp
+        from app.modules.inventory import inventory_bp
+        from app.modules.users import users_bp
 
         app.register_blueprint(auth_bp)
         app.register_blueprint(main_bp)
-        app.register_blueprint(modules_bp)
+        app.register_blueprint(patients_bp)
+        app.register_blueprint(visits_bp)
+        app.register_blueprint(prescriptions_bp)
+        app.register_blueprint(laboratory_bp)
+        app.register_blueprint(inventory_bp)
+        app.register_blueprint(users_bp)
 
-        from app.modules.seed import seed_modules
+        from app.seed import seed_modules
         seed_modules(app)
 
     return app

@@ -27,8 +27,8 @@ def _get_records(module_id, page=1, page_size=20, search=None, search_field=None
             page=page,
             page_size=page_size,
         )
-        return HOGC.crud.record.query_records(QueryRecordsRequest(context=ctx, query=query))
-    return HOGC.crud.record.list_records(ListRecordsRequest(
+        return HOGC.crud.record.query(QueryRecordsRequest(context=ctx, query=query))
+    return HOGC.crud.record.list(ListRecordsRequest(
         context=ctx, module_id=module_id, page=page, page_size=page_size
     ))
 
@@ -36,7 +36,7 @@ def _get_records(module_id, page=1, page_size=20, search=None, search_field=None
 def _get_all_records(module_id, page_size=200):
     """Fetch all records from a module (for dropdown population)."""
     ctx = _ctx()
-    return HOGC.crud.record.list_records(ListRecordsRequest(
+    return HOGC.crud.record.list(ListRecordsRequest(
         context=ctx, module_id=module_id, page=1, page_size=page_size
     )).items
 
@@ -48,25 +48,25 @@ class _GetReq:
 
 
 def _get_record(module_id, record_id):
-    return HOGC.crud.record.get_record(
+    return HOGC.crud.record.get(
         _GetReq(context=_ctx(), module_id=module_id, record_id=record_id)
     )
 
 
 def _create_record(module_id, data):
-    return HOGC.crud.record.create_record(CreateRecordRequest(
+    return HOGC.crud.record.create(CreateRecordRequest(
         context=_ctx(), module_id=module_id, data=data
     ))
 
 
 def _update_record(module_id, record_id, data):
-    return HOGC.crud.record.update_record(UpdateRecordRequest(
+    return HOGC.crud.record.update(UpdateRecordRequest(
         context=_ctx(), module_id=module_id, record_id=record_id, data=data
     ))
 
 
 def _delete_record(module_id, record_id):
     from hogc.lib.contracts.crud.requests import DeleteRecordRequest
-    return HOGC.crud.record.delete_record(DeleteRecordRequest(
+    return HOGC.crud.record.delete(DeleteRecordRequest(
         context=_ctx(), module_id=module_id, record_id=record_id
     ))

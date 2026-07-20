@@ -3,11 +3,11 @@
 {% block page_title %}Inventory Item Detail{% endblock %}
 
 {% block page_actions %}
-<a href="{{ url_for('modules.inventory_edit', record_id=item.id) }}" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i> Edit</a>
-<form method="POST" action="{{ url_for('modules.inventory_delete', record_id=item.id) }}" class="d-inline" data-confirm="Delete this item?">
+<a href="{{ url_for('inventory.inventory_edit', record_id=item.id) }}" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i> Edit</a>
+<form method="POST" action="{{ url_for('inventory.inventory_delete', record_id=item.id) }}" class="d-inline" data-confirm="Delete this item?">
     <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button>
 </form>
-<a href="{{ url_for('modules.inventory_list') }}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back</a>
+<a href="{{ url_for('inventory.inventory_list') }}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back</a>
 {% endblock %}
 
 {% block content %}
@@ -42,10 +42,10 @@
         <div class="card shadow-sm">
             <div class="card-header"><strong>Quick Actions</strong></div>
             <div class="card-body">
-                <a href="{{ url_for('modules.inventory_edit', record_id=item.id) }}" class="btn btn-outline-warning w-100 mb-2">
+                <a href="{{ url_for('inventory.inventory_edit', record_id=item.id) }}" class="btn btn-outline-warning w-100 mb-2">
                     <i class="bi bi-pencil"></i> Edit Item
                 </a>
-                <a href="{{ url_for('modules.inventory_list') }}" class="btn btn-outline-secondary w-100">
+                <a href="{{ url_for('inventory.inventory_list') }}" class="btn btn-outline-secondary w-100">
                     <i class="bi bi-arrow-left"></i> Back to Inventory
                 </a>
             </div>

@@ -31,14 +31,14 @@ def init_crud(database_url):
     Base.metadata.create_all(engine)
     SessionLocal = sessionmaker(bind=engine)
     crud = PostgreSQLCRUDProvider(session_factory=SessionLocal)
-    
+
     class HOGCCrudWrapper:
         def __init__(self, c):
             self.record = c.records
             self.module = c.modules
             self.field = c.fields
             self.picklist = c.picklists
-            
+
     HOGC.crud = HOGCCrudWrapper(crud)
-    
+
     return crud

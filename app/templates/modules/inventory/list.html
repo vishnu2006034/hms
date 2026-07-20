@@ -7,10 +7,10 @@
     <div class="input-group input-group-sm">
         <input type="text" class="form-control" name="search" placeholder="Search inventory..." value="{{ search }}">
         <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
-        {% if search %}<a href="{{ url_for('modules.inventory_list') }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></a>{% endif %}
+        {% if search %}<a href="{{ url_for('inventory.inventory_list') }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></a>{% endif %}
     </div>
 </form>
-<a href="{{ url_for('modules.inventory_create') }}" class="btn btn-warning btn-sm">
+<a href="{{ url_for('inventory.inventory_create') }}" class="btn btn-warning btn-sm">
     <i class="bi bi-plus-lg"></i> New Item
 </a>
 {% endblock %}
@@ -47,8 +47,8 @@
                         </span>
                     </td>
                     <td>
-                        <a href="{{ url_for('modules.inventory_detail', record_id=item.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
-                        <a href="{{ url_for('modules.inventory_edit', record_id=item.id) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                        <a href="{{ url_for('inventory.inventory_detail', record_id=item.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        <a href="{{ url_for('inventory.inventory_edit', record_id=item.id) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
                     </td>
                 </tr>
                 {% else %}

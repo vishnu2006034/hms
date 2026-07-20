@@ -1,19 +1,19 @@
 from hogc.lib import HOGC
 from flask import render_template, redirect, url_for, flash, request
-from flask_login import login_required, current_user
-from app.modules.blueprint import modules_bp
+from flask_login import login_required
+from app.modules.inventory import inventory_bp
 from app.modules.routes_base import _ctx, _get_records, _get_record
+from app.seed import schema
 
-import app.modules.seed as seed
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
 
 
-@modules_bp.route("/inventory")
+@inventory_bp.route("/")
 @login_required
 def inventory_list():
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "")
-    result = _get_records(seed.INVENTORY_MODULE_ID, page=page, page_size=20,
+    result = _get_records(schema.INVENTORY_MODULE_ID, page=page, page_size=20,
                           search=search, search_field="item_name")
     items = result.items
     total = result.total
@@ -23,7 +23,7 @@ def inventory_list():
                            total=total, search=search)
 
 
-@modules_bp.route("/inventory/create", methods=["GET", "POST"])
+@inventory_bp.route("/create", methods=["GET", "POST"])
 @login_required
 def inventory_create():
     if request.method == "POST":
@@ -41,31 +41,31 @@ def inventory_create():
             "location": request.form.get("location", ""),
             "status": request.form.get("status", "In-Stock"),
         }
-        HOGC.crud.record.create_record(CreateRecordRequest(
-            context=_ctx(), module_id=seed.INVENTORY_MODULE_ID, data=data
+        HOGC.crud.record.create(CreateRecordRequest(
+            context=_ctx(), module_id=schema.INVENTORY_MODULE_ID, data=data
         ))
         flash("Inventory item created successfully!", "success")
-        return redirect(url_for("modules.inventory_list"))
+        return redirect(url_for("inventory.inventory_list"))
     return render_template("modules/inventory/form.html", item=None, action="create")
 
 
-@modules_bp.route("/inventory/<record_id>")
+@inventory_bp.route("/<record_id>")
 @login_required
 def inventory_detail(record_id):
-    resp = _get_record(seed.INVENTORY_MODULE_ID, record_id)
+    resp = _get_record(schema.INVENTORY_MODULE_ID, record_id)
     if not resp.data:
         flash("Item not found.", "danger")
-        return redirect(url_for("modules.inventory_list"))
+        return redirect(url_for("inventory.inventory_list"))
     return render_template("modules/inventory/detail.html", item=resp.data)
 
 
-@modules_bp.route("/inventory/<record_id>/edit", methods=["GET", "POST"])
+@inventory_bp.route("/<record_id>/edit", methods=["GET", "POST"])
 @login_required
 def inventory_edit(record_id):
-    resp = _get_record(seed.INVENTORY_MODULE_ID, record_id)
+    resp = _get_record(schema.INVENTORY_MODULE_ID, record_id)
     if not resp.data:
         flash("Item not found.", "danger")
-        return redirect(url_for("modules.inventory_list"))
+        return redirect(url_for("inventory.inventory_list"))
 
     if request.method == "POST":
         data = {
@@ -82,20 +82,20 @@ def inventory_edit(record_id):
             "location": request.form.get("location", ""),
             "status": request.form.get("status", "In-Stock"),
         }
-        HOGC.crud.record.update_record(UpdateRecordRequest(
-            context=_ctx(), module_id=seed.INVENTORY_MODULE_ID, record_id=record_id, data=data
+        HOGC.crud.record.update(UpdateRecordRequest(
+            context=_ctx(), module_id=schema.INVENTORY_MODULE_ID, record_id=record_id, data=data
         ))
         flash("Inventory item updated successfully!", "success")
-        return redirect(url_for("modules.inventory_detail", record_id=record_id))
+        return redirect(url_for("inventory.inventory_detail", record_id=record_id))
 
     return render_template("modules/inventory/form.html", item=resp.data, action="edit")
 
 
-@modules_bp.route("/inventory/<record_id>/delete", methods=["POST"])
+@inventory_bp.route("/<record_id>/delete", methods=["POST"])
 @login_required
 def inventory_delete(record_id):
-    HOGC.crud.record.delete_record(DeleteRecordRequest(
-        context=_ctx(), module_id=seed.INVENTORY_MODULE_ID, record_id=record_id
+    HOGC.crud.record.delete(DeleteRecordRequest(
+        context=_ctx(), module_id=schema.INVENTORY_MODULE_ID, record_id=record_id
     ))
     flash("Inventory item deleted.", "success")
-    return redirect(url_for("modules.inventory_list"))
+    return redirect(url_for("inventory.inventory_list"))

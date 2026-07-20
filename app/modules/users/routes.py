@@ -1,22 +1,22 @@
 from hogc.lib import HOGC
 from flask import render_template, redirect, url_for, flash, request
-from flask_login import login_required, current_user
-from app.modules.blueprint import modules_bp
+from flask_login import login_required
+from app.modules.users import users_bp
 from app.modules.routes_base import _ctx, _get_records, _get_record
 from app.extensions import db
-import app.modules.seed as seed
+from app.seed import schema
 from app.auth.models import AuthUser
 from app.auth.utils import admin_required
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
 
 
-@modules_bp.route("/users")
+@users_bp.route("/")
 @login_required
 @admin_required
 def users_list():
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "")
-    result = _get_records(seed.USERS_MODULE_ID, page=page, page_size=20,
+    result = _get_records(schema.USERS_MODULE_ID, page=page, page_size=20,
                           search=search, search_field="full_name")
     users = result.items
     total = result.total
@@ -26,7 +26,7 @@ def users_list():
                            total=total, search=search)
 
 
-@modules_bp.route("/users/create", methods=["GET", "POST"])
+@users_bp.route("/create", methods=["GET", "POST"])
 @login_required
 @admin_required
 def users_create():
@@ -50,25 +50,25 @@ def users_create():
             "department": request.form.get("department", ""),
             "is_active": "true",
         }
-        resp = HOGC.crud.record.create_record(CreateRecordRequest(
-            context=_ctx(), module_id=seed.USERS_MODULE_ID, data=data
+        resp = HOGC.crud.record.create(CreateRecordRequest(
+            context=_ctx(), module_id=schema.USERS_MODULE_ID, data=data
         ))
         auth_user.hogc_record_id = resp.data.id
         db.session.commit()
 
         flash("Staff member created successfully!", "success")
-        return redirect(url_for("modules.users_list"))
+        return redirect(url_for("users.users_list"))
     return render_template("modules/users/form.html", user=None, action="create")
 
 
-@modules_bp.route("/users/<record_id>/edit", methods=["GET", "POST"])
+@users_bp.route("/<record_id>/edit", methods=["GET", "POST"])
 @login_required
 @admin_required
 def users_edit(record_id):
-    resp = _get_record(seed.USERS_MODULE_ID, record_id)
+    resp = _get_record(schema.USERS_MODULE_ID, record_id)
     if not resp.data:
         flash("User not found.", "danger")
-        return redirect(url_for("modules.users_list"))
+        return redirect(url_for("users.users_list"))
 
     if request.method == "POST":
         data = {
@@ -79,21 +79,21 @@ def users_edit(record_id):
             "department": request.form.get("department", ""),
             "is_active": request.form.get("is_active", "true"),
         }
-        HOGC.crud.record.update_record(UpdateRecordRequest(
-            context=_ctx(), module_id=seed.USERS_MODULE_ID, record_id=record_id, data=data
+        HOGC.crud.record.update(UpdateRecordRequest(
+            context=_ctx(), module_id=schema.USERS_MODULE_ID, record_id=record_id, data=data
         ))
         flash("Staff member updated successfully!", "success")
-        return redirect(url_for("modules.users_list"))
+        return redirect(url_for("users.users_list"))
 
     return render_template("modules/users/form.html", user=resp.data, action="edit")
 
 
-@modules_bp.route("/users/<record_id>/delete", methods=["POST"])
+@users_bp.route("/<record_id>/delete", methods=["POST"])
 @login_required
 @admin_required
 def users_delete(record_id):
-    HOGC.crud.record.delete_record(DeleteRecordRequest(
-        context=_ctx(), module_id=seed.USERS_MODULE_ID, record_id=record_id
+    HOGC.crud.record.delete(DeleteRecordRequest(
+        context=_ctx(), module_id=schema.USERS_MODULE_ID, record_id=record_id
     ))
     flash("Staff member deleted.", "success")
-    return redirect(url_for("modules.users_list"))
+    return redirect(url_for("users.users_list"))

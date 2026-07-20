@@ -52,11 +52,11 @@ def register():
         db.session.commit()
 
         try:
-            from app.modules.seed import USERS_MODULE_ID
+            from app.seed.schema import USERS_MODULE_ID as _uid
             ctx = _get_ctx()
-            record = HOGC.crud.record.create_record(CreateRecordRequest(
+            record = HOGC.crud.record.create(CreateRecordRequest(
                 context=ctx,
-                module_id=USERS_MODULE_ID,
+                module_id=_uid,
                 data={
                     "full_name": form.full_name.data,
                     "email": form.email.data,

@@ -6,7 +6,7 @@ from app.main import main_bp
 from app.config import Config
 from hogc.lib.base import RequestContext
 from hogc.lib.contracts.crud.requests import ListRecordsRequest
-import app.modules.seed as seed
+import app.seed.schema as seed
 
 
 def _get_ctx():
@@ -25,27 +25,27 @@ def dashboard():
     stats = {"patients": 0, "visits": 0, "inventory": 0, "lab": 0, "prescriptions": 0}
 
     try:
-        patients = HOGC.crud.record.list_records(ListRecordsRequest(
+        patients = HOGC.crud.record.list(ListRecordsRequest(
             context=ctx, module_id=seed.PATIENTS_MODULE_ID, page=1, page_size=1
         ))
         stats["patients"] = patients.total
 
-        visits = HOGC.crud.record.list_records(ListRecordsRequest(
+        visits = HOGC.crud.record.list(ListRecordsRequest(
             context=ctx, module_id=seed.VISITS_MODULE_ID, page=1, page_size=1
         ))
         stats["visits"] = visits.total
 
-        inventory = HOGC.crud.record.list_records(ListRecordsRequest(
+        inventory = HOGC.crud.record.list(ListRecordsRequest(
             context=ctx, module_id=seed.INVENTORY_MODULE_ID, page=1, page_size=1
         ))
         stats["inventory"] = inventory.total
 
-        prescriptions = HOGC.crud.record.list_records(ListRecordsRequest(
+        prescriptions = HOGC.crud.record.list(ListRecordsRequest(
             context=ctx, module_id=seed.PRESCRIPTIONS_MODULE_ID, page=1, page_size=1
         ))
         stats["prescriptions"] = prescriptions.total
 
-        lab = HOGC.crud.record.list_records(ListRecordsRequest(
+        lab = HOGC.crud.record.list(ListRecordsRequest(
             context=ctx, module_id=seed.LABORATORY_MODULE_ID, page=1, page_size=1
         ))
         stats["lab"] = lab.total

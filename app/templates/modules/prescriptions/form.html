@@ -91,7 +91,7 @@
                 <button type="submit" class="btn btn-warning">
                     <i class="bi bi-check-lg"></i> {{ 'Update' if action == 'edit' else 'Create' }} Prescription
                 </button>
-                <a href="{{ url_for('modules.prescriptions_list') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ url_for('prescriptions.prescriptions_list') }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>

@@ -1,8 +1,6 @@
-from app.modules.blueprint import modules_bp
-
-from app.modules import patients
-from app.modules import visits
-from app.modules import inventory
-from app.modules import prescriptions
-from app.modules import laboratory
-from app.modules import users_admin
+from app.modules.patients import patients_bp
+from app.modules.visits import visits_bp
+from app.modules.prescriptions import prescriptions_bp
+from app.modules.laboratory import laboratory_bp
+from app.modules.inventory import inventory_bp
+from app.modules.users import users_bp
