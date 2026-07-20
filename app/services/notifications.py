@@ -1,35 +1,42 @@
 import logging
+import typing
 from flask import current_app
+
 from app.auth.models import AuthUser
+from app.modules.routes_base import _ctx
 from app.seed import schema
+
 from hogc.lib import HOGC
 from hogc.lib.contracts.crud.requests import GetRecordRequest
-from app.modules.routes_base import _ctx
 
-def notify_lab_result(test_data, test_id):
+
+def notify_lab_result(test_data: dict[str, typing.Any], test_id: str) -> list[str]:
     """Simulate sending a lab result report to doctor and admin."""
-    doctor_lookup = test_data.get("doctor_lookup")
-    patient_lookup = test_data.get("patient_lookup")
+    doctor_lookup: typing.Optional[str] = test_data.get("doctor_lookup")
+    patient_lookup: typing.Optional[str] = test_data.get("patient_lookup")
     
     # Get doctor email
-    doctor = AuthUser.query.filter_by(hogc_record_id=doctor_lookup).first() if doctor_lookup else None
-    doctor_email = doctor.email if doctor else None
+    doctor: typing.Optional[AuthUser] = AuthUser.query.filter_by(hogc_record_id=doctor_lookup).first() if doctor_lookup else None
+    doctor_email: typing.Optional[str] = doctor.email if doctor else None
     
     # Get admin emails
-    admins = AuthUser.query.filter_by(role="Admin").all()
-    admin_emails = [admin.email for admin in admins if admin.email]
+    admins: list[AuthUser] = AuthUser.query.filter_by(role="Admin").all()
+    admin_emails: list[str] = [admin.email for admin in admins if admin.email]
     
     # Get patient details for the report
-    patient_name = "Unknown Patient"
+    patient_name: str = "Unknown Patient"
     if patient_lookup:
         try:
-            p_resp = HOGC.crud.record.get(GetRecordRequest(context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, record_id=patient_lookup))
+            req = GetRecordRequest(context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, record_id=patient_lookup)
+            p_resp = HOGC.crud.record.get(req)
             if p_resp.data:
-                patient_name = f"{p_resp.data.data.get('first_name', '')} {p_resp.data.data.get('last_name', '')}"
+                first_name: str = p_resp.data.data.get('first_name', '')
+                last_name: str = p_resp.data.data.get('last_name', '')
+                patient_name = f"{first_name} {last_name}"
         except Exception:
             pass
             
-    recipients = []
+    recipients: list[str] = []
     if doctor_email:
         recipients.append(doctor_email)
     recipients.extend(admin_emails)
@@ -40,11 +47,11 @@ def notify_lab_result(test_data, test_id):
     if not recipients:
         return []
         
-    test_name = test_data.get("test_name", "Unknown Test")
-    result_val = test_data.get("result_value", "N/A")
-    ref_range = test_data.get("reference_range", "N/A")
+    test_name: str = test_data.get("test_name", "Unknown Test")
+    result_val: str = test_data.get("result_value", "N/A")
+    ref_range: str = test_data.get("reference_range", "N/A")
     
-    report_body = f"""
+    report_body: str = f"""
 =========================================
 LABORATORY RESULT REPORT
 =========================================

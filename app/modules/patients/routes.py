@@ -1,37 +1,47 @@
+import typing
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
-from app.modules.patients import patients_bp
-from app.modules.routes_base import _ctx, _get_records, _get_record, _check_access
-from app.seed import schema
-from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 
+from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
+from app.modules.patients import patients_bp
+from app.modules.routes_base import _ctx, _get_record, _check_access
+from app.seed import schema
+from app.services.visibility_service import VisibilityService
+
+from hogc.lib import HOGC
 from hogc.lib.contracts.crud.models import QueryFilter
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
-from hogc.lib import HOGC
 
 
 @patients_bp.route("/")
 @login_required
-def patients_list():
-    from app.services.visibility_service import VisibilityService
-    page = request.args.get("page", 1, type=int)
-    search = request.args.get("search", "")
+def patients_list() -> typing.Any:
+    """Render the paginated list of patients."""
+    page: int = request.args.get("page", 1, type=int)
+    search: str = request.args.get("search", "")
     
-    result = VisibilityService.get_patients(search=search, page=page, page_size=20)
-    patients = result.items
-    total = result.total
-    total_pages = (total + 19) // 20
-    return render_template("modules/patients/list.html",
-                           patients=patients, page=page, total_pages=total_pages,
-                           total=total, search=search)
+    result: typing.Any = VisibilityService.get_patients(search=search, page=page, page_size=20)
+    patients: list = result.items
+    total: int = result.total
+    total_pages: int = (total + 19) // 20
+    
+    return render_template(
+        "modules/patients/list.html",
+        patients=patients, 
+        page=page, 
+        total_pages=total_pages,
+        total=total, 
+        search=search
+    )
 
 
 @patients_bp.route("/create", methods=["GET", "POST"])
 @login_required
-@role_required(*MODULE_CREATE["patients"])
-def patients_create():
+@role_required(*MODULE_CREATE.get("patients", ()))
+def patients_create() -> typing.Any:
+    """Handle patient creation."""
     if request.method == "POST":
-        data = {
+        data: dict[str, str] = {
             "first_name": request.form.get("first_name", ""),
             "last_name": request.form.get("last_name", ""),
             "date_of_birth": request.form.get("date_of_birth", ""),
@@ -48,17 +58,19 @@ def patients_create():
             "allergies": request.form.get("allergies", ""),
             "status": request.form.get("status", "Active"),
         }
-        HOGC.crud.record.create(CreateRecordRequest(
-            context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, data=data
-        ))
+        req = CreateRecordRequest(context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, data=data)
+        HOGC.crud.record.create(req)
+        
         flash("Patient created successfully!", "success")
         return redirect(url_for("patients.patients_list"))
+        
     return render_template("modules/patients/form.html", patient=None, action="create")
 
 
 @patients_bp.route("/<record_id>")
 @login_required
-def patients_detail(record_id):
+def patients_detail(record_id: str) -> typing.Any:
+    """View patient details."""
     resp = _get_record(schema.PATIENTS_MODULE_ID, record_id)
     if not resp.data:
         flash("Patient not found.", "danger")
@@ -73,8 +85,9 @@ def patients_detail(record_id):
 
 @patients_bp.route("/<record_id>/edit", methods=["GET", "POST"])
 @login_required
-@role_required(*MODULE_EDIT["patients"])
-def patients_edit(record_id):
+@role_required(*MODULE_EDIT.get("patients", ()))
+def patients_edit(record_id: str) -> typing.Any:
+    """Handle patient editing."""
     resp = _get_record(schema.PATIENTS_MODULE_ID, record_id)
     if not resp.data:
         flash("Patient not found.", "danger")
@@ -85,7 +98,7 @@ def patients_edit(record_id):
         return redirect(url_for("patients.patients_list"))
 
     if request.method == "POST":
-        data = {
+        data: dict[str, str] = {
             "first_name": request.form.get("first_name", ""),
             "last_name": request.form.get("last_name", ""),
             "date_of_birth": request.form.get("date_of_birth", ""),
@@ -102,9 +115,9 @@ def patients_edit(record_id):
             "allergies": request.form.get("allergies", ""),
             "status": request.form.get("status", "Active"),
         }
-        HOGC.crud.record.update(UpdateRecordRequest(
-            context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, record_id=record_id, data=data
-        ))
+        req = UpdateRecordRequest(context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, record_id=record_id, data=data)
+        HOGC.crud.record.update(req)
+        
         flash("Patient updated successfully!", "success")
         return redirect(url_for("patients.patients_detail", record_id=record_id))
 
@@ -113,15 +126,16 @@ def patients_edit(record_id):
 
 @patients_bp.route("/<record_id>/delete", methods=["POST"])
 @login_required
-@role_required(*MODULE_DELETE["patients"])
-def patients_delete(record_id):
+@role_required(*MODULE_DELETE.get("patients", ()))
+def patients_delete(record_id: str) -> typing.Any:
+    """Handle patient deletion."""
     resp = _get_record(schema.PATIENTS_MODULE_ID, record_id)
     if resp.data and not _check_access(resp.data, "assigned_doctor"):
         flash("Access denied: You are not assigned to this patient.", "danger")
         return redirect(url_for("patients.patients_list"))
 
-    HOGC.crud.record.delete(DeleteRecordRequest(
-        context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, record_id=record_id
-    ))
+    req = DeleteRecordRequest(context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, record_id=record_id)
+    HOGC.crud.record.delete(req)
+    
     flash("Patient deleted.", "success")
     return redirect(url_for("patients.patients_list"))

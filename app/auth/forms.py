@@ -1,10 +1,13 @@
+import typing
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SelectField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
+
 from app.auth.models import AuthUser
 
 
 class LoginForm(FlaskForm):
+    """Form for user login."""
     username = StringField("Username", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
     remember = BooleanField("Remember Me")
@@ -12,6 +15,7 @@ class LoginForm(FlaskForm):
 
 
 class RegisterForm(FlaskForm):
+    """Form for user registration."""
     username = StringField("Username", validators=[DataRequired(), Length(3, 80)])
     email = StringField("Email", validators=[DataRequired(), Email()])
     full_name = StringField("Full Name", validators=[DataRequired(), Length(2, 120)])
@@ -33,10 +37,14 @@ class RegisterForm(FlaskForm):
     )
     submit = SubmitField("Register")
 
-    def validate_username(self, field):
-        if AuthUser.query.filter_by(username=field.data).first():
+    def validate_username(self, field: StringField) -> None:
+        """Ensure the username is not already taken."""
+        user: typing.Optional[AuthUser] = AuthUser.query.filter_by(username=field.data).first()
+        if user:
             raise ValidationError("Username already taken.")
 
-    def validate_email(self, field):
-        if AuthUser.query.filter_by(email=field.data).first():
+    def validate_email(self, field: StringField) -> None:
+        """Ensure the email is not already registered."""
+        user: typing.Optional[AuthUser] = AuthUser.query.filter_by(email=field.data).first()
+        if user:
             raise ValidationError("Email already registered.")
