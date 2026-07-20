@@ -27,6 +27,7 @@ class RegisterForm(FlaskForm):
             ("Nurse", "Nurse"),
             ("Pharmacist", "Pharmacist"),
             ("Lab Technician", "Lab Technician"),
+            ("Receptionist", "Receptionist"),
         ],
         default="Doctor",
     )

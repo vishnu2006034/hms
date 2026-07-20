@@ -119,7 +119,8 @@ def _seed_users_module():
     _create_field(USERS_MODULE_ID, "Phone", "phone", FieldType.PHONE, "Phone")
     role_id = _create_field(USERS_MODULE_ID, "Role", "role", FieldType.PICKLIST, "Role", is_required=True)
     for i, (val, lbl) in enumerate([("Admin", "Admin"), ("Doctor", "Doctor"), ("Nurse", "Nurse"),
-                                     ("Pharmacist", "Pharmacist"), ("Lab Technician", "Lab Technician")]):
+                                     ("Pharmacist", "Pharmacist"), ("Lab Technician", "Lab Technician"),
+                                     ("Receptionist", "Receptionist")]):
         _add_picklist(role_id, val, lbl, is_default=(i == 1), order=i)
     _create_field(USERS_MODULE_ID, "Department", "department", FieldType.TEXT, "Department")
     _create_field(USERS_MODULE_ID, "Is Active", "is_active", FieldType.BOOLEAN, "Is Active", default_value="true")
@@ -282,6 +283,7 @@ def _drop_all_hogc():
         for table in ["related_records", "relationship_definitions",
                       "picklist_options", "records", "layouts", "fields", "modules"]:
             session.execute(db.text(f"DELETE FROM {table} WHERE tenant_id = :tid"), {"tid": Config.HOGC_TENANT_ID})
+        session.execute(db.text("DELETE FROM auth_users"))
         session.commit()
     except Exception:
         session.rollback()

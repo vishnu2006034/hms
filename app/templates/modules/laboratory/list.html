@@ -10,9 +10,11 @@
         {% if search %}<a href="{{ url_for('laboratory.laboratory_list') }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></a>{% endif %}
     </div>
 </form>
+{% if current_user.role in ('Admin', 'Doctor', 'Lab Technician') %}
 <a href="{{ url_for('laboratory.laboratory_create') }}" class="btn btn-info btn-sm">
     <i class="bi bi-plus-lg"></i> New Test
 </a>
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -35,7 +37,7 @@
                 {% for t in tests %}
                 <tr>
                     <td><code>{{ t.data.get('test_id', 'N/A') }}</code></td>
-                    <td>{{ t.data.get('patient_lookup', '-') }}</td>
+                    <td>{{ resolved.get(t.id, {}).get('patient_lookup', t.data.get('patient_lookup', '-')) }}</td>
                     <td><strong>{{ t.data.get('test_name', '') }}</strong></td>
                     <td><span class="badge bg-info">{{ t.data.get('test_type', '-') }}</span></td>
                     <td>
@@ -53,7 +55,9 @@
                     </td>
                     <td>
                         <a href="{{ url_for('laboratory.laboratory_detail', record_id=t.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        {% if current_user.role in ('Admin', 'Doctor', 'Lab Technician') %}
                         <a href="{{ url_for('laboratory.laboratory_edit', record_id=t.id) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% else %}

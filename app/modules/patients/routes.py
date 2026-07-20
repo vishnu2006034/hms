@@ -3,6 +3,7 @@ from flask_login import login_required
 from app.modules.patients import patients_bp
 from app.modules.routes_base import _ctx, _get_records, _get_record
 from app.seed import schema
+from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
 from hogc.lib import HOGC
@@ -25,6 +26,7 @@ def patients_list():
 
 @patients_bp.route("/create", methods=["GET", "POST"])
 @login_required
+@role_required(*MODULE_CREATE["patients"])
 def patients_create():
     if request.method == "POST":
         data = {
@@ -64,6 +66,7 @@ def patients_detail(record_id):
 
 @patients_bp.route("/<record_id>/edit", methods=["GET", "POST"])
 @login_required
+@role_required(*MODULE_EDIT["patients"])
 def patients_edit(record_id):
     resp = _get_record(schema.PATIENTS_MODULE_ID, record_id)
     if not resp.data:
@@ -99,6 +102,7 @@ def patients_edit(record_id):
 
 @patients_bp.route("/<record_id>/delete", methods=["POST"])
 @login_required
+@role_required(*MODULE_DELETE["patients"])
 def patients_delete(record_id):
     HOGC.crud.record.delete(DeleteRecordRequest(
         context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, record_id=record_id

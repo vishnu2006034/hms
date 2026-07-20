@@ -4,6 +4,7 @@ from flask_login import login_required
 from app.modules.inventory import inventory_bp
 from app.modules.routes_base import _ctx, _get_records, _get_record
 from app.seed import schema
+from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
 
@@ -25,6 +26,7 @@ def inventory_list():
 
 @inventory_bp.route("/create", methods=["GET", "POST"])
 @login_required
+@role_required(*MODULE_CREATE["inventory"])
 def inventory_create():
     if request.method == "POST":
         data = {
@@ -61,6 +63,7 @@ def inventory_detail(record_id):
 
 @inventory_bp.route("/<record_id>/edit", methods=["GET", "POST"])
 @login_required
+@role_required(*MODULE_EDIT["inventory"])
 def inventory_edit(record_id):
     resp = _get_record(schema.INVENTORY_MODULE_ID, record_id)
     if not resp.data:
@@ -93,6 +96,7 @@ def inventory_edit(record_id):
 
 @inventory_bp.route("/<record_id>/delete", methods=["POST"])
 @login_required
+@role_required(*MODULE_DELETE["inventory"])
 def inventory_delete(record_id):
     HOGC.crud.record.delete(DeleteRecordRequest(
         context=_ctx(), module_id=schema.INVENTORY_MODULE_ID, record_id=record_id

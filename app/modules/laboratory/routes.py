@@ -2,8 +2,9 @@ from hogc.lib import HOGC
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required
 from app.modules.laboratory import laboratory_bp
-from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records
+from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups
 from app.seed import schema
+from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
 
@@ -18,9 +19,11 @@ def laboratory_list():
     tests = result.items
     total = result.total
     total_pages = (total + 19) // 20
+    resolved = _resolve_lookups(tests,
+        "patient_lookup", schema.PATIENTS_MODULE_ID)
     return render_template("modules/laboratory/list.html",
                            tests=tests, page=page, total_pages=total_pages,
-                           total=total, search=search)
+                           total=total, search=search, resolved=resolved)
 
 
 def _laboratory_form_context():
@@ -34,6 +37,7 @@ def _laboratory_form_context():
 
 @laboratory_bp.route("/create", methods=["GET", "POST"])
 @login_required
+@role_required(*MODULE_CREATE["laboratory"])
 def laboratory_create():
     if request.method == "POST":
         data = {
@@ -67,11 +71,18 @@ def laboratory_detail(record_id):
     if not resp.data:
         flash("Lab test not found.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
-    return render_template("modules/laboratory/detail.html", test=resp.data)
+    resolved = _resolve_lookups([resp.data],
+        "patient_lookup", schema.PATIENTS_MODULE_ID,
+        "doctor_lookup", schema.USERS_MODULE_ID,
+        "visit_lookup", schema.VISITS_MODULE_ID,
+        "technician_lookup", schema.USERS_MODULE_ID)
+    return render_template("modules/laboratory/detail.html", test=resp.data,
+                           resolved=resolved)
 
 
 @laboratory_bp.route("/<record_id>/edit", methods=["GET", "POST"])
 @login_required
+@role_required(*MODULE_EDIT["laboratory"])
 def laboratory_edit(record_id):
     resp = _get_record(schema.LABORATORY_MODULE_ID, record_id)
     if not resp.data:
@@ -106,6 +117,7 @@ def laboratory_edit(record_id):
 
 @laboratory_bp.route("/<record_id>/delete", methods=["POST"])
 @login_required
+@role_required(*MODULE_DELETE["laboratory"])
 def laboratory_delete(record_id):
     HOGC.crud.record.delete(DeleteRecordRequest(
         context=_ctx(), module_id=schema.LABORATORY_MODULE_ID, record_id=record_id

@@ -3,10 +3,14 @@
 {% block page_title %}Prescription Detail{% endblock %}
 
 {% block page_actions %}
+{% if current_user.role in ('Admin', 'Doctor', 'Pharmacist') %}
 <a href="{{ url_for('prescriptions.prescriptions_edit', record_id=prescription.id) }}" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i> Edit</a>
+{% endif %}
+{% if current_user.role == 'Admin' %}
 <form method="POST" action="{{ url_for('prescriptions.prescriptions_delete', record_id=prescription.id) }}" class="d-inline" data-confirm="Delete this prescription?">
     <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button>
 </form>
+{% endif %}
 <a href="{{ url_for('prescriptions.prescriptions_list') }}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back</a>
 {% endblock %}
 
@@ -20,9 +24,9 @@
     </div>
     <div class="card-body">
         <div class="row g-3">
-            <div class="col-md-4"><strong>Patient:</strong> {{ prescription.data.get('patient_lookup', '-') }}</div>
-            <div class="col-md-4"><strong>Doctor:</strong> {{ prescription.data.get('doctor_lookup', '-') }}</div>
-            <div class="col-md-4"><strong>Visit:</strong> {{ prescription.data.get('visit_lookup', '-') }}</div>
+            <div class="col-md-4"><strong>Patient:</strong> {{ resolved.get(prescription.id, {}).get('patient_lookup', prescription.data.get('patient_lookup', '-')) }}</div>
+            <div class="col-md-4"><strong>Doctor:</strong> {{ resolved.get(prescription.id, {}).get('doctor_lookup', prescription.data.get('doctor_lookup', '-')) }}</div>
+            <div class="col-md-4"><strong>Visit:</strong> {{ resolved.get(prescription.id, {}).get('visit_lookup', prescription.data.get('visit_lookup', '-')) }}</div>
             <div class="col-md-4"><strong>Prescribed Date:</strong> {{ prescription.data.get('prescribed_date', '-') }}</div>
             <div class="col-md-4"><strong>Dosage:</strong> {{ prescription.data.get('dosage', '-') }}</div>
             <div class="col-md-4"><strong>Frequency:</strong> {{ prescription.data.get('frequency', '-') }}</div>

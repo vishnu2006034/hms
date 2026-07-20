@@ -6,32 +6,43 @@
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
             </li>
+            {% set role = current_user.role %}
+            {% if role in ('Admin', 'Doctor', 'Nurse', 'Pharmacist', 'Lab Technician', 'Receptionist') %}
             <li class="nav-item">
                 <a class="nav-link text-light {% if 'patients' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('patients.patients_list') }}">
                     <i class="bi bi-people"></i> Patients
                 </a>
             </li>
+            {% endif %}
+            {% if role in ('Admin', 'Doctor', 'Nurse', 'Receptionist') %}
             <li class="nav-item">
                 <a class="nav-link text-light {% if 'visits' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('visits.visits_list') }}">
                     <i class="bi bi-clipboard2-pulse"></i> Visits
                 </a>
             </li>
+            {% endif %}
+            {% if role in ('Admin', 'Doctor', 'Nurse', 'Pharmacist') %}
             <li class="nav-item">
                 <a class="nav-link text-light {% if 'prescriptions' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('prescriptions.prescriptions_list') }}">
                     <i class="bi bi-capsule"></i> Prescriptions
                 </a>
             </li>
+            {% endif %}
+            {% if role in ('Admin', 'Doctor', 'Nurse', 'Lab Technician') %}
             <li class="nav-item">
                 <a class="nav-link text-light {% if 'laboratory' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('laboratory.laboratory_list') }}">
                     <i class="bi bi-lab"></i> Laboratory
                 </a>
             </li>
+            {% endif %}
+            {% if role in ('Admin', 'Doctor', 'Nurse', 'Pharmacist') %}
             <li class="nav-item">
                 <a class="nav-link text-light {% if 'inventory' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('inventory.inventory_list') }}">
                     <i class="bi bi-box-seam"></i> Inventory
                 </a>
             </li>
-            {% if current_user.role == 'Admin' %}
+            {% endif %}
+            {% if role == 'Admin' %}
             <li class="nav-item">
                 <a class="nav-link text-light {% if 'users' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('users.users_list') }}">
                     <i class="bi bi-person-gear"></i> Staff

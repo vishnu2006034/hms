@@ -10,9 +10,11 @@
         {% if search %}<a href="{{ url_for('visits.visits_list') }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></a>{% endif %}
     </div>
 </form>
+{% if current_user.role in ('Admin', 'Doctor', 'Nurse', 'Receptionist') %}
 <a href="{{ url_for('visits.visits_create') }}" class="btn btn-success btn-sm">
     <i class="bi bi-plus-lg"></i> New Visit
 </a>
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -35,8 +37,8 @@
                 {% for v in visits %}
                 <tr>
                     <td><code>{{ v.data.get('visit_id', 'N/A') }}</code></td>
-                    <td>{{ v.data.get('patient_lookup', '-') }}</td>
-                    <td>{{ v.data.get('doctor_lookup', '-') }}</td>
+                    <td>{{ resolved.get(v.id, {}).get('patient_lookup', v.data.get('patient_lookup', '-')) }}</td>
+                    <td>{{ resolved.get(v.id, {}).get('doctor_lookup', v.data.get('doctor_lookup', '-')) }}</td>
                     <td>{{ v.data.get('visit_date', '-') }}</td>
                     <td><span class="badge bg-info">{{ v.data.get('department', '-') }}</span></td>
                     <td>{{ v.data.get('chief_complaint', '-')[:50] }}</td>
@@ -48,7 +50,9 @@
                     </td>
                     <td>
                         <a href="{{ url_for('visits.visits_detail', record_id=v.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        {% if current_user.role in ('Admin', 'Doctor', 'Nurse', 'Receptionist') %}
                         <a href="{{ url_for('visits.visits_edit', record_id=v.id) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% else %}

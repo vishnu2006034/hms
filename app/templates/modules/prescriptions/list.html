@@ -10,9 +10,11 @@
         {% if search %}<a href="{{ url_for('prescriptions.prescriptions_list') }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></a>{% endif %}
     </div>
 </form>
+{% if current_user.role in ('Admin', 'Doctor', 'Pharmacist') %}
 <a href="{{ url_for('prescriptions.prescriptions_create') }}" class="btn btn-warning btn-sm">
     <i class="bi bi-plus-lg"></i> New Prescription
 </a>
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -35,8 +37,8 @@
                 {% for rx in prescriptions %}
                 <tr>
                     <td><code>{{ rx.data.get('prescription_id', 'N/A') }}</code></td>
-                    <td>{{ rx.data.get('patient_lookup', '-') }}</td>
-                    <td>{{ rx.data.get('doctor_lookup', '-') }}</td>
+                    <td>{{ resolved.get(rx.id, {}).get('patient_lookup', rx.data.get('patient_lookup', '-')) }}</td>
+                    <td>{{ resolved.get(rx.id, {}).get('doctor_lookup', rx.data.get('doctor_lookup', '-')) }}</td>
                     <td><strong>{{ rx.data.get('medication_name', '-') }}</strong></td>
                     <td>{{ rx.data.get('dosage', '-') }}</td>
                     <td>{{ rx.data.get('frequency', '-') }}</td>
@@ -48,7 +50,9 @@
                     </td>
                     <td>
                         <a href="{{ url_for('prescriptions.prescriptions_detail', record_id=rx.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                        {% if current_user.role in ('Admin', 'Doctor', 'Pharmacist') %}
                         <a href="{{ url_for('prescriptions.prescriptions_edit', record_id=rx.id) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% else %}
