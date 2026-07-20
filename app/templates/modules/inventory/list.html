@@ -36,7 +36,7 @@
             <tbody>
                 {% for item in items %}
                 <tr>
-                    <td><code>{{ item.data.get('item_id', 'N/A') }}</code></td>
+                    <td><code>{{ item.data.get('item_id') or ('INV-' ~ item.id[:8] | upper) }}</code></td>
                     <td><strong>{{ item.data.get('item_name', '') }}</strong></td>
                     <td><span class="badge bg-info">{{ item.data.get('category', '-') }}</span></td>
                     <td>{{ item.data.get('quantity', '0') }}</td>

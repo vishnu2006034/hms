@@ -1,21 +1,26 @@
-from hogc.lib import HOGC
-from flask import render_template, redirect, url_for, flash, request
-from flask_login import login_required
+from flask import render_template, redirect, url_for, flash, request, abort
+from flask_login import login_required, current_user
 from app.modules.laboratory import laboratory_bp
-from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups
+from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups, _check_access
 from app.seed import schema
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 
+from hogc.lib.contracts.crud.models import QueryFilter
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
+from hogc.lib import HOGC
 
 
 @laboratory_bp.route("/")
 @login_required
 def laboratory_list():
+    from app.services.visibility_service import VisibilityService
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "")
-    result = _get_records(schema.LABORATORY_MODULE_ID, page=page, page_size=20,
-                          search=search, search_field="test_name")
+    
+    result = VisibilityService.get_laboratory_tests(search=search, page=page, page_size=20)
+    if result is None:
+        abort(403)
+        
     tests = result.items
     total = result.total
     total_pages = (total + 19) // 20
@@ -27,7 +32,8 @@ def laboratory_list():
 
 
 def _laboratory_form_context():
-    patients = _get_all_records(schema.PATIENTS_MODULE_ID)
+    from app.services.visibility_service import VisibilityService
+    patients = VisibilityService.get_all_patients()
     all_users = _get_all_records(schema.USERS_MODULE_ID)
     doctors = [u for u in all_users if u.data.get("role") in ("Doctor",)]
     technicians = all_users
@@ -71,6 +77,10 @@ def laboratory_detail(record_id):
     if not resp.data:
         flash("Lab test not found.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
+        
+    if not _check_access(resp.data, "doctor_lookup"):
+        flash("Access denied: You are not assigned to this lab test.", "danger")
+        return redirect(url_for("laboratory.laboratory_list"))
     resolved = _resolve_lookups([resp.data],
         "patient_lookup", schema.PATIENTS_MODULE_ID,
         "doctor_lookup", schema.USERS_MODULE_ID,
@@ -88,8 +98,13 @@ def laboratory_edit(record_id):
     if not resp.data:
         flash("Lab test not found.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
+        
+    if not _check_access(resp.data, "doctor_lookup"):
+        flash("Access denied: You are not assigned to this lab test.", "danger")
+        return redirect(url_for("laboratory.laboratory_list"))
 
     if request.method == "POST":
+        old_status = resp.data.data.get("status") if hasattr(resp.data, "data") and isinstance(resp.data.data, dict) else None
         data = {
             "patient_lookup": request.form.get("patient_lookup", ""),
             "doctor_lookup": request.form.get("doctor_lookup", ""),
@@ -108,10 +123,59 @@ def laboratory_edit(record_id):
         HOGC.crud.record.update(UpdateRecordRequest(
             context=_ctx(), module_id=schema.LABORATORY_MODULE_ID, record_id=record_id, data=data
         ))
-        flash("Lab test updated successfully!", "success")
+        
+        new_status = data.get("status")
+        if new_status == "Completed" and old_status != "Completed":
+            from app.services.notifications import notify_lab_result
+            sent_to = notify_lab_result(data, record_id)
+            flash(f"Lab test updated successfully! Report sent to: {', '.join(sent_to)}", "success")
+        else:
+            flash("Lab test updated successfully!", "success")
         return redirect(url_for("laboratory.laboratory_detail", record_id=record_id))
 
     return render_template("modules/laboratory/form.html", test=resp.data, action="edit",
+                           **_laboratory_form_context())
+
+
+@laboratory_bp.route("/<record_id>/result", methods=["GET", "POST"])
+@login_required
+@role_required(*MODULE_EDIT["laboratory"])
+def laboratory_result(record_id):
+    resp = _get_record(schema.LABORATORY_MODULE_ID, record_id)
+    if not resp.data:
+        flash("Lab test not found.", "danger")
+        return redirect(url_for("laboratory.laboratory_list"))
+        
+    if not _check_access(resp.data, "doctor_lookup"):
+        flash("Access denied: You are not assigned to this lab test.", "danger")
+        return redirect(url_for("laboratory.laboratory_list"))
+
+    if request.method == "POST":
+        old_status = resp.data.data.get("status") if hasattr(resp.data, "data") and isinstance(resp.data.data, dict) else None
+        data = resp.data.data.copy() if hasattr(resp.data, "data") and isinstance(resp.data.data, dict) else {}
+        data.update({
+            "result_value": request.form.get("result_value", ""),
+            "reference_range": request.form.get("reference_range", ""),
+            "result_date": request.form.get("result_date", ""),
+            "status": request.form.get("status", "Completed"),
+            "technician_lookup": request.form.get("technician_lookup", ""),
+            "notes": request.form.get("notes", "")
+        })
+        HOGC.crud.record.update(UpdateRecordRequest(
+            context=_ctx(), module_id=schema.LABORATORY_MODULE_ID, record_id=record_id, data=data
+        ))
+        
+        new_status = data.get("status")
+        if new_status == "Completed" and old_status != "Completed":
+            from app.services.notifications import notify_lab_result
+            sent_to = notify_lab_result(data, record_id)
+            flash(f"Lab test result saved successfully! Report sent to: {', '.join(sent_to)}", "success")
+        else:
+            flash("Lab test result saved successfully!", "success")
+            
+        return redirect(url_for("laboratory.laboratory_detail", record_id=record_id))
+
+    return render_template("modules/laboratory/result.html", test=resp.data,
                            **_laboratory_form_context())
 
 
@@ -119,6 +183,11 @@ def laboratory_edit(record_id):
 @login_required
 @role_required(*MODULE_DELETE["laboratory"])
 def laboratory_delete(record_id):
+    resp = _get_record(schema.LABORATORY_MODULE_ID, record_id)
+    if resp.data and not _check_access(resp.data, "doctor_lookup"):
+        flash("Access denied: You are not assigned to this lab test.", "danger")
+        return redirect(url_for("laboratory.laboratory_list"))
+        
     HOGC.crud.record.delete(DeleteRecordRequest(
         context=_ctx(), module_id=schema.LABORATORY_MODULE_ID, record_id=record_id
     ))

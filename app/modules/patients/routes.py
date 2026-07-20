@@ -1,10 +1,11 @@
 from flask import render_template, redirect, url_for, flash, request
-from flask_login import login_required
+from flask_login import login_required, current_user
 from app.modules.patients import patients_bp
-from app.modules.routes_base import _ctx, _get_records, _get_record
+from app.modules.routes_base import _ctx, _get_records, _get_record, _check_access
 from app.seed import schema
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 
+from hogc.lib.contracts.crud.models import QueryFilter
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
 from hogc.lib import HOGC
 
@@ -12,10 +13,11 @@ from hogc.lib import HOGC
 @patients_bp.route("/")
 @login_required
 def patients_list():
+    from app.services.visibility_service import VisibilityService
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "")
-    result = _get_records(schema.PATIENTS_MODULE_ID, page=page, page_size=20,
-                          search=search, search_field="first_name")
+    
+    result = VisibilityService.get_patients(search=search, page=page, page_size=20)
     patients = result.items
     total = result.total
     total_pages = (total + 19) // 20
@@ -61,6 +63,11 @@ def patients_detail(record_id):
     if not resp.data:
         flash("Patient not found.", "danger")
         return redirect(url_for("patients.patients_list"))
+        
+    if not _check_access(resp.data, "assigned_doctor"):
+        flash("Access denied: You are not assigned to this patient.", "danger")
+        return redirect(url_for("patients.patients_list"))
+        
     return render_template("modules/patients/detail.html", patient=resp.data)
 
 
@@ -71,6 +78,10 @@ def patients_edit(record_id):
     resp = _get_record(schema.PATIENTS_MODULE_ID, record_id)
     if not resp.data:
         flash("Patient not found.", "danger")
+        return redirect(url_for("patients.patients_list"))
+
+    if not _check_access(resp.data, "assigned_doctor"):
+        flash("Access denied: You are not assigned to this patient.", "danger")
         return redirect(url_for("patients.patients_list"))
 
     if request.method == "POST":
@@ -104,6 +115,11 @@ def patients_edit(record_id):
 @login_required
 @role_required(*MODULE_DELETE["patients"])
 def patients_delete(record_id):
+    resp = _get_record(schema.PATIENTS_MODULE_ID, record_id)
+    if resp.data and not _check_access(resp.data, "assigned_doctor"):
+        flash("Access denied: You are not assigned to this patient.", "danger")
+        return redirect(url_for("patients.patients_list"))
+
     HOGC.crud.record.delete(DeleteRecordRequest(
         context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, record_id=record_id
     ))

@@ -21,7 +21,7 @@
             <div class="card-header bg-info text-white">
                 <h5 class="mb-0">
                     {{ test.data.get('test_name', '') }}
-                    <span class="badge bg-light text-dark ms-2">{{ test.data.get('test_id', 'N/A') }}</span>
+                    <span class="badge bg-light text-dark ms-2">{{ test.data.get('test_id') or ('LAB-' ~ test.id[:8] | upper) }}</span>
                 </h5>
             </div>
             <div class="card-body">
@@ -55,6 +55,11 @@
             <div class="card-header"><strong>Quick Actions</strong></div>
             <div class="card-body">
                 {% if current_user.role in ('Admin', 'Doctor', 'Lab Technician') %}
+                {% if test.data.get('status') != 'Completed' %}
+                <a href="{{ url_for('laboratory.laboratory_result', record_id=test.id) }}" class="btn btn-primary w-100 mb-2">
+                    <i class="bi bi-clipboard-plus"></i> Enter Result
+                </a>
+                {% endif %}
                 <a href="{{ url_for('laboratory.laboratory_edit', record_id=test.id) }}" class="btn btn-outline-warning w-100 mb-2">
                     <i class="bi bi-pencil"></i> Edit Test
                 </a>

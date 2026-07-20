@@ -36,7 +36,7 @@
             <tbody>
                 {% for rx in prescriptions %}
                 <tr>
-                    <td><code>{{ rx.data.get('prescription_id', 'N/A') }}</code></td>
+                    <td><code>{{ rx.data.get('prescription_id') or ('RX-' ~ rx.id[:8] | upper) }}</code></td>
                     <td>{{ resolved.get(rx.id, {}).get('patient_lookup', rx.data.get('patient_lookup', '-')) }}</td>
                     <td>{{ resolved.get(rx.id, {}).get('doctor_lookup', rx.data.get('doctor_lookup', '-')) }}</td>
                     <td><strong>{{ rx.data.get('medication_name', '-') }}</strong></td>
