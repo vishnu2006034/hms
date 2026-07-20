@@ -163,17 +163,14 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.109.0" },
     { name = "hogc-lib", git = "https://github.com/HOGC-IN/platform-lib.git?branch=main" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "psycopg2-binary", marker = "extra == 'postgres'", specifier = ">=2.9" },
-    { name = "pydantic", marker = "extra == 'api'", specifier = ">=2.0.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9" },
     { name = "sqlalchemy", specifier = ">=2.0,<3.0" },
-    { name = "uvicorn", marker = "extra == 'api'", specifier = ">=0.27.0" },
 ]
-provides-extras = ["postgres", "api", "dev"]
+provides-extras = ["postgres", "dev"]
 
 [[package]]
 name = "hogc-lib"

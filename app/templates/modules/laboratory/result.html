@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Enter Lab Result{% endblock %}
+{% block page_title %}Enter Lab Result{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">{{ test.data.get('test_name', '') }}</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Result Date *</label>
+                    <input type="datetime-local" class="form-control" name="result_date" required
+                           value="{{ test.data.get('result_date', '') }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Status *</label>
+                    <select class="form-select" name="status" required>
+                        {% for s in ['Ordered', 'Sample Collected', 'In Progress', 'Completed', 'Cancelled'] %}
+                        <option value="{{ s }}" {{ 'selected' if test.data.get('status', 'Completed') == s }}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Technician</label>
+                    <select class="form-select" name="technician_lookup">
+                        <option value="">Select Technician...</option>
+                        {% for t in technicians %}
+                        <option value="{{ t.id }}" {{ 'selected' if test.data.get('technician_lookup') == t.id }}>
+                            {{ t.data.get('full_name', '') }} — {{ t.data.get('role', '') }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Reference Range</label>
+                    <input type="text" class="form-control" name="reference_range"
+                           value="{{ test.data.get('reference_range', '') }}"
+                           placeholder="e.g. 4.0 - 5.6%">
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Result Value *</label>
+                    <textarea class="form-control" name="result_value" rows="3" required placeholder="Enter test results here...">{{ test.data.get('result_value', '') }}</textarea>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" name="notes" rows="2" placeholder="Any additional notes...">{{ test.data.get('notes', '') }}</textarea>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Save Result
+                </button>
+                <a href="{{ url_for('laboratory.laboratory_detail', record_id=test.id) }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

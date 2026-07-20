@@ -5,7 +5,7 @@ load_dotenv()
 
 from sqlalchemy import create_engine, text
 
-db_url = os.getenv("DATABASE_URL", "postgresql://postgres:12345@localhost:5432/hms")
+db_url = os.getenv("DATABASE_URL", "postgresql://postgres:123456@localhost:5432/hms")
 engine = create_engine(db_url)
 
 with engine.connect() as conn:

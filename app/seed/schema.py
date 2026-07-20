@@ -138,6 +138,7 @@ def _seed_patients_module():
         _add_picklist(gender_id, val, lbl, order=i)
     _create_field(PATIENTS_MODULE_ID, "Phone", "phone", FieldType.PHONE, "Phone", is_required=True)
     _create_field(PATIENTS_MODULE_ID, "Email", "email", FieldType.EMAIL, "Email")
+    _create_field(PATIENTS_MODULE_ID, "Assigned Doctor", "assigned_doctor", FieldType.LOOKUP, "Assigned Doctor", lookup_module_id=USERS_MODULE_ID)
     _create_field(PATIENTS_MODULE_ID, "Address", "address", FieldType.TEXT, "Address")
     bg_id = _create_field(PATIENTS_MODULE_ID, "Blood Group", "blood_group", FieldType.PICKLIST, "Blood Group")
     for i, (val, lbl) in enumerate([("A+", "A+"), ("A-", "A-"), ("B+", "B+"), ("B-", "B-"),

@@ -1,34 +1,42 @@
-from hogc.lib import HOGC
-from flask import render_template, redirect, url_for, flash, request
-from flask_login import login_required
+from flask import render_template, redirect, url_for, flash, request, abort
+from flask_login import login_required, current_user
 from app.modules.visits import visits_bp
-from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups
+from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups, _check_access
 from app.seed import schema
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 
-from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
+from hogc.lib.contracts.crud.models import RecordQuery, QueryFilter
+from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest, QueryRecordsRequest
+from hogc.lib import HOGC
 
 
 @visits_bp.route("/")
 @login_required
 def visits_list():
+    from app.services.visibility_service import VisibilityService
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "")
-    result = _get_records(schema.VISITS_MODULE_ID, page=page, page_size=20,
-                          search=search, search_field="chief_complaint")
-    visits = result.items
+    
+    result = VisibilityService.get_visits(search=search, page=page, page_size=20)
+    if result is None:
+        abort(403)
+        
+    visits_page = result.items
     total = result.total
     total_pages = (total + 19) // 20
-    resolved = _resolve_lookups(visits,
+
+    resolved = _resolve_lookups(visits_page,
         "patient_lookup", schema.PATIENTS_MODULE_ID,
         "doctor_lookup", schema.USERS_MODULE_ID)
     return render_template("modules/visits/list.html",
-                           visits=visits, page=page, total_pages=total_pages,
+                           visits=visits_page, page=page, total_pages=total_pages,
                            total=total, search=search, resolved=resolved)
 
 
 def _visits_form_context():
-    patients = _get_all_records(schema.PATIENTS_MODULE_ID)
+    from app.services.visibility_service import VisibilityService
+    patients = VisibilityService.get_all_patients()
+    
     doctors = [u for u in _get_all_records(schema.USERS_MODULE_ID)
                if u.data.get("role") in ("Doctor",)]
     return {"patients": patients, "doctors": doctors}
@@ -54,6 +62,13 @@ def visits_create():
             "status": request.form.get("status", "Scheduled"),
             "notes": request.form.get("notes", ""),
         }
+        
+        if current_user.role == "Doctor":
+            patient_record = _get_record(schema.PATIENTS_MODULE_ID, data["patient_lookup"])
+            if patient_record.data and not _check_access(patient_record.data, "assigned_doctor"):
+                flash("Access denied: You are not assigned to this patient.", "danger")
+                return redirect(url_for("visits.visits_list"))
+                
         HOGC.crud.record.create(CreateRecordRequest(
             context=_ctx(), module_id=schema.VISITS_MODULE_ID, data=data
         ))
@@ -70,11 +85,32 @@ def visits_detail(record_id):
     if not resp.data:
         flash("Visit not found.", "danger")
         return redirect(url_for("visits.visits_list"))
+        
+    if not _check_access(resp.data, "doctor_lookup"):
+        flash("Access denied: You are not assigned to this visit.", "danger")
+        return redirect(url_for("visits.visits_list"))
+        
+    if current_user.role == "Doctor":
+        patient_record = _get_record(schema.PATIENTS_MODULE_ID, resp.data.data.get("patient_lookup"))
+        if patient_record.data and not _check_access(patient_record.data, "assigned_doctor"):
+            flash("Access denied: You are not assigned to this patient.", "danger")
+            return redirect(url_for("visits.visits_list"))
+            
     resolved = _resolve_lookups([resp.data],
         "patient_lookup", schema.PATIENTS_MODULE_ID,
         "doctor_lookup", schema.USERS_MODULE_ID)
+        
+    query = RecordQuery(
+        module_id=schema.LABORATORY_MODULE_ID,
+        filters=[QueryFilter(field="visit_lookup", operator="eq", value=record_id)],
+        page=1,
+        page_size=100,
+    )
+    lab_resp = HOGC.crud.record.query(QueryRecordsRequest(context=_ctx(), query=query))
+    lab_tests = lab_resp.items if lab_resp else []
+        
     return render_template("modules/visits/detail.html", visit=resp.data,
-                           resolved=resolved)
+                           resolved=resolved, lab_tests=lab_tests)
 
 
 @visits_bp.route("/<record_id>/edit", methods=["GET", "POST"])
@@ -85,6 +121,16 @@ def visits_edit(record_id):
     if not resp.data:
         flash("Visit not found.", "danger")
         return redirect(url_for("visits.visits_list"))
+        
+    if not _check_access(resp.data, "doctor_lookup"):
+        flash("Access denied: You are not assigned to this visit.", "danger")
+        return redirect(url_for("visits.visits_list"))
+        
+    if current_user.role == "Doctor":
+        patient_record = _get_record(schema.PATIENTS_MODULE_ID, resp.data.data.get("patient_lookup"))
+        if patient_record.data and not _check_access(patient_record.data, "assigned_doctor"):
+            flash("Access denied: You are not assigned to this patient.", "danger")
+            return redirect(url_for("visits.visits_list"))
 
     if request.method == "POST":
         data = {
@@ -102,6 +148,13 @@ def visits_edit(record_id):
             "status": request.form.get("status", "Scheduled"),
             "notes": request.form.get("notes", ""),
         }
+        
+        if current_user.role == "Doctor":
+            patient_record = _get_record(schema.PATIENTS_MODULE_ID, data["patient_lookup"])
+            if patient_record.data and not _check_access(patient_record.data, "assigned_doctor"):
+                flash("Access denied: You are not assigned to this patient.", "danger")
+                return redirect(url_for("visits.visits_list"))
+                
         HOGC.crud.record.update(UpdateRecordRequest(
             context=_ctx(), module_id=schema.VISITS_MODULE_ID, record_id=record_id, data=data
         ))
@@ -116,8 +169,21 @@ def visits_edit(record_id):
 @login_required
 @role_required(*MODULE_DELETE["visits"])
 def visits_delete(record_id):
+    resp = _get_record(schema.VISITS_MODULE_ID, record_id)
+    if resp.data:
+        if not _check_access(resp.data, "doctor_lookup"):
+            flash("Access denied: You are not assigned to this visit.", "danger")
+            return redirect(url_for("visits.visits_list"))
+            
+        if current_user.role == "Doctor":
+            patient_record = _get_record(schema.PATIENTS_MODULE_ID, resp.data.data.get("patient_lookup"))
+            if patient_record.data and not _check_access(patient_record.data, "assigned_doctor"):
+                flash("Access denied: You are not assigned to this patient.", "danger")
+                return redirect(url_for("visits.visits_list"))
+
     HOGC.crud.record.delete(DeleteRecordRequest(
         context=_ctx(), module_id=schema.VISITS_MODULE_ID, record_id=record_id
     ))
     flash("Visit deleted.", "success")
     return redirect(url_for("visits.visits_list"))
+

@@ -36,7 +36,7 @@
             <tbody>
                 {% for t in tests %}
                 <tr>
-                    <td><code>{{ t.data.get('test_id', 'N/A') }}</code></td>
+                    <td><code>{{ t.data.get('test_id') or ('LAB-' ~ t.id[:8] | upper) }}</code></td>
                     <td>{{ resolved.get(t.id, {}).get('patient_lookup', t.data.get('patient_lookup', '-')) }}</td>
                     <td><strong>{{ t.data.get('test_name', '') }}</strong></td>
                     <td><span class="badge bg-info">{{ t.data.get('test_type', '-') }}</span></td>

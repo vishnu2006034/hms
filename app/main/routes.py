@@ -24,32 +24,15 @@ def dashboard():
     ctx = _get_ctx()
     stats = {"patients": 0, "visits": 0, "inventory": 0, "lab": 0, "prescriptions": 0}
 
+    from app.services.visibility_service import VisibilityService
+
     try:
-        patients = HOGC.crud.record.list(ListRecordsRequest(
-            context=ctx, module_id=seed.PATIENTS_MODULE_ID, page=1, page_size=1
-        ))
-        stats["patients"] = patients.total
-
-        visits = HOGC.crud.record.list(ListRecordsRequest(
-            context=ctx, module_id=seed.VISITS_MODULE_ID, page=1, page_size=1
-        ))
-        stats["visits"] = visits.total
-
-        inventory = HOGC.crud.record.list(ListRecordsRequest(
-            context=ctx, module_id=seed.INVENTORY_MODULE_ID, page=1, page_size=1
-        ))
-        stats["inventory"] = inventory.total
-
-        prescriptions = HOGC.crud.record.list(ListRecordsRequest(
-            context=ctx, module_id=seed.PRESCRIPTIONS_MODULE_ID, page=1, page_size=1
-        ))
-        stats["prescriptions"] = prescriptions.total
-
-        lab = HOGC.crud.record.list(ListRecordsRequest(
-            context=ctx, module_id=seed.LABORATORY_MODULE_ID, page=1, page_size=1
-        ))
-        stats["lab"] = lab.total
-    except Exception:
-        pass
+        stats["patients"] = VisibilityService.count_patients()
+        stats["visits"] = VisibilityService.count_visits()
+        stats["inventory"] = VisibilityService.count_inventory_items()
+        stats["prescriptions"] = VisibilityService.count_prescriptions()
+        stats["lab"] = VisibilityService.count_laboratory_tests()
+    except Exception as e:
+        print(f"Error fetching stats: {e}")
 
     return render_template("main/dashboard.html", stats=stats)

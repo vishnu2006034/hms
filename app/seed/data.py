@@ -146,8 +146,10 @@ def _seed_default_data(module_ids):
          "medical_history": "Migraine", "allergies": "Ibuprofen", "status": "Active"},
     ]
 
+    import random
     patient_ids = []
     for p in patients_data:
+        p["assigned_doctor"] = random.choice(doctor_ids) if doctor_ids else ""
         resp = HOGC.crud.record.create(CreateRecordRequest(
             context=ctx, module_id=patients_id, data=p
         ))

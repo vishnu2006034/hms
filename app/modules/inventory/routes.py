@@ -12,10 +12,15 @@ from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRe
 @inventory_bp.route("/")
 @login_required
 def inventory_list():
+    from app.services.visibility_service import VisibilityService
+    from flask import abort
     page = request.args.get("page", 1, type=int)
     search = request.args.get("search", "")
-    result = _get_records(schema.INVENTORY_MODULE_ID, page=page, page_size=20,
-                          search=search, search_field="item_name")
+    
+    result = VisibilityService.get_inventory_items(search=search, page=page, page_size=20)
+    if result is None:
+        abort(403)
+        
     items = result.items
     total = result.total
     total_pages = (total + 19) // 20

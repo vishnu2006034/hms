@@ -76,16 +76,21 @@ def _resolve_lookups(records, *field_module_pairs):
     return result
 
 
-def _get_records(module_id, page=1, page_size=20, search=None, search_field=None):
+def _get_records(module_id, page=1, page_size=20, search=None, search_field=None, extra_filters=None):
     ctx = _ctx()
+    filters = extra_filters or []
     if search and search_field:
+        filters.append(QueryFilter(field=search_field, operator="contains", value=search))
+    
+    if filters:
         query = RecordQuery(
             module_id=module_id,
-            filters=[QueryFilter(field=search_field, operator="contains", value=search)],
+            filters=filters,
             page=page,
             page_size=page_size,
         )
         return HOGC.crud.record.query(QueryRecordsRequest(context=ctx, query=query))
+    
     return HOGC.crud.record.list(ListRecordsRequest(
         context=ctx, module_id=module_id, page=page, page_size=page_size
     ))
@@ -128,3 +133,15 @@ def _delete_record(module_id, record_id):
     return HOGC.crud.record.delete(DeleteRecordRequest(
         context=_ctx(), module_id=module_id, record_id=record_id
     ))
+
+
+def _check_access(record, lookup_field):
+    """
+    Checks if the current user (if a Doctor) is authorized to access the record.
+    Returns True if access is allowed, False otherwise.
+    """
+    if current_user.role == "Doctor":
+        assigned_id = record.data.get(lookup_field)
+        if assigned_id != current_user.hogc_record_id:
+            return False
+    return True
