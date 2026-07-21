@@ -19,7 +19,7 @@
     <div class="col-md-8">
         <div class="card shadow-sm">
             <div class="card-header bg-success text-white">
-                <h5 class="mb-0">Visit {{ visit.data.get('visit_id') or ('VST-' ~ visit.id[:8] | upper) }}</h5>
+                <h5 class="mb-0">Visit {{ fmt_auto_id(visit.data.get('visit_id'), 'VST', visit.id) }}</h5>
             </div>
             <div class="card-body">
                 <div class="row g-3">
@@ -74,7 +74,7 @@
                         <tbody>
                             {% for t in lab_tests %}
                             <tr>
-                                <td><code>{{ t.data.get('test_id') or ('LAB-' ~ t.id[:8] | upper) }}</code></td>
+                                <td><code>{{ fmt_auto_id(t.data.get('test_id'), 'LAB', t.id) }}</code></td>
                                 <td><strong>{{ t.data.get('test_name', '') }}</strong></td>
                                 <td>
                                     {% set status = t.data.get('status', 'Ordered') %}

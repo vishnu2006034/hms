@@ -19,7 +19,7 @@
     <div class="card-header bg-warning text-dark">
         <h5 class="mb-0">
             <i class="bi bi-capsule"></i> {{ prescription.data.get('medication_name', '') }}
-            <span class="badge bg-dark ms-2">{{ prescription.data.get('prescription_id') or ('RX-' ~ prescription.id[:8] | upper) }}</span>
+            <span class="badge bg-dark ms-2">{{ fmt_auto_id(prescription.data.get('prescription_id'), 'RX', prescription.id) }}</span>
         </h5>
     </div>
     <div class="card-body">

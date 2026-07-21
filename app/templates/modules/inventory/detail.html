@@ -19,7 +19,7 @@
     <div class="col-md-8">
         <div class="card shadow-sm">
             <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0">{{ item.data.get('item_name', '') }} <span class="badge bg-dark ms-2">{{ item.data.get('item_id') or ('INV-' ~ item.id[:8] | upper) }}</span></h5>
+                <h5 class="mb-0">{{ item.data.get('item_name', '') }} <span class="badge bg-dark ms-2">{{ fmt_auto_id(item.data.get('item_id'), 'INV', item.id) }}</span></h5>
             </div>
             <div class="card-body">
                 <div class="row g-3">

@@ -16,16 +16,16 @@
                     <label class="form-label">Category *</label>
                     <select class="form-select" name="category" required>
                         <option value="">Select...</option>
-                        {% for c in ['Medication', 'Equipment', 'Consumable', 'Surgical'] %}
-                        <option value="{{ c }}" {{ 'selected' if item and item.data.get('category') == c }}>{{ c }}</option>
+                        {% for value, label in picklists.get('category', []) %}
+                        <option value="{{ value }}" {{ 'selected' if item and item.data.get('category') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Status *</label>
                     <select class="form-select" name="status" required>
-                        {% for s in ['In-Stock', 'Low-Stock', 'Out-of-Stock', 'Expired'] %}
-                        <option value="{{ s }}" {{ 'selected' if item and item.data.get('status') == s }}>{{ s }}</option>
+                        {% for value, label in picklists.get('status', []) %}
+                        <option value="{{ value }}" {{ 'selected' if item and item.data.get('status') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -42,8 +42,8 @@
                     <label class="form-label">Unit *</label>
                     <select class="form-select" name="unit" required>
                         <option value="">Select...</option>
-                        {% for u in ['Box', 'Bottle', 'Piece', 'Strip', 'Vial'] %}
-                        <option value="{{ u }}" {{ 'selected' if item and item.data.get('unit') == u }}>{{ u }}</option>
+                        {% for value, label in picklists.get('unit', []) %}
+                        <option value="{{ value }}" {{ 'selected' if item and item.data.get('unit') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>

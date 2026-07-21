@@ -2,11 +2,16 @@ from hogc.lib import HOGC
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required
 from app.modules.inventory import inventory_bp
-from app.modules.routes_base import _ctx, _get_records, _get_record
+from app.modules.routes_base import _ctx, _get_records, _get_record, _get_picklist_options
 from app.seed import schema
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
+
+
+def _inventory_picklists() -> dict:
+    """Fetch live picklist options for the inventory form from the CRUD engine."""
+    return _get_picklist_options(schema.INVENTORY_MODULE_ID, "category", "status", "unit")
 
 
 @inventory_bp.route("/")
@@ -53,7 +58,8 @@ def inventory_create():
         ))
         flash("Inventory item created successfully!", "success")
         return redirect(url_for("inventory.inventory_list"))
-    return render_template("modules/inventory/form.html", item=None, action="create")
+    return render_template("modules/inventory/form.html", item=None, action="create",
+                           picklists=_inventory_picklists())
 
 
 @inventory_bp.route("/<record_id>")
@@ -96,7 +102,8 @@ def inventory_edit(record_id):
         flash("Inventory item updated successfully!", "success")
         return redirect(url_for("inventory.inventory_detail", record_id=record_id))
 
-    return render_template("modules/inventory/form.html", item=resp.data, action="edit")
+    return render_template("modules/inventory/form.html", item=resp.data, action="edit",
+                           picklists=_inventory_picklists())
 
 
 @inventory_bp.route("/<record_id>/delete", methods=["POST"])

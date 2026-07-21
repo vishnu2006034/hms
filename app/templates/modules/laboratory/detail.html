@@ -21,7 +21,7 @@
             <div class="card-header bg-info text-white">
                 <h5 class="mb-0">
                     {{ test.data.get('test_name', '') }}
-                    <span class="badge bg-light text-dark ms-2">{{ test.data.get('test_id') or ('LAB-' ~ test.id[:8] | upper) }}</span>
+                    <span class="badge bg-light text-dark ms-2">{{ fmt_auto_id(test.data.get('test_id'), 'LAB', test.id) }}</span>
                 </h5>
             </div>
             <div class="card-body">

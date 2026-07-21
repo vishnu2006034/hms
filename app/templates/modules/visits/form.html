@@ -38,8 +38,8 @@
                     <label class="form-label">Department *</label>
                     <select class="form-select" name="department" required>
                         <option value="">Select...</option>
-                        {% for d in ['General', 'Cardiology', 'Orthopedics', 'Pediatrics', 'Neurology', 'Oncology', 'Emergency', 'Surgery'] %}
-                        <option value="{{ d }}" {{ 'selected' if visit and visit.data.get('department') == d }}>{{ d }}</option>
+                        {% for value, label in picklists.get('department', []) %}
+                        <option value="{{ value }}" {{ 'selected' if visit and visit.data.get('department') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -79,8 +79,8 @@
                 <div class="col-md-6">
                     <label class="form-label">Status *</label>
                     <select class="form-select" name="status" required>
-                        {% for s in ['Scheduled', 'In-Progress', 'Completed', 'Cancelled'] %}
-                        <option value="{{ s }}" {{ 'selected' if visit and visit.data.get('status') == s }}>{{ s }}</option>
+                        {% for value, label in picklists.get('status', []) %}
+                        <option value="{{ value }}" {{ 'selected' if visit and visit.data.get('status') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>

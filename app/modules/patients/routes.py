@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 from app.modules.patients import patients_bp
-from app.modules.routes_base import _ctx, _get_record, _get_related_records, _sync_related_record_on_delete
+from app.modules.routes_base import _ctx, _get_record, _get_related_records, _sync_related_record_on_delete, _get_picklist_options
 from app.seed import schema
 from app.services.visibility_service import VisibilityService
 from app.services.authorization_service import AuthorizationService
@@ -12,6 +12,12 @@ from app.services.authorization_service import AuthorizationService
 from hogc.lib import HOGC
 from hogc.lib.contracts.crud.models import QueryFilter
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
+
+
+def _patients_picklists() -> dict:
+    """Fetch live picklist options for the patients form from the CRUD engine."""
+    return _get_picklist_options(schema.PATIENTS_MODULE_ID, "gender", "blood_group", "status")
+
 
 
 @patients_bp.route("/")
@@ -65,7 +71,8 @@ def patients_create() -> typing.Any:
         flash("Patient created successfully!", "success")
         return redirect(url_for("patients.patients_list"))
         
-    return render_template("modules/patients/form.html", patient=None, action="create")
+    return render_template("modules/patients/form.html", patient=None, action="create",
+                           picklists=_patients_picklists())
 
 
 @patients_bp.route("/<record_id>")
@@ -160,7 +167,8 @@ def patients_edit(record_id: str) -> typing.Any:
         flash("Patient updated successfully!", "success")
         return redirect(url_for("patients.patients_detail", record_id=record_id))
 
-    return render_template("modules/patients/form.html", patient=resp.data, action="edit")
+    return render_template("modules/patients/form.html", patient=resp.data, action="edit",
+                           picklists=_patients_picklists())
 
 
 @patients_bp.route("/<record_id>/delete", methods=["POST"])

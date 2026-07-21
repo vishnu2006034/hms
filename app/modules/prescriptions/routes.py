@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 from app.modules.prescriptions import prescriptions_bp
-from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups, _sync_related_record_on_create, _sync_related_record_on_delete
+from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups, _sync_related_record_on_create, _sync_related_record_on_delete, _get_picklist_options
 from app.seed import schema
 from app.services.authorization_service import AuthorizationService
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
@@ -9,6 +9,11 @@ from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_requi
 from hogc.lib.contracts.crud.models import QueryFilter
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
 from hogc.lib import HOGC
+
+
+def _prescriptions_picklists() -> dict:
+    """Fetch live picklist options for the prescriptions form from the CRUD engine."""
+    return _get_picklist_options(schema.PRESCRIPTIONS_MODULE_ID, "frequency", "status")
 
 
 @prescriptions_bp.route("/")
@@ -74,7 +79,7 @@ def prescriptions_create():
         flash("Prescription created successfully!", "success")
         return redirect(url_for("prescriptions.prescriptions_list"))
     return render_template("modules/prescriptions/form.html", prescription=None, action="create",
-                           **_prescriptions_form_context())
+                           picklists=_prescriptions_picklists(), **_prescriptions_form_context())
 
 
 @prescriptions_bp.route("/<record_id>")
@@ -140,7 +145,7 @@ def prescriptions_edit(record_id):
         return redirect(url_for("prescriptions.prescriptions_detail", record_id=record_id))
 
     return render_template("modules/prescriptions/form.html", prescription=resp.data, action="edit",
-                           **_prescriptions_form_context())
+                           picklists=_prescriptions_picklists(), **_prescriptions_form_context())
 
 
 @prescriptions_bp.route("/<record_id>/delete", methods=["POST"])

@@ -50,16 +50,16 @@
                     <label class="form-label">Test Type *</label>
                     <select class="form-select" name="test_type" required>
                         <option value="">Select...</option>
-                        {% for t in ['Blood', 'Urine', 'X-Ray', 'MRI', 'CT Scan', 'Biopsy'] %}
-                        <option value="{{ t }}" {{ 'selected' if test and test.data.get('test_type') == t }}>{{ t }}</option>
+                        {% for value, label in picklists.get('test_type', []) %}
+                        <option value="{{ value }}" {{ 'selected' if test and test.data.get('test_type') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Priority *</label>
                     <select class="form-select" name="priority" required>
-                        {% for p in ['Routine', 'Urgent', 'Emergency'] %}
-                        <option value="{{ p }}" {{ 'selected' if test and test.data.get('priority') == p }}>{{ p }}</option>
+                        {% for value, label in picklists.get('priority', []) %}
+                        <option value="{{ value }}" {{ 'selected' if test and test.data.get('priority') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -71,8 +71,8 @@
                 <div class="col-md-6">
                     <label class="form-label">Status *</label>
                     <select class="form-select" name="status" required>
-                        {% for s in ['Ordered', 'Sample Collected', 'In Progress', 'Completed', 'Cancelled'] %}
-                        <option value="{{ s }}" {{ 'selected' if test and test.data.get('status') == s }}>{{ s }}</option>
+                        {% for value, label in picklists.get('status', []) %}
+                        <option value="{{ value }}" {{ 'selected' if test and test.data.get('status') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>

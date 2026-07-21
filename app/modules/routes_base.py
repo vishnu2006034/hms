@@ -5,8 +5,9 @@ from hogc.lib import HOGC
 from hogc.lib.base import RequestContext
 from hogc.lib.contracts.crud.models import RecordQuery, QueryFilter
 from hogc.lib.contracts.crud.requests import (
-    CreateRecordRequest, UpdateRecordRequest, ListRecordsRequest, QueryRecordsRequest, ListModulesRequest, GetRecordRequest, DeleteRecordRequest,
-    LinkRecordsRequest, UnlinkRecordsRequest, GetRelatedRecordsRequest, ListRelationshipsForRecordRequest,
+    CreateRecordRequest, UpdateRecordRequest, ListRecordsRequest, QueryRecordsRequest,
+    ListModulesRequest, GetRecordRequest, DeleteRecordRequest,
+    ListFieldsRequest, GetPicklistOptionsRequest,
 )
 
 from app.config import Config
@@ -22,6 +23,43 @@ def _ctx() -> RequestContext:
         user_id=user_id,
         roles=roles,
     )
+
+
+def _get_picklist_options(module_id: str, *field_api_names: str) -> dict[str, list[tuple[str, str]]]:
+    """Fetch live picklist options from the CRUD engine for the given field API names.
+
+    Args:
+        module_id: The module whose fields to query.
+        *field_api_names: One or more field api_name strings (e.g. 'gender', 'status').
+
+    Returns:
+        A dict mapping each field api_name to a list of (value, label) tuples,
+        ordered by display_order. Returns empty list for any field that fails.
+    """
+    result: dict[str, list[tuple[str, str]]] = {name: [] for name in field_api_names}
+    try:
+        ctx: RequestContext = _ctx()
+        fields_resp = HOGC.crud.field.list(ListFieldsRequest(context=ctx, module_id=module_id))
+        field_id_map: dict[str, str] = {
+            f.api_name: f.id
+            for f in (fields_resp.items if fields_resp and fields_resp.items else [])
+            if f.api_name in field_api_names
+        }
+        for api_name in field_api_names:
+            field_id = field_id_map.get(api_name)
+            if not field_id:
+                continue
+            try:
+                opts_resp = HOGC.crud.picklist.get_options(
+                    GetPicklistOptionsRequest(context=ctx, field_id=field_id)
+                )
+                if opts_resp and opts_resp.items:
+                    result[api_name] = [(o.value, o.label) for o in opts_resp.items]
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return result
 
 
 def _get_record_display_name(module_id: str, record_id: str) -> str:

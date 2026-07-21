@@ -26,8 +26,8 @@
                     <label class="form-label">Gender *</label>
                     <select class="form-select" name="gender" required>
                         <option value="">Select...</option>
-                        {% for g in ['Male', 'Female', 'Other'] %}
-                        <option value="{{ g }}" {{ 'selected' if patient and patient.data.get('gender') == g }}>{{ g }}</option>
+                        {% for value, label in picklists.get('gender', []) %}
+                        <option value="{{ value }}" {{ 'selected' if patient and patient.data.get('gender') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -49,16 +49,16 @@
                     <label class="form-label">Blood Group</label>
                     <select class="form-select" name="blood_group">
                         <option value="">Select...</option>
-                        {% for bg in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
-                        <option value="{{ bg }}" {{ 'selected' if patient and patient.data.get('blood_group') == bg }}>{{ bg }}</option>
+                        {% for value, label in picklists.get('blood_group', []) %}
+                        <option value="{{ value }}" {{ 'selected' if patient and patient.data.get('blood_group') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Status *</label>
                     <select class="form-select" name="status" required>
-                        {% for s in ['Active', 'Discharged', 'Transferred', 'Deceased'] %}
-                        <option value="{{ s }}" {{ 'selected' if patient and patient.data.get('status') == s }}>{{ s }}</option>
+                        {% for value, label in picklists.get('status', []) %}
+                        <option value="{{ value }}" {{ 'selected' if patient and patient.data.get('status') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>

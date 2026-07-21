@@ -36,7 +36,7 @@
             <tbody>
                 {% for v in visits %}
                 <tr>
-                    <td><code>{{ v.data.get('visit_id') or ('VST-' ~ v.id[:8] | upper) }}</code></td>
+                    <td><code>{{ fmt_auto_id(v.data.get('visit_id'), 'VST', v.id) }}</code></td>
                     <td>{{ resolved.get(v.id, {}).get('patient_lookup', v.data.get('patient_lookup', '-')) }}</td>
                     <td>{{ resolved.get(v.id, {}).get('doctor_lookup', v.data.get('doctor_lookup', '-')) }}</td>
                     <td>{{ v.data.get('visit_date', '-') }}</td>

@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 from app.modules.visits import visits_bp
-from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups, _sync_related_record_on_create, _sync_related_record_on_delete, _get_related_records
+from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups, _sync_related_record_on_create, _sync_related_record_on_delete, _get_related_records, _get_picklist_options
 from app.seed import schema
 from app.services.authorization_service import AuthorizationService
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
@@ -9,6 +9,11 @@ from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_requi
 from hogc.lib.contracts.crud.models import RecordQuery, QueryFilter
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest, QueryRecordsRequest
 from hogc.lib import HOGC
+
+
+def _visits_picklists() -> dict:
+    """Fetch live picklist options for the visits form from the CRUD engine."""
+    return _get_picklist_options(schema.VISITS_MODULE_ID, "department", "status")
 
 
 @visits_bp.route("/")
@@ -79,7 +84,7 @@ def visits_create():
         flash("Visit created successfully!", "success")
         return redirect(url_for("visits.visits_list"))
     return render_template("modules/visits/form.html", visit=None, action="create",
-                           **_visits_form_context())
+                           picklists=_visits_picklists(), **_visits_form_context())
 
 
 @visits_bp.route("/<record_id>")
@@ -165,7 +170,7 @@ def visits_edit(record_id):
         return redirect(url_for("visits.visits_detail", record_id=record_id))
 
     return render_template("modules/visits/form.html", visit=resp.data, action="edit",
-                           **_visits_form_context())
+                           picklists=_visits_picklists(), **_visits_form_context())
 
 
 @visits_bp.route("/<record_id>/delete", methods=["POST"])

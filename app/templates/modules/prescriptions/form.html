@@ -59,8 +59,8 @@
                     <label class="form-label">Frequency *</label>
                     <select class="form-select" name="frequency" required>
                         <option value="">Select...</option>
-                        {% for f in ['Once daily', 'Twice daily', 'Three times daily', 'As needed'] %}
-                        <option value="{{ f }}" {{ 'selected' if prescription and prescription.data.get('frequency') == f }}>{{ f }}</option>
+                        {% for value, label in picklists.get('frequency', []) %}
+                        <option value="{{ value }}" {{ 'selected' if prescription and prescription.data.get('frequency') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -77,8 +77,8 @@
                 <div class="col-md-6">
                     <label class="form-label">Status *</label>
                     <select class="form-select" name="status" required>
-                        {% for s in ['Active', 'Completed', 'Cancelled', 'Expired'] %}
-                        <option value="{{ s }}" {{ 'selected' if prescription and prescription.data.get('status') == s }}>{{ s }}</option>
+                        {% for value, label in picklists.get('status', []) %}
+                        <option value="{{ value }}" {{ 'selected' if prescription and prescription.data.get('status') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>

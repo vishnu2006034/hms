@@ -18,8 +18,8 @@
                 <div class="col-md-6">
                     <label class="form-label">Status *</label>
                     <select class="form-select" name="status" required>
-                        {% for s in ['Ordered', 'Sample Collected', 'In Progress', 'Completed', 'Cancelled'] %}
-                        <option value="{{ s }}" {{ 'selected' if test.data.get('status', 'Completed') == s }}>{{ s }}</option>
+                        {% for value, label in picklists.get('status', []) %}
+                        <option value="{{ value }}" {{ 'selected' if test.data.get('status', 'Completed') == value }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
