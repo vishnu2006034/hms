@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 from app.modules.patients import patients_bp
-from app.modules.routes_base import _ctx, _get_record
+from app.modules.routes_base import _ctx, _get_record, _get_related_records, _sync_related_record_on_delete
 from app.seed import schema
 from app.services.visibility_service import VisibilityService
 from app.services.authorization_service import AuthorizationService
@@ -81,7 +81,45 @@ def patients_detail(record_id: str) -> typing.Any:
         flash("Access denied: You are not assigned to this patient.", "danger")
         return redirect(url_for("patients.patients_list"))
         
-    return render_template("modules/patients/detail.html", patient=resp.data)
+    related_visits = []
+    related_prescriptions = []
+    related_lab_tests = []
+    ctx = _ctx()
+    if schema.PATIENTS_VISITS_REL_ID:
+        try:
+            vr = _get_related_records(ctx, schema.PATIENTS_VISITS_REL_ID, record_id, page_size=50)
+            if vr and vr.items:
+                for link in vr.items:
+                    rec = _get_record(schema.VISITS_MODULE_ID, link.to_record_id)
+                    if rec and rec.data:
+                        related_visits.append(rec.data)
+        except Exception:
+            pass
+    if schema.PATIENTS_PRESCRIPTIONS_REL_ID:
+        try:
+            pr = _get_related_records(ctx, schema.PATIENTS_PRESCRIPTIONS_REL_ID, record_id, page_size=50)
+            if pr and pr.items:
+                for link in pr.items:
+                    rec = _get_record(schema.PRESCRIPTIONS_MODULE_ID, link.to_record_id)
+                    if rec and rec.data:
+                        related_prescriptions.append(rec.data)
+        except Exception:
+            pass
+    if schema.PATIENTS_LABORATORY_REL_ID:
+        try:
+            lr = _get_related_records(ctx, schema.PATIENTS_LABORATORY_REL_ID, record_id, page_size=50)
+            if lr and lr.items:
+                for link in lr.items:
+                    rec = _get_record(schema.LABORATORY_MODULE_ID, link.to_record_id)
+                    if rec and rec.data:
+                        related_lab_tests.append(rec.data)
+        except Exception:
+            pass
+
+    return render_template("modules/patients/detail.html", patient=resp.data,
+                           related_visits=related_visits,
+                           related_prescriptions=related_prescriptions,
+                           related_lab_tests=related_lab_tests)
 
 
 @patients_bp.route("/<record_id>/edit", methods=["GET", "POST"])
@@ -135,6 +173,7 @@ def patients_delete(record_id: str) -> typing.Any:
         flash("Access denied: You are not assigned to this patient.", "danger")
         return redirect(url_for("patients.patients_list"))
 
+    _sync_related_record_on_delete(_ctx(), schema.PATIENTS_MODULE_ID, record_id)
     req = DeleteRecordRequest(context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, record_id=record_id)
     HOGC.crud.record.delete(req)
     

@@ -83,5 +83,89 @@
             </div>
         </div>
     </div>
+
+    {% if related_visits or related_prescriptions or related_lab_tests %}
+    <div class="col-12 mt-3">
+        <ul class="nav nav-tabs" id="relatedTabs" role="tablist">
+            {% if related_visits %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="visits-tab" data-bs-toggle="tab" data-bs-target="#visits" type="button" role="tab">Visits ({{ related_visits|length }})</button>
+            </li>
+            {% endif %}
+            {% if related_prescriptions %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link{% if not related_visits %} active{% endif %}" id="rx-tab" data-bs-toggle="tab" data-bs-target="#prescriptions" type="button" role="tab">Prescriptions ({{ related_prescriptions|length }})</button>
+            </li>
+            {% endif %}
+            {% if related_lab_tests %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link{% if not related_visits and not related_prescriptions %} active{% endif %}" id="lab-tab" data-bs-toggle="tab" data-bs-target="#lab" type="button" role="tab">Lab Tests ({{ related_lab_tests|length }})</button>
+            </li>
+            {% endif %}
+        </ul>
+        <div class="tab-content mt-2">
+            {% if related_visits %}
+            <div class="tab-pane fade show active" id="visits" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead><tr><th>Visit ID</th><th>Date</th><th>Department</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody>
+                            {% for v in related_visits %}
+                            <tr>
+                                <td><code>{{ v.data.get('visit_id') or ('VST-' ~ v.id[:8] | upper) }}</code></td>
+                                <td>{{ v.data.get('visit_date', '-') }}</td>
+                                <td>{{ v.data.get('department', '-') }}</td>
+                                <td><span class="badge bg-{{ 'success' if v.data.get('status') == 'Completed' else 'warning' }}">{{ v.data.get('status', '-') }}</span></td>
+                                <td><a href="{{ url_for('visits.visits_detail', record_id=v.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            {% if related_prescriptions %}
+            <div class="tab-pane fade{% if not related_visits %} show active{% endif %}" id="prescriptions" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead><tr><th>Medication</th><th>Dosage</th><th>Frequency</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody>
+                            {% for rx in related_prescriptions %}
+                            <tr>
+                                <td>{{ rx.data.get('medication_name', '-') }}</td>
+                                <td>{{ rx.data.get('dosage', '-') }}</td>
+                                <td>{{ rx.data.get('frequency', '-') }}</td>
+                                <td><span class="badge bg-{{ 'success' if rx.data.get('status') == 'Active' else 'secondary' }}">{{ rx.data.get('status', '-') }}</span></td>
+                                <td><a href="{{ url_for('prescriptions.prescriptions_detail', record_id=rx.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            {% if related_lab_tests %}
+            <div class="tab-pane fade{% if not related_visits and not related_prescriptions %} show active{% endif %}" id="lab" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead><tr><th>Test Name</th><th>Type</th><th>Status</th><th>Result</th><th>Action</th></tr></thead>
+                        <tbody>
+                            {% for t in related_lab_tests %}
+                            <tr>
+                                <td>{{ t.data.get('test_name', '-') }}</td>
+                                <td>{{ t.data.get('test_type', '-') }}</td>
+                                <td><span class="badge bg-{{ 'success' if t.data.get('status') == 'Completed' else 'info' }}">{{ t.data.get('status', '-') }}</span></td>
+                                <td>{{ t.data.get('result_value', '-') }}</td>
+                                <td><a href="{{ url_for('laboratory.laboratory_detail', record_id=t.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

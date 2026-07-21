@@ -29,7 +29,7 @@ def init_crud(database_url):
 
     engine = create_engine(database_url)
     Base.metadata.create_all(engine)
-    SessionLocal = sessionmaker(bind=engine)
+    SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
     crud = PostgreSQLCRUDProvider(session_factory=SessionLocal)
 
     class HOGCCrudWrapper:
@@ -38,6 +38,7 @@ def init_crud(database_url):
             self.module = c.modules
             self.field = c.fields
             self.picklist = c.picklists
+            self.related_records = c.related_records
 
     HOGC.crud = HOGCCrudWrapper(crud)
 

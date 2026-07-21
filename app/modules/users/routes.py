@@ -2,7 +2,7 @@ from hogc.lib import HOGC
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required
 from app.modules.users import users_bp
-from app.modules.routes_base import _ctx, _get_records, _get_record
+from app.modules.routes_base import _ctx, _get_records, _get_record, _sync_related_record_on_delete
 from app.extensions import db
 from app.seed import schema
 from app.auth.models import AuthUser
@@ -92,6 +92,7 @@ def users_edit(record_id):
 @login_required
 @admin_required
 def users_delete(record_id):
+    _sync_related_record_on_delete(_ctx(), schema.USERS_MODULE_ID, record_id)
     HOGC.crud.record.delete(DeleteRecordRequest(
         context=_ctx(), module_id=schema.USERS_MODULE_ID, record_id=record_id
     ))

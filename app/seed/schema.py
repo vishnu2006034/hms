@@ -19,6 +19,14 @@ INVENTORY_MODULE_ID = None
 PRESCRIPTIONS_MODULE_ID = None
 LABORATORY_MODULE_ID = None
 
+# Relationship definition IDs - set after creation
+PATIENTS_VISITS_REL_ID = None
+VISITS_PRESCRIPTIONS_REL_ID = None
+VISITS_LABORATORY_REL_ID = None
+PATIENTS_PRESCRIPTIONS_REL_ID = None
+PATIENTS_LABORATORY_REL_ID = None
+USERS_VISITS_REL_ID = None
+
 
 def _ctx():
     return RequestContext(
@@ -72,30 +80,22 @@ def _add_picklist(field_id, value, label, color=None, is_default=False, order=0)
 
 
 def _create_relationship(from_module_id, to_module_id, rel_type, from_field="", to_field=""):
+    from hogc.engines.crud import RelationshipDefinition
     session = SessionLocal()
     try:
-        rel_id = uuid.uuid4().hex
-        session.execute(db.text("""
-            INSERT INTO relationship_definitions
-            (id, tenant_id, org_id, created_at, updated_at, created_by, updated_by,
-             version, status, tags_json, metadata_json,
-             from_module_id, to_module_id, relationship_type,
-             from_field_name, to_field_name, cascade_delete)
-            VALUES
-            (:id, :tenant_id, :org_id, NOW(), NOW(), 'system', 'system',
-             1, 'active', '[]', '{}',
-             :from_module_id, :to_module_id, :rel_type,
-             :from_field, :to_field, false)
-        """), {
-            "id": rel_id,
-            "tenant_id": Config.HOGC_TENANT_ID,
-            "org_id": Config.HOGC_ORG_ID,
-            "from_module_id": from_module_id,
-            "to_module_id": to_module_id,
-            "rel_type": rel_type,
-            "from_field": from_field,
-            "to_field": to_field,
-        })
+        rel = RelationshipDefinition(
+            tenant_id=Config.HOGC_TENANT_ID,
+            org_id=Config.HOGC_ORG_ID,
+            from_module_id=from_module_id,
+            to_module_id=to_module_id,
+            relationship_type=rel_type,
+            from_field_name=from_field,
+            to_field_name=to_field,
+            cascade_delete=False,
+        )
+        session.add(rel)
+        session.flush()
+        rel_id = rel.id
         session.commit()
         return rel_id
     except Exception:
@@ -270,12 +270,14 @@ def _seed_laboratory_module():
 
 
 def _seed_relationships():
-    _create_relationship(PATIENTS_MODULE_ID, VISITS_MODULE_ID, "one_to_many")
-    _create_relationship(VISITS_MODULE_ID, PRESCRIPTIONS_MODULE_ID, "one_to_many")
-    _create_relationship(VISITS_MODULE_ID, LABORATORY_MODULE_ID, "one_to_many")
-    _create_relationship(PATIENTS_MODULE_ID, PRESCRIPTIONS_MODULE_ID, "one_to_many")
-    _create_relationship(PATIENTS_MODULE_ID, LABORATORY_MODULE_ID, "one_to_many")
-    _create_relationship(USERS_MODULE_ID, VISITS_MODULE_ID, "one_to_many")
+    global PATIENTS_VISITS_REL_ID, VISITS_PRESCRIPTIONS_REL_ID, VISITS_LABORATORY_REL_ID
+    global PATIENTS_PRESCRIPTIONS_REL_ID, PATIENTS_LABORATORY_REL_ID, USERS_VISITS_REL_ID
+    PATIENTS_VISITS_REL_ID = _create_relationship(PATIENTS_MODULE_ID, VISITS_MODULE_ID, "one_to_many")
+    VISITS_PRESCRIPTIONS_REL_ID = _create_relationship(VISITS_MODULE_ID, PRESCRIPTIONS_MODULE_ID, "one_to_many")
+    VISITS_LABORATORY_REL_ID = _create_relationship(VISITS_MODULE_ID, LABORATORY_MODULE_ID, "one_to_many")
+    PATIENTS_PRESCRIPTIONS_REL_ID = _create_relationship(PATIENTS_MODULE_ID, PRESCRIPTIONS_MODULE_ID, "one_to_many")
+    PATIENTS_LABORATORY_REL_ID = _create_relationship(PATIENTS_MODULE_ID, LABORATORY_MODULE_ID, "one_to_many")
+    USERS_VISITS_REL_ID = _create_relationship(USERS_MODULE_ID, VISITS_MODULE_ID, "one_to_many")
 
 
 def _drop_all_hogc():
@@ -311,3 +313,32 @@ def _lookup_module_ids():
             PRESCRIPTIONS_MODULE_ID = m.id
         elif m.api_name == "laboratory":
             LABORATORY_MODULE_ID = m.id
+    _lookup_relationship_ids()
+
+
+def _lookup_relationship_ids():
+    global PATIENTS_VISITS_REL_ID, VISITS_PRESCRIPTIONS_REL_ID, VISITS_LABORATORY_REL_ID
+    global PATIENTS_PRESCRIPTIONS_REL_ID, PATIENTS_LABORATORY_REL_ID, USERS_VISITS_REL_ID
+    session = SessionLocal()
+    try:
+        rows = session.execute(db.text("""
+            SELECT id, from_module_id, to_module_id, relationship_type
+            FROM relationship_definitions
+            WHERE tenant_id = :tid AND org_id = :oid AND status = 'active'
+        """), {"tid": Config.HOGC_TENANT_ID, "oid": Config.HOGC_ORG_ID}).fetchall()
+        for row in rows:
+            rid, from_mid, to_mid, rtype = row
+            if from_mid == PATIENTS_MODULE_ID and to_mid == VISITS_MODULE_ID:
+                PATIENTS_VISITS_REL_ID = rid
+            elif from_mid == VISITS_MODULE_ID and to_mid == PRESCRIPTIONS_MODULE_ID:
+                VISITS_PRESCRIPTIONS_REL_ID = rid
+            elif from_mid == VISITS_MODULE_ID and to_mid == LABORATORY_MODULE_ID:
+                VISITS_LABORATORY_REL_ID = rid
+            elif from_mid == PATIENTS_MODULE_ID and to_mid == PRESCRIPTIONS_MODULE_ID:
+                PATIENTS_PRESCRIPTIONS_REL_ID = rid
+            elif from_mid == PATIENTS_MODULE_ID and to_mid == LABORATORY_MODULE_ID:
+                PATIENTS_LABORATORY_REL_ID = rid
+            elif from_mid == USERS_MODULE_ID and to_mid == VISITS_MODULE_ID:
+                USERS_VISITS_REL_ID = rid
+    finally:
+        session.close()

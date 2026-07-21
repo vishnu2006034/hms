@@ -5,7 +5,8 @@ from hogc.lib import HOGC
 from hogc.lib.base import RequestContext
 from hogc.lib.contracts.crud.models import RecordQuery, QueryFilter
 from hogc.lib.contracts.crud.requests import (
-    CreateRecordRequest, UpdateRecordRequest, ListRecordsRequest, QueryRecordsRequest, ListModulesRequest, GetRecordRequest, DeleteRecordRequest
+    CreateRecordRequest, UpdateRecordRequest, ListRecordsRequest, QueryRecordsRequest, ListModulesRequest, GetRecordRequest, DeleteRecordRequest,
+    LinkRecordsRequest, UnlinkRecordsRequest, GetRelatedRecordsRequest, ListRelationshipsForRecordRequest,
 )
 
 from app.config import Config
@@ -144,5 +145,117 @@ def _delete_record(module_id: str, record_id: str) -> typing.Any:
     return HOGC.crud.record.delete(DeleteRecordRequest(
         context=_ctx(), module_id=module_id, record_id=record_id
     ))
+
+
+# ── Relationship helpers ──────────────────────────────────────────────
+
+def _link_related_records(ctx: RequestContext, relationship_id: str, from_record_id: str, to_record_id: str, attributes: typing.Optional[dict] = None) -> typing.Any:
+    """Create a link between two records via a relationship definition."""
+    return HOGC.crud.related_records.link(LinkRecordsRequest(
+        context=ctx,
+        relationship_id=relationship_id,
+        from_record_id=from_record_id,
+        to_record_id=to_record_id,
+        attributes=attributes or {},
+    ))
+
+
+def _unlink_related_records(ctx: RequestContext, relationship_id: str, from_record_id: str, to_record_id: str) -> typing.Any:
+    """Remove a link between two records."""
+    return HOGC.crud.related_records.unlink(UnlinkRecordsRequest(
+        context=ctx,
+        relationship_id=relationship_id,
+        from_record_id=from_record_id,
+        to_record_id=to_record_id,
+    ))
+
+
+def _get_related_records(ctx: RequestContext, relationship_id: str, record_id: str, page: int = 1, page_size: int = 50) -> typing.Any:
+    """Get records related to a specific record within a relationship."""
+    return HOGC.crud.related_records.get_related(GetRelatedRecordsRequest(
+        context=ctx,
+        relationship_id=relationship_id,
+        record_id=record_id,
+        page=page,
+        page_size=page_size,
+    ))
+
+
+def _list_record_relationships(ctx: RequestContext, module_id: str, record_id: str) -> typing.Any:
+    """List all relationships involving a record."""
+    return HOGC.crud.related_records.list_relationships(ListRelationshipsForRecordRequest(
+        context=ctx,
+        module_id=module_id,
+        record_id=record_id,
+    ))
+
+
+def _sync_related_record_on_create(ctx: RequestContext, module_id: str, record_id: str, data: dict) -> None:
+    """After creating a record with LOOKUP fields, also create related_record links.
+
+    Works for: Visits, Prescriptions, Laboratory.
+    """
+    from app.seed import schema as s
+    patient_id = data.get("patient_lookup", "")
+    doctor_id = data.get("doctor_lookup", "")
+    visit_id = data.get("visit_lookup", "")
+
+    if module_id == s.VISITS_MODULE_ID:
+        if patient_id and s.PATIENTS_VISITS_REL_ID:
+            _link_related_records(ctx, s.PATIENTS_VISITS_REL_ID, patient_id, record_id)
+        if doctor_id and s.USERS_VISITS_REL_ID:
+            _link_related_records(ctx, s.USERS_VISITS_REL_ID, doctor_id, record_id)
+
+    elif module_id == s.PRESCRIPTIONS_MODULE_ID:
+        if patient_id and s.PATIENTS_PRESCRIPTIONS_REL_ID:
+            _link_related_records(ctx, s.PATIENTS_PRESCRIPTIONS_REL_ID, patient_id, record_id)
+        if visit_id and s.VISITS_PRESCRIPTIONS_REL_ID:
+            _link_related_records(ctx, s.VISITS_PRESCRIPTIONS_REL_ID, visit_id, record_id)
+
+    elif module_id == s.LABORATORY_MODULE_ID:
+        if patient_id and s.PATIENTS_LABORATORY_REL_ID:
+            _link_related_records(ctx, s.PATIENTS_LABORATORY_REL_ID, patient_id, record_id)
+        if visit_id and s.VISITS_LABORATORY_REL_ID:
+            _link_related_records(ctx, s.VISITS_LABORATORY_REL_ID, visit_id, record_id)
+
+
+def _sync_related_record_on_update(ctx: RequestContext, module_id: str, record_id: str, old_data: dict, new_data: dict) -> None:
+    """Update related_record links when a record's LOOKUP fields change."""
+    from app.seed import schema as s
+    _sync_related_record_on_delete(ctx, module_id, record_id, old_data)
+    _sync_related_record_on_create(ctx, module_id, record_id, new_data)
+
+
+def _sync_related_record_on_delete(ctx: RequestContext, module_id: str, record_id: str, old_data: typing.Optional[dict] = None) -> None:
+    """Remove all related_record links when a record is deleted."""
+    from app.seed import schema as s
+    _unlink_relation(ctx, old_data, record_id, s.PATIENTS_VISITS_REL_ID, module_id, s.PATIENTS_MODULE_ID, "patient_lookup")
+    _unlink_relation(ctx, old_data, record_id, s.USERS_VISITS_REL_ID, module_id, s.USERS_MODULE_ID, "doctor_lookup")
+    _unlink_relation(ctx, old_data, record_id, s.PATIENTS_PRESCRIPTIONS_REL_ID, module_id, s.PATIENTS_MODULE_ID, "patient_lookup")
+    _unlink_relation(ctx, old_data, record_id, s.VISITS_PRESCRIPTIONS_REL_ID, module_id, s.VISITS_MODULE_ID, "visit_lookup")
+    _unlink_relation(ctx, old_data, record_id, s.PATIENTS_LABORATORY_REL_ID, module_id, s.PATIENTS_MODULE_ID, "patient_lookup")
+    _unlink_relation(ctx, old_data, record_id, s.VISITS_LABORATORY_REL_ID, module_id, s.VISITS_MODULE_ID, "visit_lookup")
+
+
+def _unlink_relation(ctx: RequestContext, old_data: typing.Optional[dict], record_id: str, rel_id: typing.Optional[str],
+                     module_id: str, from_module_id: str, lookup_field: str) -> None:
+    """Unlink records for a given relationship (handles both directions)."""
+    if not rel_id:
+        return
+    if module_id == from_module_id:
+        fp = _get_related_records(ctx, rel_id, record_id, page_size=200)
+        if fp and fp.items:
+            for link in fp.items:
+                try:
+                    _unlink_related_records(ctx, rel_id, link.from_record_id, link.to_record_id)
+                except Exception:
+                    pass
+    elif old_data:
+        from_id = old_data.get(lookup_field, "")
+        if from_id:
+            try:
+                _unlink_related_records(ctx, rel_id, from_id, record_id)
+            except Exception:
+                pass
 
 

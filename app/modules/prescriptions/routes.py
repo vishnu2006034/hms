@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 from app.modules.prescriptions import prescriptions_bp
-from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups
+from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups, _sync_related_record_on_create, _sync_related_record_on_delete
 from app.seed import schema
 from app.services.authorization_service import AuthorizationService
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
@@ -67,9 +67,10 @@ def prescriptions_create():
                 return redirect(url_for("prescriptions.prescriptions_list"))
             data["doctor_lookup"] = current_user.hogc_record_id
 
-        HOGC.crud.record.create(CreateRecordRequest(
+        resp = HOGC.crud.record.create(CreateRecordRequest(
             context=_ctx(), module_id=schema.PRESCRIPTIONS_MODULE_ID, data=data
         ))
+        _sync_related_record_on_create(_ctx(), schema.PRESCRIPTIONS_MODULE_ID, resp.data.id, data)
         flash("Prescription created successfully!", "success")
         return redirect(url_for("prescriptions.prescriptions_list"))
     return render_template("modules/prescriptions/form.html", prescription=None, action="create",
@@ -132,6 +133,9 @@ def prescriptions_edit(record_id):
         HOGC.crud.record.update(UpdateRecordRequest(
             context=_ctx(), module_id=schema.PRESCRIPTIONS_MODULE_ID, record_id=record_id, data=data
         ))
+        old_data = resp.data.data if hasattr(resp.data, 'data') and isinstance(resp.data.data, dict) else {}
+        from app.modules.routes_base import _sync_related_record_on_update
+        _sync_related_record_on_update(_ctx(), schema.PRESCRIPTIONS_MODULE_ID, record_id, old_data, data)
         flash("Prescription updated successfully!", "success")
         return redirect(url_for("prescriptions.prescriptions_detail", record_id=record_id))
 
@@ -148,6 +152,8 @@ def prescriptions_delete(record_id):
         flash("Access denied: You are not assigned to this prescription.", "danger")
         return redirect(url_for("prescriptions.prescriptions_list"))
         
+    old_data = resp.data.data if resp and resp.data and hasattr(resp.data, 'data') and isinstance(resp.data.data, dict) else {}
+    _sync_related_record_on_delete(_ctx(), schema.PRESCRIPTIONS_MODULE_ID, record_id, old_data)
     HOGC.crud.record.delete(DeleteRecordRequest(
         context=_ctx(), module_id=schema.PRESCRIPTIONS_MODULE_ID, record_id=record_id
     ))

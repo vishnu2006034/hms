@@ -2,8 +2,9 @@
 from hogc.lib import HOGC
 from app.extensions import db
 from hogc.lib.base import RequestContext
-from hogc.lib.contracts.crud.requests import CreateRecordRequest
+from hogc.lib.contracts.crud.requests import CreateRecordRequest, LinkRecordsRequest
 from app.config import Config
+from app.seed import schema
 
 
 def _ctx():
@@ -223,7 +224,24 @@ def _seed_default_data(module_ids):
         resp = HOGC.crud.record.create(CreateRecordRequest(
             context=ctx, module_id=visits_id, data=v
         ))
-        visit_ids.append(resp.data.id)
+        vid = resp.data.id
+        visit_ids.append(vid)
+        patient_id = v.get("patient_lookup", "")
+        doctor_id = v.get("doctor_lookup", "")
+        if patient_id and schema.PATIENTS_VISITS_REL_ID:
+            HOGC.crud.related_records.link(LinkRecordsRequest(
+                context=ctx,
+                relationship_id=schema.PATIENTS_VISITS_REL_ID,
+                from_record_id=patient_id,
+                to_record_id=vid,
+            ))
+        if doctor_id and schema.USERS_VISITS_REL_ID:
+            HOGC.crud.related_records.link(LinkRecordsRequest(
+                context=ctx,
+                relationship_id=schema.USERS_VISITS_REL_ID,
+                from_record_id=doctor_id,
+                to_record_id=vid,
+            ))
 
     # Prescriptions
     prescriptions_data = [
@@ -248,9 +266,26 @@ def _seed_default_data(module_ids):
     ]
 
     for rx in prescriptions_data:
-        HOGC.crud.record.create(CreateRecordRequest(
+        resp = HOGC.crud.record.create(CreateRecordRequest(
             context=ctx, module_id=prescriptions_id, data=rx
         ))
+        rx_id = resp.data.id
+        patient_id = rx.get("patient_lookup", "")
+        visit_id = rx.get("visit_lookup", "")
+        if patient_id and schema.PATIENTS_PRESCRIPTIONS_REL_ID:
+            HOGC.crud.related_records.link(LinkRecordsRequest(
+                context=ctx,
+                relationship_id=schema.PATIENTS_PRESCRIPTIONS_REL_ID,
+                from_record_id=patient_id,
+                to_record_id=rx_id,
+            ))
+        if visit_id and schema.VISITS_PRESCRIPTIONS_REL_ID:
+            HOGC.crud.related_records.link(LinkRecordsRequest(
+                context=ctx,
+                relationship_id=schema.VISITS_PRESCRIPTIONS_REL_ID,
+                from_record_id=visit_id,
+                to_record_id=rx_id,
+            ))
 
     # Laboratory Tests
     lab_data = [
@@ -279,6 +314,23 @@ def _seed_default_data(module_ids):
     ]
 
     for lab in lab_data:
-        HOGC.crud.record.create(CreateRecordRequest(
+        resp = HOGC.crud.record.create(CreateRecordRequest(
             context=ctx, module_id=laboratory_id, data=lab
         ))
+        lab_id = resp.data.id
+        patient_id = lab.get("patient_lookup", "")
+        visit_id = lab.get("visit_lookup", "")
+        if patient_id and schema.PATIENTS_LABORATORY_REL_ID:
+            HOGC.crud.related_records.link(LinkRecordsRequest(
+                context=ctx,
+                relationship_id=schema.PATIENTS_LABORATORY_REL_ID,
+                from_record_id=patient_id,
+                to_record_id=lab_id,
+            ))
+        if visit_id and schema.VISITS_LABORATORY_REL_ID:
+            HOGC.crud.related_records.link(LinkRecordsRequest(
+                context=ctx,
+                relationship_id=schema.VISITS_LABORATORY_REL_ID,
+                from_record_id=visit_id,
+                to_record_id=lab_id,
+            ))
