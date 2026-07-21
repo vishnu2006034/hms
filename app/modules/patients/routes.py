@@ -4,9 +4,10 @@ from flask_login import login_required, current_user
 
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 from app.modules.patients import patients_bp
-from app.modules.routes_base import _ctx, _get_record, _check_access
+from app.modules.routes_base import _ctx, _get_record
 from app.seed import schema
 from app.services.visibility_service import VisibilityService
+from app.services.authorization_service import AuthorizationService
 
 from hogc.lib import HOGC
 from hogc.lib.contracts.crud.models import QueryFilter
@@ -76,7 +77,7 @@ def patients_detail(record_id: str) -> typing.Any:
         flash("Patient not found.", "danger")
         return redirect(url_for("patients.patients_list"))
         
-    if not _check_access(resp.data, "assigned_doctor"):
+    if not AuthorizationService.can_access_patient(current_user, resp.data):
         flash("Access denied: You are not assigned to this patient.", "danger")
         return redirect(url_for("patients.patients_list"))
         
@@ -93,7 +94,7 @@ def patients_edit(record_id: str) -> typing.Any:
         flash("Patient not found.", "danger")
         return redirect(url_for("patients.patients_list"))
 
-    if not _check_access(resp.data, "assigned_doctor"):
+    if not AuthorizationService.can_access_patient(current_user, resp.data):
         flash("Access denied: You are not assigned to this patient.", "danger")
         return redirect(url_for("patients.patients_list"))
 
@@ -130,7 +131,7 @@ def patients_edit(record_id: str) -> typing.Any:
 def patients_delete(record_id: str) -> typing.Any:
     """Handle patient deletion."""
     resp = _get_record(schema.PATIENTS_MODULE_ID, record_id)
-    if resp.data and not _check_access(resp.data, "assigned_doctor"):
+    if resp.data and not AuthorizationService.can_access_patient(current_user, resp.data):
         flash("Access denied: You are not assigned to this patient.", "danger")
         return redirect(url_for("patients.patients_list"))
 

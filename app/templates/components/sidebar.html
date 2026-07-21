@@ -35,7 +35,7 @@
                 </a>
             </li>
             {% endif %}
-            {% if role in ('Admin', 'Doctor', 'Nurse', 'Pharmacist') %}
+            {% if role in ('Admin', 'Nurse', 'Pharmacist') %}
             <li class="nav-item">
                 <a class="nav-link text-light {% if 'inventory' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('inventory.inventory_list') }}">
                     <i class="bi bi-box-seam"></i> Inventory

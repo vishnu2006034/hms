@@ -146,13 +146,3 @@ def _delete_record(module_id: str, record_id: str) -> typing.Any:
     ))
 
 
-def _check_access(record: typing.Any, lookup_field: str) -> bool:
-    """
-    Checks if the current user (if a Doctor) is authorized to access the record.
-    Returns True if access is allowed, False otherwise.
-    """
-    if current_user.role == "Doctor":
-        assigned_id: str = record.data.get(lookup_field)
-        if assigned_id != current_user.hogc_record_id:
-            return False
-    return True

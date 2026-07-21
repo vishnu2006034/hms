@@ -1,8 +1,9 @@
 from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 from app.modules.laboratory import laboratory_bp
-from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups, _check_access
+from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups
 from app.seed import schema
+from app.services.authorization_service import AuthorizationService
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 
 from hogc.lib.contracts.crud.models import QueryFilter
@@ -61,6 +62,13 @@ def laboratory_create():
             "notes": request.form.get("notes", ""),
             "technician_lookup": request.form.get("technician_lookup", ""),
         }
+        if current_user.role == "Doctor":
+            patient_record = _get_record(schema.PATIENTS_MODULE_ID, data["patient_lookup"])
+            if patient_record.data and not AuthorizationService.can_access_patient(current_user, patient_record.data):
+                flash("Access denied: You are not assigned to this patient.", "danger")
+                return redirect(url_for("laboratory.laboratory_list"))
+            data["doctor_lookup"] = current_user.hogc_record_id
+
         HOGC.crud.record.create(CreateRecordRequest(
             context=_ctx(), module_id=schema.LABORATORY_MODULE_ID, data=data
         ))
@@ -78,7 +86,7 @@ def laboratory_detail(record_id):
         flash("Lab test not found.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
         
-    if not _check_access(resp.data, "doctor_lookup"):
+    if not AuthorizationService.can_access_laboratory(current_user, resp.data):
         flash("Access denied: You are not assigned to this lab test.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
     resolved = _resolve_lookups([resp.data],
@@ -99,7 +107,7 @@ def laboratory_edit(record_id):
         flash("Lab test not found.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
         
-    if not _check_access(resp.data, "doctor_lookup"):
+    if not AuthorizationService.can_access_laboratory(current_user, resp.data):
         flash("Access denied: You are not assigned to this lab test.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
 
@@ -120,6 +128,13 @@ def laboratory_edit(record_id):
             "notes": request.form.get("notes", ""),
             "technician_lookup": request.form.get("technician_lookup", ""),
         }
+        if current_user.role == "Doctor":
+            patient_record = _get_record(schema.PATIENTS_MODULE_ID, data["patient_lookup"])
+            if patient_record.data and not AuthorizationService.can_access_patient(current_user, patient_record.data):
+                flash("Access denied: You are not assigned to this patient.", "danger")
+                return redirect(url_for("laboratory.laboratory_list"))
+            data["doctor_lookup"] = current_user.hogc_record_id
+
         HOGC.crud.record.update(UpdateRecordRequest(
             context=_ctx(), module_id=schema.LABORATORY_MODULE_ID, record_id=record_id, data=data
         ))
@@ -146,7 +161,7 @@ def laboratory_result(record_id):
         flash("Lab test not found.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
         
-    if not _check_access(resp.data, "doctor_lookup"):
+    if not AuthorizationService.can_access_laboratory(current_user, resp.data):
         flash("Access denied: You are not assigned to this lab test.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
 
@@ -184,7 +199,7 @@ def laboratory_result(record_id):
 @role_required(*MODULE_DELETE["laboratory"])
 def laboratory_delete(record_id):
     resp = _get_record(schema.LABORATORY_MODULE_ID, record_id)
-    if resp.data and not _check_access(resp.data, "doctor_lookup"):
+    if resp.data and not AuthorizationService.can_access_laboratory(current_user, resp.data):
         flash("Access denied: You are not assigned to this lab test.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
         
