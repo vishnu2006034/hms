@@ -8,6 +8,7 @@ from hogc.lib.contracts.crud.requests import (
     CreateRecordRequest, UpdateRecordRequest, ListRecordsRequest, QueryRecordsRequest,
     ListModulesRequest, GetRecordRequest, DeleteRecordRequest,
     ListFieldsRequest, GetPicklistOptionsRequest,
+    LinkRecordsRequest, UnlinkRecordsRequest, GetRelatedRecordsRequest, ListRelationshipsForRecordRequest,
 )
 
 from app.config import Config
