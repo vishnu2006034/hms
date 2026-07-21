@@ -6,7 +6,7 @@ from app.config import Config
 from hogc.lib.base import RequestContext
 from hogc.lib.contracts.crud.requests import (
     CreateModuleRequest, CreateFieldRequest, AddPicklistOptionRequest,
-    ListModulesRequest,
+    ListModulesRequest, CreateLayoutRequest,
 )
 from hogc.lib.contracts.crud.types import FieldType
 
@@ -67,6 +67,17 @@ def _create_field(module_id, field_name, api_name, field_type, label="",
     return resp.data.id
 
 
+def _create_layout(module_id, name, field_order, is_default=False):
+    resp = HOGC.crud.layout.create(CreateLayoutRequest(
+        context=_ctx(),
+        module_id=module_id,
+        name=name,
+        field_order=field_order,
+        is_default=is_default,
+    ))
+    return resp.data.id
+
+
 def _add_picklist(field_id, value, label, color=None, is_default=False, order=0):
     HOGC.crud.picklist.add_option(AddPicklistOptionRequest(
         context=_ctx(),
@@ -103,6 +114,16 @@ def _create_relationship(from_module_id, to_module_id, rel_type, from_field="", 
         return None
     finally:
         session.close()
+
+
+def _create_layout(module_id, name, field_order, is_default=False):
+    HOGC.crud.layout.create(CreateLayoutRequest(
+        context=_ctx(),
+        module_id=module_id,
+        name=name,
+        field_order=field_order,
+        is_default=is_default,
+    ))
 
 
 class _GetReq:
@@ -267,6 +288,18 @@ def _seed_laboratory_module():
     _create_field(LABORATORY_MODULE_ID, "Notes", "notes", FieldType.TEXT, "Notes")
     _create_field(LABORATORY_MODULE_ID, "Technician ID", "technician_lookup", FieldType.LOOKUP, "Technician",
                   lookup_module_id=USERS_MODULE_ID)
+
+
+def _seed_layouts():
+    global USERS_MODULE_ID, PATIENTS_MODULE_ID, VISITS_MODULE_ID
+    global INVENTORY_MODULE_ID, PRESCRIPTIONS_MODULE_ID, LABORATORY_MODULE_ID
+
+    _create_layout(USERS_MODULE_ID, "Standard Layout", ["full_name", "email", "phone", "role", "department", "is_active"], True)
+    _create_layout(PATIENTS_MODULE_ID, "Standard Layout", ["patient_id", "first_name", "last_name", "date_of_birth", "gender", "phone", "email", "assigned_doctor", "address", "blood_group", "emergency_contact", "emergency_phone", "insurance_provider", "insurance_id", "medical_history", "allergies", "status"], True)
+    _create_layout(VISITS_MODULE_ID, "Standard Layout", ["visit_id", "patient_lookup", "doctor_lookup", "visit_date", "department", "chief_complaint", "diagnosis", "treatment", "vitals_bp", "vitals_temp", "vitals_pulse", "vitals_weight", "status", "notes"], True)
+    _create_layout(INVENTORY_MODULE_ID, "Standard Layout", ["item_id", "item_name", "category", "description", "quantity", "unit", "unit_price", "supplier", "reorder_level", "expiry_date", "batch_number", "location", "status"], True)
+    _create_layout(PRESCRIPTIONS_MODULE_ID, "Standard Layout", ["prescription_id", "patient_lookup", "doctor_lookup", "visit_lookup", "prescribed_date", "medication_name", "dosage", "frequency", "duration", "instructions", "refills", "status"], True)
+    _create_layout(LABORATORY_MODULE_ID, "Standard Layout", ["test_id", "patient_lookup", "doctor_lookup", "visit_lookup", "test_name", "test_type", "priority", "sample_date", "result_date", "result_value", "reference_range", "status", "notes", "technician_lookup"], True)
 
 
 def _seed_relationships():

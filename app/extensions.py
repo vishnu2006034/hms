@@ -37,6 +37,7 @@ def init_crud(database_url):
             self.record = c.records
             self.module = c.modules
             self.field = c.fields
+            self.layout = c.layouts
             self.picklist = c.picklists
             self.related_records = c.related_records
 
