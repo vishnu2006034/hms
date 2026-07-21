@@ -14,7 +14,8 @@ dependencies = [
     "python-dotenv>=1.0",
     "flask-wtf>=1.2",
     "flask-sqlalchemy>=3.1",
+    "flask-login",
 ]
 
 [tool.uv.sources]
-hogc-crud-engine = { path = "../platform-crud-engine" }
+hogc-crud-engine = { git = "https://github.com/HOGC-IN/hogc-crud-engine.git", branch = "intern" }
