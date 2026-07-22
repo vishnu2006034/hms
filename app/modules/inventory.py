@@ -1,7 +1,8 @@
 from hogc.lib import HOGC
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required
-from app.modules.inventory import inventory_bp
+from flask import Blueprint
+inventory_bp = Blueprint("inventory", __name__, url_prefix="/inventory")
 from app.modules.routes_base import _ctx, _get_records, _get_record, _get_picklist_options
 from app.seed import schema
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required

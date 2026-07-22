@@ -1,12 +1,12 @@
 from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
-from app.modules.prescriptions import prescriptions_bp
+from flask import Blueprint
+prescriptions_bp = Blueprint("prescriptions", __name__, url_prefix="/prescriptions")
 from app.modules.routes_base import _ctx, _get_records, _get_record, _get_all_records, _resolve_lookups, _sync_related_record_on_create, _sync_related_record_on_delete, _get_picklist_options
 from app.seed import schema
 from app.services.authorization_service import AuthorizationService
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 
-from hogc.lib.contracts.crud.models import QueryFilter
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
 from hogc.lib import HOGC
 

@@ -1,7 +1,8 @@
 from hogc.lib import HOGC
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required
-from app.modules.users import users_bp
+from flask import Blueprint
+users_bp = Blueprint("users", __name__, url_prefix="/users")
 from app.modules.routes_base import _ctx, _get_records, _get_record, _sync_related_record_on_delete
 from app.extensions import db
 from app.seed import schema

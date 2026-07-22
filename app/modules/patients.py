@@ -3,14 +3,14 @@ from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
-from app.modules.patients import patients_bp
+from flask import Blueprint
+patients_bp = Blueprint("patients", __name__, url_prefix="/patients")
 from app.modules.routes_base import _ctx, _get_record, _get_related_records, _sync_related_record_on_delete, _get_picklist_options
 from app.seed import schema
 from app.services.visibility_service import VisibilityService
 from app.services.authorization_service import AuthorizationService
 
 from hogc.lib import HOGC
-from hogc.lib.contracts.crud.models import QueryFilter
 from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRequest, DeleteRecordRequest
 
 
