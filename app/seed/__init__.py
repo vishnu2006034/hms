@@ -1,9 +1,9 @@
 """Seed orchestrator — creates schema and populates sample data."""
 from hogc.lib import HOGC
 from app.extensions import db
-from hogc.lib.contracts.crud.requests import ListModulesRequest
+from hogc.lib.contracts.crud.requests import ListModulesRequest, GetModuleRequest
 from app.seed.schema import (
-    _ctx, _GetReq, _seed_users_module, _seed_patients_module, _seed_visits_module,
+    _ctx, _seed_users_module, _seed_patients_module, _seed_visits_module,
     _seed_inventory_module, _seed_prescriptions_module, _seed_laboratory_module,
     _seed_layouts, _seed_relationships, _drop_all_hogc, _lookup_module_ids,
 )
@@ -51,7 +51,7 @@ def seed_modules(app):
             for m in existing.items:
                 try:
                     mod_resp = HOGC.crud.module.get(
-                        _GetReq(context=_ctx(), module_id=m.id)
+                        GetModuleRequest(context=_ctx(), module_id=m.id)
                     )
                     if mod_resp.data and mod_resp.data.fields:
                         has_fields = True
