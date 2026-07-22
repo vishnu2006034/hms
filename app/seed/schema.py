@@ -1,7 +1,8 @@
 """Seed schema — Module, field, picklist, and relationship creation helpers."""
 from hogc.lib import HOGC
 import uuid
-from app.extensions import SessionLocal, db
+from app import extensions
+from app.extensions import db
 from app.config import Config
 from hogc.lib.base import RequestContext
 from hogc.lib.contracts.crud.requests import (
@@ -91,8 +92,8 @@ def _create_layout(module_id, name, field_order, is_default=False):
 
 
 def _create_relationship(from_module_id, to_module_id, rel_type, from_field="", to_field=""):
-    from hogc.engines.crud import RelationshipDefinition
-    session = SessionLocal()
+    from hogc.engines.crud.schema import RelationshipDefinition
+    session = extensions.SessionLocal()
     try:
         rel = RelationshipDefinition(
             tenant_id=Config.HOGC_TENANT_ID,
@@ -298,7 +299,7 @@ def _seed_relationships():
 
 
 def _drop_all_hogc():
-    session = SessionLocal()
+    session = extensions.SessionLocal()
     try:
         for table in ["related_records", "relationship_definitions",
                       "picklist_options", "records", "layouts", "fields", "modules"]:
@@ -336,7 +337,7 @@ def _lookup_module_ids():
 def _lookup_relationship_ids():
     global PATIENTS_VISITS_REL_ID, VISITS_PRESCRIPTIONS_REL_ID, VISITS_LABORATORY_REL_ID
     global PATIENTS_PRESCRIPTIONS_REL_ID, PATIENTS_LABORATORY_REL_ID, USERS_VISITS_REL_ID
-    session = SessionLocal()
+    session = extensions.SessionLocal()
     try:
         rows = session.execute(db.text("""
             SELECT id, from_module_id, to_module_id, relationship_type
