@@ -29,6 +29,7 @@ def _do_seed():
         "prescriptions": schema.PRESCRIPTIONS_MODULE_ID,
         "laboratory": schema.LABORATORY_MODULE_ID,
     })
+    _lookup_module_ids()
 
 
 def seed_modules(app):

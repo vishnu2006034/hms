@@ -16,8 +16,14 @@ from app.config import Config
 
 def _ctx() -> RequestContext:
     """Get the RequestContext for the current user."""
-    user_id: str = str(current_user.id) if current_user.is_authenticated else "system"
-    roles: list[str] = [current_user.role] if current_user.is_authenticated else []
+    user_id: str = "system"
+    roles: list[str] = []
+    try:
+        if current_user and current_user.is_authenticated:
+            user_id = str(current_user.id)
+            roles = [current_user.role]
+    except Exception:
+        pass
     return RequestContext(
         tenant_id=Config.HOGC_TENANT_ID,
         org_id=Config.HOGC_ORG_ID,
