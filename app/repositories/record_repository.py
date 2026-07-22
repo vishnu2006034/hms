@@ -11,13 +11,6 @@ from hogc.lib.contracts.crud.requests import (
 )
 
 
-class _GetReq:
-    """Internal request wrapper."""
-    def __init__(self, **kwargs: typing.Any) -> None:
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-
 class RecordRepository:
     """Repository for managing HOGC records with RequestContext."""
 
@@ -81,7 +74,7 @@ class RecordRepository:
     @classmethod
     def get_record(cls, module_id: str, record_id: str) -> typing.Any:
         """Fetch a specific record by ID."""
-        req = _GetReq(context=cls._ctx(), module_id=module_id, record_id=record_id)
+        req = GetRecordRequest(context=cls._ctx(), module_id=module_id, record_id=record_id)
         return HOGC.crud.record.get(req)
 
     @classmethod

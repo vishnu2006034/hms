@@ -151,18 +151,11 @@ def _get_all_records(module_id: str, page_size: int = 200) -> list:
     )).items
 
 
-class _GetReq:
-    """Internal request wrapper."""
-    def __init__(self, **kwargs) -> None:
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-
 def _get_record(module_id: str, record_id: str) -> typing.Any:
     """Get a single record by ID."""
-    return HOGC.crud.record.get(
-        _GetReq(context=_ctx(), module_id=module_id, record_id=record_id)
-    )
+    return HOGC.crud.record.get(GetRecordRequest(
+        context=_ctx(), module_id=module_id, record_id=record_id
+    ))
 
 
 def _create_record(module_id: str, data: dict) -> typing.Any:

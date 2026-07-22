@@ -67,17 +67,6 @@ def _create_field(module_id, field_name, api_name, field_type, label="",
     return resp.data.id
 
 
-def _create_layout(module_id, name, field_order, is_default=False):
-    resp = HOGC.crud.layout.create(CreateLayoutRequest(
-        context=_ctx(),
-        module_id=module_id,
-        name=name,
-        field_order=field_order,
-        is_default=is_default,
-    ))
-    return resp.data.id
-
-
 def _add_picklist(field_id, value, label, color=None, is_default=False, order=0):
     HOGC.crud.picklist.add_option(AddPicklistOptionRequest(
         context=_ctx(),
@@ -88,6 +77,17 @@ def _add_picklist(field_id, value, label, color=None, is_default=False, order=0)
         is_default=is_default,
         display_order=order,
     ))
+
+
+def _create_layout(module_id, name, field_order, is_default=False):
+    resp = HOGC.crud.layout.create(CreateLayoutRequest(
+        context=_ctx(),
+        module_id=module_id,
+        name=name,
+        field_order=field_order,
+        is_default=is_default,
+    ))
+    return resp.data.id
 
 
 def _create_relationship(from_module_id, to_module_id, rel_type, from_field="", to_field=""):
@@ -114,22 +114,6 @@ def _create_relationship(from_module_id, to_module_id, rel_type, from_field="", 
         return None
     finally:
         session.close()
-
-
-def _create_layout(module_id, name, field_order, is_default=False):
-    HOGC.crud.layout.create(CreateLayoutRequest(
-        context=_ctx(),
-        module_id=module_id,
-        name=name,
-        field_order=field_order,
-        is_default=is_default,
-    ))
-
-
-class _GetReq:
-    def __init__(self, **kwargs):
-        for k, v in kwargs.items():
-            setattr(self, k, v)
 
 
 def _seed_users_module():

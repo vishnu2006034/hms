@@ -59,6 +59,19 @@ wheels = [
 ]
 
 [[package]]
+name = "flask-login"
+version = "0.6.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "flask" },
+    { name = "werkzeug" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c3/6e/2f4e13e373bb49e68c02c51ceadd22d172715a06716f9299d9df01b6ddb2/Flask-Login-0.6.3.tar.gz", hash = "sha256:5e23d14a607ef12806c699590b89d0f0e0d67baeec599d75947bf9c147330333", size = 48834, upload-time = "2023-10-30T14:53:21.151Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/59/f5/67e9cc5c2036f58115f9fe0f00d203cf6780c3ff8ae0e705e7a9d9e8ff9e/Flask_Login-0.6.3-py3-none-any.whl", hash = "sha256:849b25b82a436bf830a054e74214074af59097171562ab10bfa999e6b78aae5d", size = 17303, upload-time = "2023-10-30T14:53:19.636Z" },
+]
+
+[[package]]
 name = "flask-sqlalchemy"
 version = "3.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -155,7 +168,7 @@ wheels = [
 [[package]]
 name = "hogc-crud-engine"
 version = "0.1.0"
-source = { directory = "../platform-crud-engine" }
+source = { directory = "platform-crud-engine" }
 dependencies = [
     { name = "hogc-lib" },
     { name = "sqlalchemy" },
@@ -163,7 +176,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "hogc-lib", git = "https://github.com/HOGC-IN/platform-lib.git?branch=main" },
+    { name = "hogc-lib", git = "https://github.com/HOGC-IN/hogc-lib?branch=main" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "psycopg2-binary", marker = "extra == 'postgres'", specifier = ">=2.9" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
@@ -175,7 +188,7 @@ provides-extras = ["postgres", "dev"]
 [[package]]
 name = "hogc-lib"
 version = "0.1.0"
-source = { git = "https://github.com/HOGC-IN/platform-lib.git?branch=main#2c131e0c05e904bb239931e0c2099a232a4888b3" }
+source = { git = "https://github.com/HOGC-IN/hogc-lib?branch=main#c56c28992410778c6f32c3b2ef3d261edb54744b" }
 dependencies = [
     { name = "pydantic" },
     { name = "sqlalchemy", extra = ["asyncio"] },
@@ -187,6 +200,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "flask" },
+    { name = "flask-login" },
     { name = "flask-sqlalchemy" },
     { name = "flask-wtf" },
     { name = "hogc-crud-engine" },
@@ -197,9 +211,10 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "flask", specifier = ">=3.0" },
+    { name = "flask-login" },
     { name = "flask-sqlalchemy", specifier = ">=3.1" },
     { name = "flask-wtf", specifier = ">=1.2" },
-    { name = "hogc-crud-engine", directory = "../platform-crud-engine" },
+    { name = "hogc-crud-engine", directory = "platform-crud-engine" },
     { name = "psycopg2-binary", specifier = ">=2.9" },
     { name = "python-dotenv", specifier = ">=1.0" },
 ]
