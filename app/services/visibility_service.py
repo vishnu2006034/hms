@@ -43,8 +43,10 @@ class VisibilityService:
     def get_patients(cls, search: typing.Optional[str] = None, page: int = 1, page_size: int = 20) -> typing.Any:
         """Fetch paginated patients based on user role."""
         ctx = cls._get_ctx()
-        if current_user.role == "Doctor":
-            visit_filters = [QueryFilter(field="doctor_lookup", operator="eq", value=current_user.hogc_record_id)]
+        user_role = getattr(current_user, "role", None) if getattr(current_user, "is_authenticated", False) else None
+        hogc_id = getattr(current_user, "hogc_record_id", None) if getattr(current_user, "is_authenticated", False) else None
+        if user_role == "Doctor":
+            visit_filters = [QueryFilter(field="doctor_lookup", operator="eq", value=hogc_id)]
             visit_query = RecordQuery(module_id=schema.VISITS_MODULE_ID, filters=visit_filters, page=1, page_size=1000)
             visits_resp = HOGC.crud.record.query(QueryRecordsRequest(context=ctx, query=visit_query))
             visit_patient_ids = {v.data.get("patient_lookup") for v in visits_resp.items if v.data.get("patient_lookup")}
@@ -52,7 +54,7 @@ class VisibilityService:
             all_patients = HOGC.crud.record.list(ListRecordsRequest(context=ctx, module_id=schema.PATIENTS_MODULE_ID, page=1, page_size=1000)).items
             filtered = []
             for p in all_patients:
-                if p.data.get("assigned_doctor") == current_user.hogc_record_id or p.id in visit_patient_ids:
+                if p.data.get("assigned_doctor") == hogc_id or p.id in visit_patient_ids:
                     if not search or search.lower() in str(p.data.get("first_name", "")).lower() or search.lower() in str(p.data.get("last_name", "")).lower():
                         filtered.append(p)
                         
@@ -71,8 +73,10 @@ class VisibilityService:
     def get_all_patients(cls) -> typing.Any:
         """Fetch all patients available to the user."""
         ctx = cls._get_ctx()
-        if current_user.role == "Doctor":
-            visit_filters = [QueryFilter(field="doctor_lookup", operator="eq", value=current_user.hogc_record_id)]
+        user_role = getattr(current_user, "role", None) if getattr(current_user, "is_authenticated", False) else None
+        hogc_id = getattr(current_user, "hogc_record_id", None) if getattr(current_user, "is_authenticated", False) else None
+        if user_role == "Doctor":
+            visit_filters = [QueryFilter(field="doctor_lookup", operator="eq", value=hogc_id)]
             visit_query = RecordQuery(module_id=schema.VISITS_MODULE_ID, filters=visit_filters, page=1, page_size=1000)
             visits_resp = HOGC.crud.record.query(QueryRecordsRequest(context=ctx, query=visit_query))
             visit_patient_ids = {v.data.get("patient_lookup") for v in visits_resp.items if v.data.get("patient_lookup")}
@@ -80,7 +84,7 @@ class VisibilityService:
             all_patients = HOGC.crud.record.list(ListRecordsRequest(context=ctx, module_id=schema.PATIENTS_MODULE_ID, page=1, page_size=200)).items
             filtered = []
             for p in all_patients:
-                if p.data.get("assigned_doctor") == current_user.hogc_record_id or p.id in visit_patient_ids:
+                if p.data.get("assigned_doctor") == hogc_id or p.id in visit_patient_ids:
                     filtered.append(p)
             return filtered
 
@@ -109,13 +113,15 @@ class VisibilityService:
     @classmethod
     def get_visits(cls, search: typing.Optional[str] = None, page: int = 1, page_size: int = 20) -> typing.Any:
         """Fetch paginated visits based on user role."""
-        if current_user.role in ("Pharmacist", "Lab Technician"):
+        user_role = getattr(current_user, "role", None) if getattr(current_user, "is_authenticated", False) else None
+        hogc_id = getattr(current_user, "hogc_record_id", None) if getattr(current_user, "is_authenticated", False) else None
+        if user_role in ("Pharmacist", "Lab Technician"):
             return None
 
         ctx = cls._get_ctx()
         filters: list[QueryFilter] = []
-        if current_user.role == "Doctor":
-            filters.append(QueryFilter(field="doctor_lookup", operator="eq", value=current_user.hogc_record_id))
+        if user_role == "Doctor":
+            filters.append(QueryFilter(field="doctor_lookup", operator="eq", value=hogc_id))
         
         filters = cls._add_search_filter(filters, search, "visit_id")
         if filters:
@@ -143,13 +149,15 @@ class VisibilityService:
     @classmethod
     def get_prescriptions(cls, search: typing.Optional[str] = None, page: int = 1, page_size: int = 20) -> typing.Any:
         """Fetch paginated prescriptions based on user role."""
-        if current_user.role in ("Receptionist", "Lab Technician"):
+        user_role = getattr(current_user, "role", None) if getattr(current_user, "is_authenticated", False) else None
+        hogc_id = getattr(current_user, "hogc_record_id", None) if getattr(current_user, "is_authenticated", False) else None
+        if user_role in ("Receptionist", "Lab Technician"):
             return None
 
         ctx = cls._get_ctx()
         filters: list[QueryFilter] = []
-        if current_user.role == "Doctor":
-            filters.append(QueryFilter(field="doctor_lookup", operator="eq", value=current_user.hogc_record_id))
+        if user_role == "Doctor":
+            filters.append(QueryFilter(field="doctor_lookup", operator="eq", value=hogc_id))
         
         filters = cls._add_search_filter(filters, search, "medication_name")
         if filters:
@@ -175,14 +183,16 @@ class VisibilityService:
     @classmethod
     def get_laboratory_tests(cls, search: typing.Optional[str] = None, page: int = 1, page_size: int = 20) -> typing.Any:
         """Fetch paginated laboratory tests based on user role."""
-        if current_user.role in ("Receptionist", "Pharmacist"):
+        user_role = getattr(current_user, "role", None) if getattr(current_user, "is_authenticated", False) else None
+        hogc_id = getattr(current_user, "hogc_record_id", None) if getattr(current_user, "is_authenticated", False) else None
+        if user_role in ("Receptionist", "Pharmacist"):
             return None
 
         ctx = cls._get_ctx()
         filters: list[QueryFilter] = []
-        if current_user.role == "Doctor":
-            filters.append(QueryFilter(field="doctor_lookup", operator="eq", value=current_user.hogc_record_id))
-        elif current_user.role == "Lab Technician":
+        if user_role == "Doctor":
+            filters.append(QueryFilter(field="doctor_lookup", operator="eq", value=hogc_id))
+        elif user_role == "Lab Technician":
             pass
         
         filters = cls._add_search_filter(filters, search, "test_name")
@@ -194,7 +204,8 @@ class VisibilityService:
     @classmethod
     def get_inventory_items(cls, search: typing.Optional[str] = None, page: int = 1, page_size: int = 20) -> typing.Any:
         """Fetch paginated inventory items based on user role."""
-        if current_user.role not in ("Pharmacist", "Admin"):
+        user_role = getattr(current_user, "role", None) if getattr(current_user, "is_authenticated", False) else None
+        if getattr(current_user, "is_authenticated", False) and user_role not in ("Pharmacist", "Admin"):
             return None
 
         ctx = cls._get_ctx()
