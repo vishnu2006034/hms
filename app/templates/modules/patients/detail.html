@@ -31,10 +31,13 @@
             </div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <strong>Age:</strong> {{ patient.data.get('age', '-') }}
+                    </div>
+                    <div class="col-md-4">
                         <strong>Gender:</strong> {{ patient.data.get('gender', '-') }}
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <strong>Date of Birth:</strong> {{ patient.data.get('date_of_birth', '-') }}
                     </div>
                     <div class="col-md-6">

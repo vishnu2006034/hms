@@ -25,6 +25,7 @@
                 <tr>
                     <th>Patient ID</th>
                     <th>Name</th>
+                    <th>Age</th>
                     <th>Gender</th>
                     <th>Phone</th>
                     <th>Blood Group</th>
@@ -37,6 +38,7 @@
                 <tr>
                     <td><code>PAT-{{ p.id[:8] | upper }}</code></td>
                     <td><strong>{{ p.data.get('first_name', '') }} {{ p.data.get('last_name', '') }}</strong></td>
+                    <td>{{ p.data.get('age', '-') }}</td>
                     <td>{{ p.data.get('gender', '-') }}</td>
                     <td>{{ p.data.get('phone', '-') }}</td>
                     <td><span class="badge bg-danger">{{ p.data.get('blood_group', '-') }}</span></td>
@@ -58,7 +60,7 @@
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="7" class="text-center text-muted py-4">No patients found.</td></tr>
+                <tr><td colspan="8" class="text-center text-muted py-4">No patients found.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

@@ -51,6 +51,7 @@ def patients_create() -> typing.Any:
         data: dict[str, str] = {
             "first_name": request.form.get("first_name", ""),
             "last_name": request.form.get("last_name", ""),
+            "age": request.form.get("age", ""),
             "date_of_birth": request.form.get("date_of_birth", ""),
             "gender": request.form.get("gender", ""),
             "phone": request.form.get("phone", ""),
@@ -147,6 +148,7 @@ def patients_edit(record_id: str) -> typing.Any:
         data: dict[str, str] = {
             "first_name": request.form.get("first_name", ""),
             "last_name": request.form.get("last_name", ""),
+            "age": request.form.get("age", ""),
             "date_of_birth": request.form.get("date_of_birth", ""),
             "gender": request.form.get("gender", ""),
             "phone": request.form.get("phone", ""),

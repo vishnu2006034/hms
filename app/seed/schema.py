@@ -139,6 +139,7 @@ def _seed_patients_module():
     _create_field(PATIENTS_MODULE_ID, "First Name", "first_name", FieldType.TEXT, "First Name", is_required=True)
     _create_field(PATIENTS_MODULE_ID, "Last Name", "last_name", FieldType.TEXT, "Last Name", is_required=True)
     _create_field(PATIENTS_MODULE_ID, "Date of Birth", "date_of_birth", FieldType.DATE, "Date of Birth", is_required=True)
+    _create_field(PATIENTS_MODULE_ID, "Age", "age", FieldType.NUMBER, "Age")
     gender_id = _create_field(PATIENTS_MODULE_ID, "Gender", "gender", FieldType.PICKLIST, "Gender", is_required=True)
     for i, (val, lbl) in enumerate([("Male", "Male"), ("Female", "Female"), ("Other", "Other")]):
         _add_picklist(gender_id, val, lbl, order=i)
@@ -280,7 +281,7 @@ def _seed_layouts():
     global INVENTORY_MODULE_ID, PRESCRIPTIONS_MODULE_ID, LABORATORY_MODULE_ID
 
     _create_layout(USERS_MODULE_ID, "Standard Layout", ["full_name", "email", "phone", "role", "department", "is_active"], True)
-    _create_layout(PATIENTS_MODULE_ID, "Standard Layout", ["patient_id", "first_name", "last_name", "date_of_birth", "gender", "phone", "email", "assigned_doctor", "address", "blood_group", "emergency_contact", "emergency_phone", "insurance_provider", "insurance_id", "medical_history", "allergies", "status"], True)
+    _create_layout(PATIENTS_MODULE_ID, "Standard Layout", ["patient_id", "first_name", "last_name", "age", "date_of_birth", "gender", "phone", "email", "assigned_doctor", "address", "blood_group", "emergency_contact", "emergency_phone", "insurance_provider", "insurance_id", "medical_history", "allergies", "status"], True)
     _create_layout(VISITS_MODULE_ID, "Standard Layout", ["visit_id", "patient_lookup", "doctor_lookup", "visit_date", "department", "chief_complaint", "diagnosis", "treatment", "vitals_bp", "vitals_temp", "vitals_pulse", "vitals_weight", "status", "notes"], True)
     _create_layout(INVENTORY_MODULE_ID, "Standard Layout", ["item_id", "item_name", "category", "description", "quantity", "unit", "unit_price", "supplier", "reorder_level", "expiry_date", "batch_number", "location", "status"], True)
     _create_layout(PRESCRIPTIONS_MODULE_ID, "Standard Layout", ["prescription_id", "patient_lookup", "doctor_lookup", "visit_lookup", "prescribed_date", "medication_name", "dosage", "frequency", "duration", "instructions", "refills", "status"], True)
