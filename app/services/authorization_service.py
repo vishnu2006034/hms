@@ -31,13 +31,28 @@ class AuthorizationService:
             return True
             
         if user.role == "Doctor":
-            from app.repositories.record_repository import RecordRepository
+            from app.config import Config
             from app.seed import schema
-            from hogc.lib.contracts.crud.models import QueryFilter
+            from hogc.lib import HOGC
+            from hogc.lib.base import RequestContext
+            from hogc.lib.contracts.crud.models import RecordQuery, QueryFilter
+            from hogc.lib.contracts.crud.requests import QueryRecordsRequest
             
-            visits_resp = RecordRepository.get_records(schema.VISITS_MODULE_ID, page=1, page_size=1000, filters=[
-                QueryFilter(field="doctor_lookup", operator="eq", value=user.hogc_record_id)
-            ])
+            user_id = str(user.id) if hasattr(user, "id") and user.id else "system"
+            roles = [user.role] if hasattr(user, "role") and user.role else []
+            ctx = RequestContext(
+                tenant_id=Config.HOGC_TENANT_ID,
+                org_id=Config.HOGC_ORG_ID,
+                user_id=user_id,
+                roles=roles,
+            )
+            query = RecordQuery(
+                module_id=schema.VISITS_MODULE_ID,
+                filters=[QueryFilter(field="doctor_lookup", operator="eq", value=user.hogc_record_id)],
+                page=1,
+                page_size=1000,
+            )
+            visits_resp = HOGC.crud.record.query(QueryRecordsRequest(context=ctx, query=query))
             for v in visits_resp.items:
                 if v.data.get("patient_lookup") == patient_record.id:
                     return True
