@@ -11,8 +11,8 @@ ROLES_ALL: tuple[str, ...] = ("Admin", "Doctor", "Nurse", "Pharmacist", "Lab Tec
 
 # ── Module Permission Maps ───────────────────────────────────────────────────
 MODULE_CREATE: dict[str, tuple[str, ...]] = {
-    "patients": ("Admin", "Doctor", "Nurse", "Receptionist"),
-    "visits": ("Admin", "Doctor", "Nurse", "Receptionist"),
+    "patients": ("Admin", "Nurse", "Receptionist"),
+    "visits": ("Admin", "Nurse", "Receptionist"),
     "prescriptions": ("Admin", "Doctor", "Pharmacist"),
     "laboratory": ("Admin", "Doctor", "Lab Technician"),
     "inventory": ("Admin", "Pharmacist"),
@@ -20,7 +20,7 @@ MODULE_CREATE: dict[str, tuple[str, ...]] = {
 }
 
 MODULE_EDIT: dict[str, tuple[str, ...]] = {
-    "patients": ("Admin", "Doctor", "Nurse", "Receptionist"),
+    "patients": ("Admin", "Nurse", "Receptionist"),
     "visits": ("Admin", "Doctor", "Nurse", "Receptionist"),
     "prescriptions": ("Admin", "Doctor", "Pharmacist"),
     "laboratory": ("Admin", "Doctor", "Lab Technician"),

@@ -10,47 +10,50 @@
                 <div class="col-md-4">
                     <label class="form-label">First Name *</label>
                     <input type="text" class="form-control" name="first_name" required
-                           value="{{ patient.data.get('first_name', '') if patient else '' }}">
+                        value="{{ patient.data.get('first_name', '') if patient else '' }}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Last Name *</label>
                     <input type="text" class="form-control" name="last_name" required
-                           value="{{ patient.data.get('last_name', '') if patient else '' }}">
+                        value="{{ patient.data.get('last_name', '') if patient else '' }}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Date of Birth *</label>
                     <input type="date" class="form-control" name="date_of_birth" required
-                           value="{{ patient.data.get('date_of_birth', '') if patient else '' }}">
+                        value="{{ patient.data.get('date_of_birth', '') if patient else '' }}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Gender *</label>
                     <select class="form-select" name="gender" required>
                         <option value="">Select...</option>
                         {% for value, label in picklists.get('gender', []) %}
-                        <option value="{{ value }}" {{ 'selected' if patient and patient.data.get('gender') == value }}>{{ label }}</option>
+                        <option value="{{ value }}" {{ 'selected' if patient and patient.data.get('gender')==value }}>{{
+                            label }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Phone *</label>
                     <input type="tel" class="form-control" name="phone" required
-                           value="{{ patient.data.get('phone', '') if patient else '' }}">
+                        value="{{ patient.data.get('phone', '') if patient else '' }}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Email</label>
                     <input type="email" class="form-control" name="email"
-                           value="{{ patient.data.get('email', '') if patient else '' }}">
+                        value="{{ patient.data.get('email', '') if patient else '' }}">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Address</label>
-                    <textarea class="form-control" name="address" rows="2">{{ patient.data.get('address', '') if patient else '' }}</textarea>
+                    <textarea class="form-control" name="address"
+                        rows="2">{{ patient.data.get('address', '') if patient else '' }}</textarea>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Blood Group</label>
                     <select class="form-select" name="blood_group">
                         <option value="">Select...</option>
                         {% for value, label in picklists.get('blood_group', []) %}
-                        <option value="{{ value }}" {{ 'selected' if patient and patient.data.get('blood_group') == value }}>{{ label }}</option>
+                        <option value="{{ value }}" {{ 'selected' if patient and patient.data.get('blood_group')==value
+                            }}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -58,37 +61,40 @@
                     <label class="form-label">Status *</label>
                     <select class="form-select" name="status" required>
                         {% for value, label in picklists.get('status', []) %}
-                        <option value="{{ value }}" {{ 'selected' if patient and patient.data.get('status') == value }}>{{ label }}</option>
+                        <option value="{{ value }}" {{ 'selected' if patient and patient.data.get('status')==value }}>{{
+                            label }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Emergency Contact</label>
                     <input type="text" class="form-control" name="emergency_contact"
-                           value="{{ patient.data.get('emergency_contact', '') if patient else '' }}">
+                        value="{{ patient.data.get('emergency_contact', '') if patient else '' }}">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Emergency Phone</label>
                     <input type="tel" class="form-control" name="emergency_phone"
-                           value="{{ patient.data.get('emergency_phone', '') if patient else '' }}">
+                        value="{{ patient.data.get('emergency_phone', '') if patient else '' }}">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Insurance Provider</label>
                     <input type="text" class="form-control" name="insurance_provider"
-                           value="{{ patient.data.get('insurance_provider', '') if patient else '' }}">
+                        value="{{ patient.data.get('insurance_provider', '') if patient else '' }}">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Insurance ID</label>
                     <input type="text" class="form-control" name="insurance_id"
-                           value="{{ patient.data.get('insurance_id', '') if patient else '' }}">
+                        value="{{ patient.data.get('insurance_id', '') if patient else '' }}">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Medical History</label>
-                    <textarea class="form-control" name="medical_history" rows="2">{{ patient.data.get('medical_history', '') if patient else '' }}</textarea>
+                    <textarea class="form-control" name="medical_history"
+                        rows="2">{{ patient.data.get('medical_history', '') if patient else '' }}</textarea>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Allergies</label>
-                    <textarea class="form-control" name="allergies" rows="2">{{ patient.data.get('allergies', '') if patient else '' }}</textarea>
+                    <textarea class="form-control" name="allergies"
+                        rows="2">{{ patient.data.get('allergies', '') if patient else '' }}</textarea>
                 </div>
             </div>
             <div class="mt-4">
