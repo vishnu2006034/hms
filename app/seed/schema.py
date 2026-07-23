@@ -10,6 +10,7 @@ from hogc.lib.contracts.crud.requests import (
     ListModulesRequest, CreateLayoutRequest,
 )
 from hogc.lib.contracts.crud.types import FieldType
+from hogc.engines.crud.schema import RelationshipDefinition
 
 
 # Module IDs - set after creation
@@ -92,7 +93,6 @@ def _create_layout(module_id, name, field_order, is_default=False):
 
 
 def _create_relationship(from_module_id, to_module_id, rel_type, from_field="", to_field=""):
-    from hogc.engines.crud.schema import RelationshipDefinition
     session = extensions.SessionLocal()
     try:
         rel = RelationshipDefinition(
