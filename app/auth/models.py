@@ -19,6 +19,34 @@ class AuthUser(UserMixin, db.Model):
     is_active_user: bool = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
+    def __init__(
+        self,
+        username: str = "",
+        email: str = "",
+        full_name: str = "",
+        role: str = "Doctor",
+        password_hash: str = "",
+        hogc_record_id: typing.Optional[str] = None,
+        is_active_user: bool = True,
+        **kwargs: typing.Any,
+    ) -> None:
+        """Initialize AuthUser instance."""
+        super().__init__(**kwargs)
+        if username:
+            self.username = username
+        if email:
+            self.email = email
+        if full_name:
+            self.full_name = full_name
+        if role:
+            self.role = role
+        if password_hash:
+            self.password_hash = password_hash
+        if hogc_record_id is not None:
+            self.hogc_record_id = hogc_record_id
+        self.is_active_user = is_active_user
+
+
     def set_password(self, password: str) -> None:
         """Hash and set the user's password."""
         self.password_hash = generate_password_hash(password)
