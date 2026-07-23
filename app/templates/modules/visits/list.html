@@ -10,7 +10,7 @@
         {% if search %}<a href="{{ url_for('visits.visits_list') }}" class="btn btn-outline-danger"><i class="bi bi-x"></i></a>{% endif %}
     </div>
 </form>
-{% if current_user.role in ('Admin', 'Doctor', 'Nurse', 'Receptionist') %}
+{% if current_user.role in ('Admin', 'Nurse', 'Receptionist') %}
 <a href="{{ url_for('visits.visits_create') }}" class="btn btn-success btn-sm">
     <i class="bi bi-plus-lg"></i> New Visit
 </a>

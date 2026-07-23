@@ -21,28 +21,59 @@ class VisibilityService:
     @classmethod
     def get_patients(cls, search: typing.Optional[str] = None, page: int = 1, page_size: int = 20) -> typing.Any:
         """Fetch paginated patients based on user role."""
-        filters: list[QueryFilter] = []
         if current_user.role == "Doctor":
-            filters.append(QueryFilter(field="assigned_doctor", operator="eq", value=current_user.hogc_record_id))
-        
-        filters = cls._add_search_filter(filters, search, "first_name")
+            visit_filters = [QueryFilter(field="doctor_lookup", operator="eq", value=current_user.hogc_record_id)]
+            visits_resp = RecordRepository.get_records(schema.VISITS_MODULE_ID, page=1, page_size=1000, filters=visit_filters)
+            visit_patient_ids = {v.data.get("patient_lookup") for v in visits_resp.items if v.data.get("patient_lookup")}
+            
+            all_patients = RecordRepository.get_records(schema.PATIENTS_MODULE_ID, page=1, page_size=1000).items
+            filtered = []
+            for p in all_patients:
+                if p.data.get("assigned_doctor") == current_user.hogc_record_id or p.id in visit_patient_ids:
+                    if not search or search.lower() in str(p.data.get("first_name", "")).lower() or search.lower() in str(p.data.get("last_name", "")).lower():
+                        filtered.append(p)
+                        
+            from types import SimpleNamespace
+            total = len(filtered)
+            start = (page - 1) * page_size
+            return SimpleNamespace(items=filtered[start:start+page_size], total=total)
+
+        filters: list[QueryFilter] = cls._add_search_filter([], search, "first_name")
         return RecordRepository.get_records(schema.PATIENTS_MODULE_ID, page, page_size, filters)
 
     @classmethod
     def get_all_patients(cls) -> typing.Any:
         """Fetch all patients available to the user."""
-        filters: list[QueryFilter] = []
         if current_user.role == "Doctor":
-            filters.append(QueryFilter(field="assigned_doctor", operator="eq", value=current_user.hogc_record_id))
-        return RecordRepository.get_all_records(schema.PATIENTS_MODULE_ID, filters=filters)
+            visit_filters = [QueryFilter(field="doctor_lookup", operator="eq", value=current_user.hogc_record_id)]
+            visits_resp = RecordRepository.get_records(schema.VISITS_MODULE_ID, page=1, page_size=1000, filters=visit_filters)
+            visit_patient_ids = {v.data.get("patient_lookup") for v in visits_resp.items if v.data.get("patient_lookup")}
+            
+            all_patients = RecordRepository.get_all_records(schema.PATIENTS_MODULE_ID)
+            filtered = []
+            for p in all_patients:
+                if p.data.get("assigned_doctor") == current_user.hogc_record_id or p.id in visit_patient_ids:
+                    filtered.append(p)
+            return filtered
+
+        return RecordRepository.get_all_records(schema.PATIENTS_MODULE_ID)
 
     @classmethod
     def count_patients(cls) -> int:
         """Count total patients available to the user."""
-        filters: list[QueryFilter] = []
         if current_user.role == "Doctor":
-            filters.append(QueryFilter(field="assigned_doctor", operator="eq", value=current_user.hogc_record_id))
-        result = RecordRepository.get_records(schema.PATIENTS_MODULE_ID, page=1, page_size=1, filters=filters)
+            visit_filters = [QueryFilter(field="doctor_lookup", operator="eq", value=current_user.hogc_record_id)]
+            visits_resp = RecordRepository.get_records(schema.VISITS_MODULE_ID, page=1, page_size=1000, filters=visit_filters)
+            visit_patient_ids = {v.data.get("patient_lookup") for v in visits_resp.items if v.data.get("patient_lookup")}
+            
+            all_patients = RecordRepository.get_all_records(schema.PATIENTS_MODULE_ID)
+            filtered = []
+            for p in all_patients:
+                if p.data.get("assigned_doctor") == current_user.hogc_record_id or p.id in visit_patient_ids:
+                    filtered.append(p)
+            return len(filtered)
+
+        result = RecordRepository.get_records(schema.PATIENTS_MODULE_ID, page=1, page_size=1)
         return result.total
 
     @classmethod

@@ -27,7 +27,22 @@ class AuthorizationService:
 
     @classmethod
     def can_access_patient(cls, user, patient_record) -> bool:
-        return cls._check_doctor_ownership(user, patient_record, "assigned_doctor")
+        if cls._check_doctor_ownership(user, patient_record, "assigned_doctor"):
+            return True
+            
+        if user.role == "Doctor":
+            from app.repositories.record_repository import RecordRepository
+            from app.seed import schema
+            from hogc.lib.contracts.crud.models import QueryFilter
+            
+            visits_resp = RecordRepository.get_records(schema.VISITS_MODULE_ID, page=1, page_size=1000, filters=[
+                QueryFilter(field="doctor_lookup", operator="eq", value=user.hogc_record_id)
+            ])
+            for v in visits_resp.items:
+                if v.data.get("patient_lookup") == patient_record.id:
+                    return True
+                    
+        return False
 
     @classmethod
     def can_access_visit(cls, user, visit_record) -> bool:
