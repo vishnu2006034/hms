@@ -19,7 +19,7 @@ class VisitService:
     @staticmethod
     def get_picklists() -> dict[str, list[tuple[str, str]]]:
         """Fetch live picklist options for the visits form."""
-        return _get_picklist_options(schema.VISITS_MODULE_ID, "department", "status")
+        return _get_picklist_options(schema.VISITS_MODULE_ID, "department", "status", "symptoms")
 
     @classmethod
     def get_form_context(cls) -> dict[str, typing.Any]:
@@ -98,6 +98,7 @@ class VisitService:
             "visit_date": form_data.get("visit_date", ""),
             "department": form_data.get("department", ""),
             "chief_complaint": form_data.get("chief_complaint", ""),
+            "symptoms": ",".join(form_data.getlist("symptoms")) if hasattr(form_data, "getlist") else form_data.get("symptoms", ""),
             "diagnosis": form_data.get("diagnosis", ""),
             "treatment": form_data.get("treatment", ""),
             "vitals_bp": form_data.get("vitals_bp", ""),
@@ -136,6 +137,7 @@ class VisitService:
             "visit_date": form_data.get("visit_date", ""),
             "department": form_data.get("department", ""),
             "chief_complaint": form_data.get("chief_complaint", ""),
+            "symptoms": ",".join(form_data.getlist("symptoms")) if hasattr(form_data, "getlist") else form_data.get("symptoms", ""),
             "diagnosis": form_data.get("diagnosis", ""),
             "treatment": form_data.get("treatment", ""),
             "vitals_bp": form_data.get("vitals_bp", ""),

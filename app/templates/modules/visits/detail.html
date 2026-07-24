@@ -34,6 +34,15 @@
                     </div>
                     <div class="col-12"><strong>Chief Complaint:</strong> {{ visit.data.get('chief_complaint', '-') }}</div>
                     <div class="col-12"><strong>Diagnosis:</strong> {{ visit.data.get('diagnosis', '-') }}</div>
+                    <div class="col-12">
+                        <strong>Symptoms:</strong> 
+                        {% set symptoms = visit.data.get('symptoms', '') %}
+                        {% if symptoms %}
+                            {{ symptoms.replace(',', ', ') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
                     <div class="col-12"><strong>Treatment:</strong> {{ visit.data.get('treatment', '-') }}</div>
                     <div class="col-12"><strong>Notes:</strong> {{ visit.data.get('notes', '-') }}</div>
                 </div>

@@ -84,7 +84,15 @@
             <div class="card-header"><strong>Medical</strong></div>
             <div class="card-body">
                 <p class="mb-1"><strong>History:</strong> {{ patient.data.get('medical_history', '-') }}</p>
-                <p class="mb-0"><strong>Allergies:</strong> {{ patient.data.get('allergies', '-') }}</p>
+                <p class="mb-0">
+                    <strong>Allergies:</strong> 
+                    {% set allergies = patient.data.get('allergies', '') %}
+                    {% if allergies %}
+                        {{ allergies.replace(',', ', ') }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </p>
             </div>
         </div>
     </div>

@@ -15,7 +15,7 @@ class PatientService:
     @staticmethod
     def get_picklists() -> dict[str, list[tuple[str, str]]]:
         """Fetch live picklist options for patient form."""
-        return _get_picklist_options(schema.PATIENTS_MODULE_ID, "gender", "blood_group", "status")
+        return _get_picklist_options(schema.PATIENTS_MODULE_ID, "gender", "blood_group", "status", "allergies")
 
     @classmethod
     def list_patients(cls, search: str = "", page: int = 1, page_size: int = 20) -> dict[str, typing.Any]:
@@ -121,7 +121,7 @@ class PatientService:
             "insurance_provider": form_data.get("insurance_provider", ""),
             "insurance_id": form_data.get("insurance_id", ""),
             "medical_history": form_data.get("medical_history", ""),
-            "allergies": form_data.get("allergies", ""),
+            "allergies": ",".join(form_data.getlist("allergies")) if hasattr(form_data, "getlist") else form_data.get("allergies", ""),
             "status": form_data.get("status", "Active"),
         }
         req = CreateRecordRequest(context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, data=data)
@@ -152,7 +152,7 @@ class PatientService:
             "insurance_provider": form_data.get("insurance_provider", ""),
             "insurance_id": form_data.get("insurance_id", ""),
             "medical_history": form_data.get("medical_history", ""),
-            "allergies": form_data.get("allergies", ""),
+            "allergies": ",".join(form_data.getlist("allergies")) if hasattr(form_data, "getlist") else form_data.get("allergies", ""),
             "status": form_data.get("status", "Active"),
         }
         req = UpdateRecordRequest(context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, record_id=record_id, data=data)

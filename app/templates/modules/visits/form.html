@@ -53,6 +53,20 @@
                     <textarea class="form-control" name="diagnosis" rows="2">{{ visit.data.get('diagnosis', '') if visit else '' }}</textarea>
                 </div>
                 <div class="col-md-12">
+                    <label class="form-label d-block">Symptoms</label>
+                    <div class="d-flex flex-wrap gap-3">
+                        {% set current_symptoms = visit.data.get('symptoms', '').split(',') if visit and visit.data.get('symptoms') else [] %}
+                        {% for value, label in picklists.get('symptoms', []) %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="symptoms" value="{{ value }}" id="symptom_{{ loop.index }}" {{ 'checked' if value in current_symptoms }}>
+                            <label class="form-check-label" for="symptom_{{ loop.index }}">
+                                {{ label }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-12">
                     <label class="form-label">Treatment</label>
                     <textarea class="form-control" name="treatment" rows="2">{{ visit.data.get('treatment', '') if visit else '' }}</textarea>
                 </div>

@@ -97,9 +97,18 @@
                         rows="2">{{ patient.data.get('medical_history', '') if patient else '' }}</textarea>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Allergies</label>
-                    <textarea class="form-control" name="allergies"
-                        rows="2">{{ patient.data.get('allergies', '') if patient else '' }}</textarea>
+                    <label class="form-label d-block">Allergies</label>
+                    <div class="d-flex flex-wrap gap-3">
+                        {% set current_allergies = patient.data.get('allergies', '').split(',') if patient and patient.data.get('allergies') else [] %}
+                        {% for value, label in picklists.get('allergies', []) %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="allergies" value="{{ value }}" id="allergy_{{ loop.index }}" {{ 'checked' if value in current_allergies }}>
+                            <label class="form-check-label" for="allergy_{{ loop.index }}">
+                                {{ label }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
             <div class="mt-4">

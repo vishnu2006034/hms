@@ -156,7 +156,10 @@ def _seed_patients_module():
     _create_field(PATIENTS_MODULE_ID, "Insurance Provider", "insurance_provider", FieldType.TEXT, "Insurance Provider")
     _create_field(PATIENTS_MODULE_ID, "Insurance ID", "insurance_id", FieldType.TEXT, "Insurance ID")
     _create_field(PATIENTS_MODULE_ID, "Medical History", "medical_history", FieldType.TEXT, "Medical History")
-    _create_field(PATIENTS_MODULE_ID, "Allergies", "allergies", FieldType.TEXT, "Allergies")
+    alg_id = _create_field(PATIENTS_MODULE_ID, "Allergies", "allergies", FieldType.MULTI_PICKLIST, "Allergies")
+    for i, (val, lbl) in enumerate([("Penicillin", "Penicillin"), ("Peanuts", "Peanuts"), ("Latex", "Latex"), 
+                                     ("Dust", "Dust"), ("Pollen", "Pollen"), ("Other", "Other")]):
+        _add_picklist(alg_id, val, lbl, order=i)
     status_id = _create_field(PATIENTS_MODULE_ID, "Status", "status", FieldType.PICKLIST, "Status", is_required=True)
     for i, (val, lbl) in enumerate([("Active", "Active"), ("Discharged", "Discharged"),
                                      ("Transferred", "Transferred"), ("Deceased", "Deceased")]):
@@ -188,6 +191,10 @@ def _seed_visits_module():
     for i, (val, lbl) in enumerate([("Scheduled", "Scheduled"), ("In-Progress", "In-Progress"),
                                      ("Completed", "Completed"), ("Cancelled", "Cancelled")]):
         _add_picklist(status_id, val, lbl, is_default=(val == "Scheduled"), order=i)
+    symp_id = _create_field(VISITS_MODULE_ID, "Symptoms", "symptoms", FieldType.MULTI_PICKLIST, "Symptoms")
+    for i, (val, lbl) in enumerate([("Fever", "Fever"), ("Cough", "Cough"), ("Headache", "Headache"),
+                                     ("Nausea", "Nausea"), ("Fatigue", "Fatigue"), ("Other", "Other")]):
+        _add_picklist(symp_id, val, lbl, order=i)
     _create_field(VISITS_MODULE_ID, "Notes", "notes", FieldType.TEXT, "Notes")
 
 
@@ -282,7 +289,7 @@ def _seed_layouts():
 
     _create_layout(USERS_MODULE_ID, "Standard Layout", ["full_name", "email", "phone", "role", "department", "is_active"], True)
     _create_layout(PATIENTS_MODULE_ID, "Standard Layout", ["patient_id", "first_name", "last_name", "age", "date_of_birth", "gender", "phone", "email", "assigned_doctor", "address", "blood_group", "emergency_contact", "emergency_phone", "insurance_provider", "insurance_id", "medical_history", "allergies", "status"], True)
-    _create_layout(VISITS_MODULE_ID, "Standard Layout", ["visit_id", "patient_lookup", "doctor_lookup", "visit_date", "department", "chief_complaint", "diagnosis", "treatment", "vitals_bp", "vitals_temp", "vitals_pulse", "vitals_weight", "status", "notes"], True)
+    _create_layout(VISITS_MODULE_ID, "Standard Layout", ["visit_id", "patient_lookup", "doctor_lookup", "visit_date", "department", "chief_complaint", "diagnosis", "symptoms", "treatment", "vitals_bp", "vitals_temp", "vitals_pulse", "vitals_weight", "status", "notes"], True)
     _create_layout(INVENTORY_MODULE_ID, "Standard Layout", ["item_id", "item_name", "category", "description", "quantity", "unit", "unit_price", "supplier", "reorder_level", "expiry_date", "batch_number", "location", "status"], True)
     _create_layout(PRESCRIPTIONS_MODULE_ID, "Standard Layout", ["prescription_id", "patient_lookup", "doctor_lookup", "visit_lookup", "prescribed_date", "medication_name", "dosage", "frequency", "duration", "instructions", "refills", "status"], True)
     _create_layout(LABORATORY_MODULE_ID, "Standard Layout", ["test_id", "patient_lookup", "doctor_lookup", "visit_lookup", "test_name", "test_type", "priority", "sample_date", "result_date", "result_value", "reference_range", "status", "notes", "technician_lookup"], True)
