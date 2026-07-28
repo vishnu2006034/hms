@@ -106,6 +106,20 @@ CREATE DATABASE hms;
    uv pip install .
    ```
 
+   > **About the CRUD Engine dependency:**
+   > The `hogc-crud-engine` package is **not on PyPI** — it is pulled directly from GitHub.
+   > The source is configured in `pyproject.toml` under `[tool.uv.sources]`:
+   > ```toml
+   > [tool.uv.sources]
+   > hogc-crud-engine = { git = "https://github.com/HOGC-IN/hogc-crud-engine.git", branch = "intern" }
+   > ```
+   > **`uv pip install .`** reads this config and installs the engine from the `intern` branch automatically.
+   >
+   > If you are **not using `uv`**, install the engine manually first:
+   > ```bash
+   > pip install git+https://github.com/HOGC-IN/hogc-crud-engine.git@intern
+   > pip install .
+   > ```
 
 ## Configuration
 
@@ -152,3 +166,16 @@ On the first run (or after running `reset_db.py`), the app will automatically se
    - **Inventory:** Keep track of hospital supplies and medications.
    - **Prescriptions:** Issue and view medical prescriptions.
    - **Laboratory:** Order and record lab tests and results.
+
+---
+
+## How the CRUD Engine Works
+
+This project uses the **HOGC CRUD Engine** — an EAV platform for defining modules, fields, and records at runtime.
+
+📖 **See [CRUD_ENGINE.md](CRUD_ENGINE.md)** for the full guide, including:
+- Core concepts (Modules, Fields, Records, Picklists, Layouts, Relationships)
+- All available field types
+- Project architecture overview
+- Code examples for every CRUD operation
+- Step-by-step guide to adding a new module
