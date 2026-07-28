@@ -4,8 +4,84 @@ A dynamic Hospital Management System built using Flask and the HOGC EAV CRUD Eng
 
 ## Prerequisites
 
-- **Python 3.8+**
-- **PostgreSQL** (running locally or accessible via network)
+- **Python 3.12+**
+- **PostgreSQL 14+** (running locally or accessible via network)
+- **Git**
+
+---
+
+## PostgreSQL Installation Guide
+
+> If you already have PostgreSQL installed and running, skip to [Installation & Setup](#installation--setup).
+
+### Windows
+
+1. **Download** the installer from the official site:
+   [https://www.postgresql.org/download/windows/](https://www.postgresql.org/download/windows/)
+2. Run the installer and follow the setup wizard:
+   - Choose a **password** for the `postgres` superuser — **remember this password**, you'll need it for the `.env` file.
+   - Keep the default **port** as `5432`.
+   - Leave everything else as default and finish the installation.
+3. The installer includes **pgAdmin** (a GUI tool) and adds `psql` to your PATH.
+4. **Verify** the installation by opening a terminal:
+   ```bash
+   psql --version
+   ```
+   > If `psql` is not recognized, add `C:\Program Files\PostgreSQL\<version>\bin` to your system PATH.
+
+### macOS
+
+1. **Install via Homebrew** (recommended):
+   ```bash
+   brew install postgresql@16
+   brew services start postgresql@16
+   ```
+2. **Verify** installation:
+   ```bash
+   psql --version
+   ```
+
+### Linux (Ubuntu / Debian)
+
+1. **Install via apt**:
+   ```bash
+   sudo apt update
+   sudo apt install postgresql postgresql-contrib
+   ```
+2. **Start the service**:
+   ```bash
+   sudo systemctl start postgresql
+   sudo systemctl enable postgresql
+   ```
+3. **Set a password** for the `postgres` user:
+   ```bash
+   sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'yourpassword';"
+   ```
+
+---
+
+### Creating the `hms` Database
+
+After PostgreSQL is installed and running, create the database that the app will use:
+
+**Option A — Using the `psql` command line:**
+```bash
+# Connect as the postgres superuser
+psql -U postgres
+
+# Inside the psql prompt, run:
+CREATE DATABASE hms;
+
+# Exit
+\q
+```
+
+**Option B — Using pgAdmin (GUI):**
+1. Open **pgAdmin** and connect to your local server.
+2. Right-click **Databases** → **Create** → **Database…**
+3. Enter `hms` as the database name and click **Save**.
+
+---
 
 ## Installation & Setup
 
@@ -27,22 +103,21 @@ A dynamic Hospital Management System built using Flask and the HOGC EAV CRUD Eng
 
 3. **Install dependencies**:
    ```bash
-   pip install -r requirements.txt
+   uv pip install .
    ```
-   *(Note: Ensure that the `hogc` engine is installed in your environment if it is a local or custom package).*
+
 
 ## Configuration
 
 1. Create a `.env` file in the root directory (`hms/.env`).
-2. Add your PostgreSQL database connection string to the `.env` file. For example:
+2. Add the following environment variables, replacing `yourpassword` with the password you set during PostgreSQL installation:
    ```env
+   FLASK_APP=run.py
+   FLASK_ENV=development
+   FLASK_SECRET_KEY=change-this-to-a-random-secret-key
    DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/hms
-   
-   # Optional: Configure HOGC Tenant
-   HOGC_TENANT_ID=hms
-   HOGC_ORG_ID=default
    ```
-   *(Make sure to create an empty database named `hms` in PostgreSQL before proceeding).*
+   > Make sure you have already created the `hms` database — see [Creating the hms Database](#creating-the-hms-database) above.
 
 ## Initializing the Database
 
