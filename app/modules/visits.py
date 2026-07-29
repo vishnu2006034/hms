@@ -4,6 +4,8 @@ from flask_login import login_required, current_user
 
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 from app.services.visit_service import VisitService
+from app.modules.routes_base import get_module_metadata
+from app.seed import schema
 
 visits_bp = Blueprint("visits", __name__, url_prefix="/visits")
 
@@ -30,9 +32,16 @@ def visits_list() -> typing.Any:
     )
 
 
+def _build_lookup_data(form_ctx: dict) -> dict:
+    return {
+        "patient_lookup": [(p.id, f"{p.data.get('first_name', '')} {p.data.get('last_name', '')} — {p.data.get('phone', '')}") for p in form_ctx.get("patients", [])],
+        "doctor_lookup": [(d.id, f"{d.data.get('full_name', '')} — {d.data.get('department', '')}") for d in form_ctx.get("doctors", [])]
+    }
+
+
 @visits_bp.route("/create", methods=["GET", "POST"])
 @login_required
-@role_required(*MODULE_CREATE["visits"])
+@role_required(*MODULE_CREATE.get("visits", ()))
 def visits_create() -> typing.Any:
     """Handle visit creation."""
     if request.method == "POST":
@@ -45,12 +54,14 @@ def visits_create() -> typing.Any:
         return redirect(url_for("visits.visits_list"))
 
     form_ctx: dict[str, typing.Any] = VisitService.get_form_context()
+    meta = get_module_metadata(schema.VISITS_MODULE_ID)
     return render_template(
         "modules/visits/form.html",
         visit=None,
+        record=None,
         action="create",
-        picklists=VisitService.get_picklists(),
-        **form_ctx
+        lookup_data=_build_lookup_data(form_ctx),
+        **meta
     )
 
 
@@ -67,17 +78,27 @@ def visits_detail(record_id: str) -> typing.Any:
         flash("Access denied: You are not assigned to this visit.", "danger")
         return redirect(url_for("visits.visits_list"))
 
+    resolved = detail.get("resolved", {})
+    visit_resolved = resolved.get(record_id, {})
+    lookup_data = {
+        k: {detail["visit"].get(k): v} for k, v in visit_resolved.items() if detail["visit"].get(k)
+    }
+
+    meta = get_module_metadata(schema.VISITS_MODULE_ID)
     return render_template(
         "modules/visits/detail.html",
         visit=detail["visit"],
-        resolved=detail["resolved"],
-        lab_tests=detail["lab_tests"]
+        record=detail["visit"],
+        resolved=resolved,
+        lab_tests=detail["lab_tests"],
+        lookup_data=lookup_data,
+        **meta
     )
 
 
 @visits_bp.route("/<record_id>/edit", methods=["GET", "POST"])
 @login_required
-@role_required(*MODULE_EDIT["visits"])
+@role_required(*MODULE_EDIT.get("visits", ()))
 def visits_edit(record_id: str) -> typing.Any:
     """Handle visit editing."""
     detail: dict[str, typing.Any] | None = VisitService.get_visit_detail(record_id, current_user)
@@ -99,12 +120,14 @@ def visits_edit(record_id: str) -> typing.Any:
         return redirect(url_for("visits.visits_detail", record_id=record_id))
 
     form_ctx: dict[str, typing.Any] = VisitService.get_form_context()
+    meta = get_module_metadata(schema.VISITS_MODULE_ID)
     return render_template(
         "modules/visits/form.html",
         visit=detail["visit"],
+        record=detail["visit"],
         action="edit",
-        picklists=VisitService.get_picklists(),
-        **form_ctx
+        lookup_data=_build_lookup_data(form_ctx),
+        **meta
     )
 
 

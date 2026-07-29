@@ -4,6 +4,8 @@ from flask_login import login_required
 
 from app.auth.utils import admin_required
 from app.services.user_service import UserService
+from app.modules.routes_base import get_module_metadata
+from app.seed import schema
 
 users_bp = Blueprint("users", __name__, url_prefix="/users")
 
@@ -37,7 +39,8 @@ def users_create() -> typing.Any:
         flash("Staff member created successfully!", "success")
         return redirect(url_for("users.users_list"))
 
-    return render_template("modules/users/form.html", user=None, action="create")
+    meta = get_module_metadata(schema.USERS_MODULE_ID)
+    return render_template("modules/users/form.html", user=None, record=None, action="create", **meta)
 
 
 @users_bp.route("/<record_id>/edit", methods=["GET", "POST"])
@@ -55,7 +58,8 @@ def users_edit(record_id: str) -> typing.Any:
         flash("Staff member updated successfully!", "success")
         return redirect(url_for("users.users_list"))
 
-    return render_template("modules/users/form.html", user=detail["user"], action="edit")
+    meta = get_module_metadata(schema.USERS_MODULE_ID)
+    return render_template("modules/users/form.html", user=detail["user"], record=detail["user"], action="edit", **meta)
 
 
 @users_bp.route("/<record_id>/delete", methods=["POST"])

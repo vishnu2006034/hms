@@ -4,6 +4,8 @@ from flask_login import login_required, current_user
 
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 from app.services.laboratory_service import LaboratoryService
+from app.modules.routes_base import get_module_metadata
+from app.seed import schema
 
 laboratory_bp = Blueprint("laboratory", __name__, url_prefix="/laboratory")
 
@@ -30,9 +32,18 @@ def laboratory_list() -> typing.Any:
     )
 
 
+def _build_lookup_data(form_ctx: dict) -> dict:
+    return {
+        "patient_lookup": [(p.id, f"{p.data.get('first_name', '')} {p.data.get('last_name', '')} — {p.data.get('phone', '')}") for p in form_ctx.get("patients", [])],
+        "doctor_lookup": [(d.id, f"{d.data.get('full_name', '')} — {d.data.get('department', '')}") for d in form_ctx.get("doctors", [])],
+        "visit_lookup": [(v.id, f"{v.data.get('visit_date', '')[:10]} — {v.data.get('chief_complaint', '')[:40]}") for v in form_ctx.get("visits", [])],
+        "technician_lookup": [(t.id, f"{t.data.get('full_name', '')} — {t.data.get('role', '')}") for t in form_ctx.get("technicians", [])]
+    }
+
+
 @laboratory_bp.route("/create", methods=["GET", "POST"])
 @login_required
-@role_required(*MODULE_CREATE["laboratory"])
+@role_required(*MODULE_CREATE.get("laboratory", ()))
 def laboratory_create() -> typing.Any:
     """Handle lab test creation."""
     if request.method == "POST":
@@ -41,16 +52,18 @@ def laboratory_create() -> typing.Any:
             flash("Access denied: You are not assigned to this patient.", "danger")
             return redirect(url_for("laboratory.laboratory_list"))
 
-        flash("Lab test created successfully!", "success")
+        flash("Lab Test created successfully!", "success")
         return redirect(url_for("laboratory.laboratory_list"))
 
     form_ctx: dict[str, typing.Any] = LaboratoryService.get_form_context()
+    meta = get_module_metadata(schema.LABORATORY_MODULE_ID)
     return render_template(
         "modules/laboratory/form.html",
         test=None,
+        record=None,
         action="create",
-        picklists=LaboratoryService.get_picklists(),
-        **form_ctx
+        lookup_data=_build_lookup_data(form_ctx),
+        **meta
     )
 
 
@@ -60,32 +73,42 @@ def laboratory_detail(record_id: str) -> typing.Any:
     """View lab test details."""
     detail: dict[str, typing.Any] | None = LaboratoryService.get_test_detail(record_id, current_user)
     if detail is None:
-        flash("Lab test not found.", "danger")
+        flash("Test not found.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
 
     if detail.get("access_denied"):
-        flash("Access denied: You are not assigned to this lab test.", "danger")
+        flash("Access denied: You are not assigned to this test.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
 
+    resolved = detail.get("resolved", {})
+    test_resolved = resolved.get(record_id, {})
+    lookup_data = {
+        k: {detail["test"].get(k): v} for k, v in test_resolved.items() if detail["test"].get(k)
+    }
+
+    meta = get_module_metadata(schema.LABORATORY_MODULE_ID)
     return render_template(
         "modules/laboratory/detail.html",
         test=detail["test"],
-        resolved=detail["resolved"]
+        record=detail["test"],
+        resolved=resolved,
+        lookup_data=lookup_data,
+        **meta
     )
 
 
 @laboratory_bp.route("/<record_id>/edit", methods=["GET", "POST"])
 @login_required
-@role_required(*MODULE_EDIT["laboratory"])
+@role_required(*MODULE_EDIT.get("laboratory", ()))
 def laboratory_edit(record_id: str) -> typing.Any:
     """Handle lab test editing."""
     detail: dict[str, typing.Any] | None = LaboratoryService.get_test_detail(record_id, current_user)
     if detail is None:
-        flash("Lab test not found.", "danger")
+        flash("Test not found.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
 
     if detail.get("access_denied"):
-        flash("Access denied: You are not assigned to this lab test.", "danger")
+        flash("Access denied: You are not assigned to this test.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
 
     if request.method == "POST":
@@ -95,53 +118,65 @@ def laboratory_edit(record_id: str) -> typing.Any:
             return redirect(url_for("laboratory.laboratory_list"))
 
         if res and res.get("sent_to"):
-            flash(f"Lab test updated successfully! Report sent to: {', '.join(res['sent_to'])}", "success")
+            flash(f"Test updated successfully! Email notification sent to {res['sent_to']}", "success")
         else:
-            flash("Lab test updated successfully!", "success")
+            flash("Test updated successfully!", "success")
 
         return redirect(url_for("laboratory.laboratory_detail", record_id=record_id))
 
     form_ctx: dict[str, typing.Any] = LaboratoryService.get_form_context()
+    meta = get_module_metadata(schema.LABORATORY_MODULE_ID)
     return render_template(
         "modules/laboratory/form.html",
         test=detail["test"],
+        record=detail["test"],
         action="edit",
-        picklists=LaboratoryService.get_picklists(),
-        **form_ctx
+        lookup_data=_build_lookup_data(form_ctx),
+        **meta
     )
 
 
 @laboratory_bp.route("/<record_id>/result", methods=["GET", "POST"])
 @login_required
-@role_required(*MODULE_EDIT["laboratory"])
+@role_required('Admin', 'Technician')
 def laboratory_result(record_id: str) -> typing.Any:
-    """Submit test result and update status."""
+    """Submit test results (specialized view)."""
     detail: dict[str, typing.Any] | None = LaboratoryService.get_test_detail(record_id, current_user)
     if detail is None:
-        flash("Lab test not found.", "danger")
+        flash("Test not found.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
 
     if detail.get("access_denied"):
-        flash("Access denied: You are not assigned to this lab test.", "danger")
+        flash("Access denied: You are not assigned to this test.", "danger")
         return redirect(url_for("laboratory.laboratory_list"))
 
     if request.method == "POST":
         res: dict[str, typing.Any] | None = LaboratoryService.submit_result(record_id, request.form, current_user)
         if res and res.get("access_denied"):
-            flash("Access denied: You are not assigned to this lab test.", "danger")
+            flash("Access denied.", "danger")
             return redirect(url_for("laboratory.laboratory_list"))
 
         if res and res.get("sent_to"):
-            flash(f"Lab test result recorded! Report sent to: {', '.join(res['sent_to'])}", "success")
+            flash(f"Results submitted! Email notification sent to {res['sent_to']}", "success")
         else:
-            flash("Lab test result recorded successfully!", "success")
+            flash("Results submitted successfully!", "success")
 
         return redirect(url_for("laboratory.laboratory_detail", record_id=record_id))
 
+    resolved = detail.get("resolved", {})
+    test_resolved = resolved.get(record_id, {})
+    lookup_data = {
+        k: {detail["test"].get(k): v} for k, v in test_resolved.items() if detail["test"].get(k)
+    }
+
+    meta = get_module_metadata(schema.LABORATORY_MODULE_ID)
     return render_template(
-        "modules/laboratory/result_form.html",
+        "modules/laboratory/result.html",
         test=detail["test"],
-        resolved=detail["resolved"]
+        record=detail["test"],
+        resolved=resolved,
+        lookup_data=lookup_data,
+        **meta
     )
 
 

@@ -20,82 +20,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="row g-3">
-    <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    {{ patient.data.get('first_name', '') }} {{ patient.data.get('last_name', '') }}
-                    <span class="badge bg-light text-dark ms-2">PAT-{{ patient.id[:8] | upper }}</span>
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <strong>Age:</strong> {{ patient.data.get('age', '-') }}
-                    </div>
-                    <div class="col-md-4">
-                        <strong>Gender:</strong> {{ patient.data.get('gender', '-') }}
-                    </div>
-                    <div class="col-md-4">
-                        <strong>Date of Birth:</strong> {{ patient.data.get('date_of_birth', '-') }}
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Phone:</strong> {{ patient.data.get('phone', '-') }}
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Email:</strong> {{ patient.data.get('email', '-') }}
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Blood Group:</strong> <span class="badge bg-danger">{{ patient.data.get('blood_group',
-                            '-') }}</span>
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Status:</strong>
-                        {% set status = patient.data.get('status', 'Active') %}
-                        <span
-                            class="badge {% if status == 'Active' %}bg-success{% elif status == 'Discharged' %}bg-secondary{% elif status == 'Transferred' %}bg-warning{% else %}bg-dark{% endif %}">
-                            {{ status }}
-                        </span>
-                    </div>
-                    <div class="col-12">
-                        <strong>Address:</strong> {{ patient.data.get('address', '-') }}
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="card shadow-sm mb-3">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+            {{ patient.data.get('first_name', '') }} {{ patient.data.get('last_name', '') }}
+            <span class="badge bg-light text-dark ms-2">PAT-{{ patient.id[:8] | upper }}</span>
+        </h5>
     </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm mb-3">
-            <div class="card-header"><strong>Emergency Contact</strong></div>
-            <div class="card-body">
-                <p class="mb-1">{{ patient.data.get('emergency_contact', '-') }}</p>
-                <p class="mb-0">{{ patient.data.get('emergency_phone', '-') }}</p>
-            </div>
-        </div>
-        <div class="card shadow-sm mb-3">
-            <div class="card-header"><strong>Insurance</strong></div>
-            <div class="card-body">
-                <p class="mb-1">{{ patient.data.get('insurance_provider', '-') }}</p>
-                <p class="mb-0">ID: {{ patient.data.get('insurance_id', '-') }}</p>
-            </div>
-        </div>
-        <div class="card shadow-sm">
-            <div class="card-header"><strong>Medical</strong></div>
-            <div class="card-body">
-                <p class="mb-1"><strong>History:</strong> {{ patient.data.get('medical_history', '-') }}</p>
-                <p class="mb-0">
-                    <strong>Allergies:</strong> 
-                    {% set allergies = patient.data.get('allergies', '') %}
-                    {% if allergies %}
-                        {{ allergies.replace(',', ', ') }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </p>
-            </div>
-        </div>
+    <div class="card-body">
+        {% include 'components/dynamic_detail.html' %}
     </div>
+</div>
 
     {% if related_visits or related_prescriptions or related_lab_tests %}
     <div class="col-12 mt-3">

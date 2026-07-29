@@ -1,0 +1,33 @@
+<div class="row g-3">
+    {% if layout %}
+        {% for api_name in layout.field_order %}
+            {% set field = fields.get(api_name) %}
+            {% if field %}
+                {% if field.field_type.name != 'AUTO_NUMBER' %}
+                    <div class="col-md-{% if field.field_type.name in ('TEXT', 'MULTI_PICKLIST', 'EMAIL', 'URL') %}6{% else %}4{% endif %}">
+                        <strong>{{ field.label }}:</strong> 
+                        {% set val = record.data.get(api_name) %}
+                        {% if val is none or val == '' %}
+                            <span class="text-muted">-</span>
+                        {% else %}
+                            {% if field.field_type.name == 'LOOKUP' %}
+                                {% set lookup_dict = dict((lookup_data|default({})).get(api_name, [])) %}
+                                {{ lookup_dict.get(val, val) }}
+                            {% elif api_name == 'status' %}
+                                <span class="badge {% if val == 'Active' or val == 'Completed' or val == 'In-Stock' %}bg-success{% elif val == 'Cancelled' or val == 'Expired' %}bg-danger{% elif val == 'In-Progress' or val == 'Low-Stock' %}bg-warning{% else %}bg-secondary{% endif %}">{{ val }}</span>
+                            {% elif field.field_type.name == 'MULTI_PICKLIST' %}
+                                {{ val.replace(',', ', ') }}
+                            {% elif field.field_type.name == 'BOOLEAN' %}
+                                {% if val == 'true' or val == True %}Yes{% else %}No{% endif %}
+                            {% else %}
+                                {{ val }}
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <div class="col-12"><div class="alert alert-warning">No layout defined for this module.</div></div>
+    {% endif %}
+</div>

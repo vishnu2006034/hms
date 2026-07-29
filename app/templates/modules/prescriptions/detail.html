@@ -23,22 +23,7 @@
         </h5>
     </div>
     <div class="card-body">
-        <div class="row g-3">
-            <div class="col-md-4"><strong>Patient:</strong> {{ resolved.get(prescription.id, {}).get('patient_lookup', prescription.data.get('patient_lookup', '-')) }}</div>
-            <div class="col-md-4"><strong>Doctor:</strong> {{ resolved.get(prescription.id, {}).get('doctor_lookup', prescription.data.get('doctor_lookup', '-')) }}</div>
-            <div class="col-md-4"><strong>Visit:</strong> {{ resolved.get(prescription.id, {}).get('visit_lookup', prescription.data.get('visit_lookup', '-')) }}</div>
-            <div class="col-md-4"><strong>Prescribed Date:</strong> {{ prescription.data.get('prescribed_date', '-') }}</div>
-            <div class="col-md-4"><strong>Dosage:</strong> {{ prescription.data.get('dosage', '-') }}</div>
-            <div class="col-md-4"><strong>Frequency:</strong> {{ prescription.data.get('frequency', '-') }}</div>
-            <div class="col-md-4"><strong>Duration:</strong> {{ prescription.data.get('duration', '-') }}</div>
-            <div class="col-md-4"><strong>Refills:</strong> {{ prescription.data.get('refills', '0') }}</div>
-            <div class="col-md-4">
-                <strong>Status:</strong>
-                {% set status = prescription.data.get('status', 'Active') %}
-                <span class="badge {% if status == 'Active' %}bg-success{% elif status == 'Completed' %}bg-secondary{% elif status == 'Cancelled' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ status }}</span>
-            </div>
-            <div class="col-12"><strong>Instructions:</strong> {{ prescription.data.get('instructions', '-') }}</div>
-        </div>
+        {% include 'components/dynamic_detail.html' %}
     </div>
 </div>
 {% endblock %}
