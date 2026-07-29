@@ -4,6 +4,8 @@ from flask_login import login_required, current_user
 
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 from app.services.prescription_service import PrescriptionService
+from app.modules.routes_base import get_module_metadata
+from app.seed import schema
 
 prescriptions_bp = Blueprint("prescriptions", __name__, url_prefix="/prescriptions")
 
@@ -30,9 +32,17 @@ def prescriptions_list() -> typing.Any:
     )
 
 
+def _build_lookup_data(form_ctx: dict) -> dict:
+    return {
+        "patient_lookup": [(p.id, f"{p.data.get('first_name', '')} {p.data.get('last_name', '')} — {p.data.get('phone', '')}") for p in form_ctx.get("patients", [])],
+        "doctor_lookup": [(d.id, f"{d.data.get('full_name', '')} — {d.data.get('department', '')}") for d in form_ctx.get("doctors", [])],
+        "visit_lookup": [(v.id, f"{v.data.get('visit_date', '')[:10]} — {v.data.get('chief_complaint', '')[:40]}") for v in form_ctx.get("visits", [])]
+    }
+
+
 @prescriptions_bp.route("/create", methods=["GET", "POST"])
 @login_required
-@role_required(*MODULE_CREATE["prescriptions"])
+@role_required(*MODULE_CREATE.get("prescriptions", ()))
 def prescriptions_create() -> typing.Any:
     """Handle prescription creation."""
     if request.method == "POST":
@@ -45,12 +55,14 @@ def prescriptions_create() -> typing.Any:
         return redirect(url_for("prescriptions.prescriptions_list"))
 
     form_ctx: dict[str, typing.Any] = PrescriptionService.get_form_context()
+    meta = get_module_metadata(schema.PRESCRIPTIONS_MODULE_ID)
     return render_template(
         "modules/prescriptions/form.html",
         prescription=None,
+        record=None,
         action="create",
-        picklists=PrescriptionService.get_picklists(),
-        **form_ctx
+        lookup_data=_build_lookup_data(form_ctx),
+        **meta
     )
 
 
@@ -67,16 +79,26 @@ def prescriptions_detail(record_id: str) -> typing.Any:
         flash("Access denied: You are not assigned to this prescription.", "danger")
         return redirect(url_for("prescriptions.prescriptions_list"))
 
+    resolved = detail.get("resolved", {})
+    presc_resolved = resolved.get(record_id, {})
+    lookup_data = {
+        k: {detail["prescription"].get(k): v} for k, v in presc_resolved.items() if detail["prescription"].get(k)
+    }
+
+    meta = get_module_metadata(schema.PRESCRIPTIONS_MODULE_ID)
     return render_template(
         "modules/prescriptions/detail.html",
         prescription=detail["prescription"],
-        resolved=detail["resolved"]
+        record=detail["prescription"],
+        resolved=resolved,
+        lookup_data=lookup_data,
+        **meta
     )
 
 
 @prescriptions_bp.route("/<record_id>/edit", methods=["GET", "POST"])
 @login_required
-@role_required(*MODULE_EDIT["prescriptions"])
+@role_required(*MODULE_EDIT.get("prescriptions", ()))
 def prescriptions_edit(record_id: str) -> typing.Any:
     """Handle prescription editing."""
     detail: dict[str, typing.Any] | None = PrescriptionService.get_prescription_detail(record_id, current_user)
@@ -98,12 +120,14 @@ def prescriptions_edit(record_id: str) -> typing.Any:
         return redirect(url_for("prescriptions.prescriptions_detail", record_id=record_id))
 
     form_ctx: dict[str, typing.Any] = PrescriptionService.get_form_context()
+    meta = get_module_metadata(schema.PRESCRIPTIONS_MODULE_ID)
     return render_template(
         "modules/prescriptions/form.html",
         prescription=detail["prescription"],
+        record=detail["prescription"],
         action="edit",
-        picklists=PrescriptionService.get_picklists(),
-        **form_ctx
+        lookup_data=_build_lookup_data(form_ctx),
+        **meta
     )
 
 

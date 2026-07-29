@@ -4,6 +4,8 @@ from flask_login import login_required
 
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 from app.services.inventory_service import InventoryService
+from app.modules.routes_base import get_module_metadata
+from app.seed import schema
 
 inventory_bp = Blueprint("inventory", __name__, url_prefix="/inventory")
 
@@ -31,7 +33,7 @@ def inventory_list() -> typing.Any:
 
 @inventory_bp.route("/create", methods=["GET", "POST"])
 @login_required
-@role_required(*MODULE_CREATE["inventory"])
+@role_required(*MODULE_CREATE.get("inventory", ()))
 def inventory_create() -> typing.Any:
     """Handle inventory item creation."""
     if request.method == "POST":
@@ -39,11 +41,13 @@ def inventory_create() -> typing.Any:
         flash("Inventory item created successfully!", "success")
         return redirect(url_for("inventory.inventory_list"))
 
+    meta = get_module_metadata(schema.INVENTORY_MODULE_ID)
     return render_template(
         "modules/inventory/form.html",
         item=None,
+        record=None,
         action="create",
-        picklists=InventoryService.get_picklists()
+        **meta
     )
 
 
@@ -56,12 +60,18 @@ def inventory_detail(record_id: str) -> typing.Any:
         flash("Item not found.", "danger")
         return redirect(url_for("inventory.inventory_list"))
 
-    return render_template("modules/inventory/detail.html", item=detail["item"])
+    meta = get_module_metadata(schema.INVENTORY_MODULE_ID)
+    return render_template(
+        "modules/inventory/detail.html", 
+        item=detail["item"],
+        record=detail["item"],
+        **meta
+    )
 
 
 @inventory_bp.route("/<record_id>/edit", methods=["GET", "POST"])
 @login_required
-@role_required(*MODULE_EDIT["inventory"])
+@role_required(*MODULE_EDIT.get("inventory", ()))
 def inventory_edit(record_id: str) -> typing.Any:
     """Handle inventory item editing."""
     detail: dict[str, typing.Any] | None = InventoryService.get_item_detail(record_id)
@@ -74,11 +84,13 @@ def inventory_edit(record_id: str) -> typing.Any:
         flash("Inventory item updated successfully!", "success")
         return redirect(url_for("inventory.inventory_detail", record_id=record_id))
 
+    meta = get_module_metadata(schema.INVENTORY_MODULE_ID)
     return render_template(
         "modules/inventory/form.html",
         item=detail["item"],
+        record=detail["item"],
         action="edit",
-        picklists=InventoryService.get_picklists()
+        **meta
     )
 
 

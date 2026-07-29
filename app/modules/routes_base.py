@@ -9,9 +9,36 @@ from hogc.lib.contracts.crud.requests import (
     ListModulesRequest, GetRecordRequest, DeleteRecordRequest,
     ListFieldsRequest, GetPicklistOptionsRequest,
     LinkRecordsRequest, UnlinkRecordsRequest, GetRelatedRecordsRequest, ListRelationshipsForRecordRequest,
+    ListLayoutsRequest,
 )
 
 from app.config import Config
+
+
+def get_module_metadata(module_id: str) -> dict[str, typing.Any]:
+    """Fetch layout, fields, and picklists for a module to dynamically render forms."""
+    ctx = _ctx()
+    
+    # 1. Fetch Fields
+    fields_resp = HOGC.crud.field.list(ListFieldsRequest(context=ctx, module_id=module_id))
+    fields_list = fields_resp.items if fields_resp and fields_resp.items else []
+    fields = {f.api_name: f for f in fields_list}
+    
+    # 2. Fetch Layout
+    layout_resp = HOGC.crud.layout.list(ListLayoutsRequest(context=ctx, module_id=module_id))
+    layout = None
+    if layout_resp and layout_resp.items:
+        layout = layout_resp.items[0]
+        
+    # 3. Fetch Picklists
+    picklist_fields = [f.api_name for f in fields_list if getattr(f, 'field_type', None) and 'picklist' in str(f.field_type).lower()]
+    picklists = _get_picklist_options(module_id, *picklist_fields)
+    
+    return {
+        "layout": layout,
+        "fields": fields,
+        "picklists": picklists
+    }
 
 
 def _ctx() -> RequestContext:

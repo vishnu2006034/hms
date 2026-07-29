@@ -12,6 +12,13 @@ from hogc.lib.contracts.crud.requests import CreateRecordRequest, UpdateRecordRe
 class PatientService:
     """Business service layer for Managing Patient records and relationships using HOGC facade."""
 
+    @classmethod
+    def get_doctors(cls) -> list:
+        """Fetch users with the Doctor role."""
+        from app.services.user_service import UserService
+        res = UserService.list_users(page_size=100)
+        return [u for u in res.get("users", []) if u.data.get("role") == "Doctor"]
+
     @staticmethod
     def get_picklists() -> dict[str, list[tuple[str, str]]]:
         """Fetch live picklist options for patient form."""

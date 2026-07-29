@@ -4,6 +4,8 @@ from flask_login import login_required, current_user
 
 from app.auth.utils import MODULE_CREATE, MODULE_EDIT, MODULE_DELETE, role_required
 from app.services.patient_service import PatientService
+from app.modules.routes_base import get_module_metadata
+from app.seed import schema
 
 patients_bp = Blueprint("patients", __name__, url_prefix="/patients")
 
@@ -36,11 +38,16 @@ def patients_create() -> typing.Any:
         flash("Patient created successfully!", "success")
         return redirect(url_for("patients.patients_list"))
 
+    meta = get_module_metadata(schema.PATIENTS_MODULE_ID)
+    doctors = PatientService.get_doctors()
+    lookup_data = {"assigned_doctor": [(d.id, d.data.get("full_name", "")) for d in doctors]}
     return render_template(
         "modules/patients/form.html",
         patient=None,
+        record=None,
         action="create",
-        picklists=PatientService.get_picklists()
+        lookup_data=lookup_data,
+        **meta
     )
 
 
@@ -57,12 +64,18 @@ def patients_detail(record_id: str) -> typing.Any:
         flash("Access denied: You are not assigned to this patient.", "danger")
         return redirect(url_for("patients.patients_list"))
 
+    meta = get_module_metadata(schema.PATIENTS_MODULE_ID)
+    doctors = PatientService.get_doctors()
+    lookup_data = {"assigned_doctor": [(d.id, d.data.get("full_name", "")) for d in doctors]}
     return render_template(
         "modules/patients/detail.html",
         patient=detail["patient"],
+        record=detail["patient"],
         related_visits=detail["related_visits"],
         related_prescriptions=detail["related_prescriptions"],
-        related_lab_tests=detail["related_lab_tests"]
+        related_lab_tests=detail["related_lab_tests"],
+        lookup_data=lookup_data,
+        **meta
     )
 
 
@@ -89,11 +102,16 @@ def patients_edit(record_id: str) -> typing.Any:
         flash("Patient updated successfully!", "success")
         return redirect(url_for("patients.patients_detail", record_id=record_id))
 
+    meta = get_module_metadata(schema.PATIENTS_MODULE_ID)
+    doctors = PatientService.get_doctors()
+    lookup_data = {"assigned_doctor": [(d.id, d.data.get("full_name", "")) for d in doctors]}
     return render_template(
         "modules/patients/form.html",
         patient=edit_data["patient"],
+        record=edit_data["patient"],
         action="edit",
-        picklists=edit_data["picklists"]
+        lookup_data=lookup_data,
+        **meta
     )
 
 

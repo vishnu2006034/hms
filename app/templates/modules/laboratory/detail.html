@@ -25,28 +25,7 @@
                 </h5>
             </div>
             <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-4"><strong>Patient:</strong> {{ resolved.get(test.id, {}).get('patient_lookup', test.data.get('patient_lookup', '-')) }}</div>
-                    <div class="col-md-4"><strong>Doctor:</strong> {{ resolved.get(test.id, {}).get('doctor_lookup', test.data.get('doctor_lookup', '-')) }}</div>
-                    <div class="col-md-4"><strong>Visit:</strong> {{ resolved.get(test.id, {}).get('visit_lookup', test.data.get('visit_lookup', '-')) }}</div>
-                    <div class="col-md-4"><strong>Test Type:</strong> <span class="badge bg-info">{{ test.data.get('test_type', '-') }}</span></div>
-                    <div class="col-md-4">
-                        <strong>Priority:</strong>
-                        {% set pri = test.data.get('priority', 'Routine') %}
-                        <span class="badge {% if pri == 'Emergency' %}bg-danger{% elif pri == 'Urgent' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ pri }}</span>
-                    </div>
-                    <div class="col-md-4">
-                        <strong>Status:</strong>
-                        {% set status = test.data.get('status', 'Ordered') %}
-                        <span class="badge {% if status == 'Completed' %}bg-success{% elif status == 'In Progress' %}bg-warning text-dark{% elif status == 'Cancelled' %}bg-danger{% elif status == 'Sample Collected' %}bg-info{% else %}bg-primary{% endif %}">{{ status }}</span>
-                    </div>
-                    <div class="col-md-6"><strong>Sample Date:</strong> {{ test.data.get('sample_date', '-') }}</div>
-                    <div class="col-md-6"><strong>Result Date:</strong> {{ test.data.get('result_date', '-') }}</div>
-                    <div class="col-md-6"><strong>Technician:</strong> {{ resolved.get(test.id, {}).get('technician_lookup', test.data.get('technician_lookup', '-')) }}</div>
-                    <div class="col-md-6"><strong>Reference Range:</strong> {{ test.data.get('reference_range', '-') }}</div>
-                    <div class="col-12"><strong>Result Value:</strong> {{ test.data.get('result_value', '-') }}</div>
-                    <div class="col-12"><strong>Notes:</strong> {{ test.data.get('notes', '-') }}</div>
-                </div>
+                {% include 'components/dynamic_detail.html' %}
             </div>
         </div>
     </div>
