@@ -20,10 +20,10 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Doctor *</label>
-                    <select class="form-select" name="doctor_lookup" required>
-                        <option value="">Select Doctor...</option>
+                    <select class="form-select" name="doctor_lookup" required id="doctorSelect">
+                        <option value="" data-department="">Select Doctor...</option>
                         {% for d in doctors %}
-                        <option value="{{ d.id }}" {{ 'selected' if visit and visit.data.get('doctor_lookup') == d.id }}>
+                        <option value="{{ d.id }}" data-department="{{ d.data.get('department', '') }}" {{ 'selected' if visit and visit.data.get('doctor_lookup') == d.id }}>
                             {{ d.data.get('full_name', '') }} — {{ d.data.get('department', '') }}
                         </option>
                         {% endfor %}
@@ -35,8 +35,8 @@
                            value="{{ visit.data.get('visit_date', '') if visit else '' }}">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Department *</label>
-                    <select class="form-select" name="department" required>
+                    <label class="form-label">Department (Auto-assigned)</label>
+                    <select class="form-select" id="departmentSelect" disabled>
                         <option value="">Select...</option>
                         {% for value, label in picklists.get('department', []) %}
                         <option value="{{ value }}" {{ 'selected' if visit and visit.data.get('department') == value }}>{{ label }}</option>
@@ -112,4 +112,34 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const doctorSelect = document.getElementById('doctorSelect');
+    const departmentSelect = document.getElementById('departmentSelect');
+
+    function updateDepartment() {
+        if (!doctorSelect || !departmentSelect) return;
+        const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
+        const dept = selectedOption.getAttribute('data-department');
+        
+        if (dept) {
+            for (let i = 0; i < departmentSelect.options.length; i++) {
+                if (departmentSelect.options[i].value === dept) {
+                    departmentSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        } else {
+            departmentSelect.selectedIndex = 0;
+        }
+    }
+
+    if (doctorSelect) {
+        doctorSelect.addEventListener('change', updateDepartment);
+        // Run once on load to handle pre-selected doctors (e.g. on edit)
+        updateDepartment();
+    }
+});
+</script>
 {% endblock %}

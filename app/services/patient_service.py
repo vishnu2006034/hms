@@ -106,7 +106,7 @@ class PatientService:
     @classmethod
     def create_patient(cls, form_data: dict[str, typing.Any]) -> typing.Any:
         """Create a new patient record using HOGC facade."""
-        data: dict[str, str] = {
+        raw_data: dict[str, str] = {
             "first_name": form_data.get("first_name", ""),
             "last_name": form_data.get("last_name", ""),
             "age": form_data.get("age", ""),
@@ -124,6 +124,7 @@ class PatientService:
             "allergies": ",".join(form_data.getlist("allergies")) if hasattr(form_data, "getlist") else form_data.get("allergies", ""),
             "status": form_data.get("status", "Active"),
         }
+        data = {k: (v if v != "" else None) for k, v in raw_data.items()}
         req = CreateRecordRequest(context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, data=data)
         return HOGC.crud.record.create(req)
 
@@ -137,7 +138,7 @@ class PatientService:
         if not AuthorizationService.can_access_patient(current_user, resp.data):
             return {"access_denied": True}
 
-        data: dict[str, str] = {
+        raw_data: dict[str, str] = {
             "first_name": form_data.get("first_name", ""),
             "last_name": form_data.get("last_name", ""),
             "age": form_data.get("age", ""),
@@ -155,6 +156,7 @@ class PatientService:
             "allergies": ",".join(form_data.getlist("allergies")) if hasattr(form_data, "getlist") else form_data.get("allergies", ""),
             "status": form_data.get("status", "Active"),
         }
+        data = {k: (v if v != "" else None) for k, v in raw_data.items()}
         req = UpdateRecordRequest(context=_ctx(), module_id=schema.PATIENTS_MODULE_ID, record_id=record_id, data=data)
         updated = HOGC.crud.record.update(req)
         return {"updated": updated}

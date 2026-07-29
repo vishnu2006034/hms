@@ -63,19 +63,19 @@ def _seed_default_data(module_ids):
 
     staff_data = [
         {"full_name": "Dr. Sarah Johnson", "email": "sarah.johnson@hospital.com",
-         "phone": "+1-555-0101", "role": "Doctor", "department": "Cardiology", "is_active": "true",
+         "phone": "+911234567891", "role": "Doctor", "department": "Cardiology", "is_active": "true",
          "username": "sarah.johnson", "password": "password123"},
         {"full_name": "Dr. James Patel", "email": "james.patel@hospital.com",
-         "phone": "+1-555-0102", "role": "Doctor", "department": "Neurology", "is_active": "true",
+         "phone": "+919876543210", "role": "Doctor", "department": "Neurology", "is_active": "true",
          "username": "james.patel", "password": "password123"},
         {"full_name": "Dr. Emily Chen", "email": "emily.chen@hospital.com",
-         "phone": "+1-555-0103", "role": "Doctor", "department": "Pediatrics", "is_active": "true",
+         "phone": "+919876543211", "role": "Doctor", "department": "Pediatrics", "is_active": "true",
          "username": "emily.chen", "password": "password123"},
         {"full_name": "Dr. Robert Williams", "email": "robert.williams@hospital.com",
-         "phone": "+1-555-0104", "role": "Doctor", "department": "Orthopedics", "is_active": "true",
+         "phone": "+919876543212", "role": "Doctor", "department": "Orthopedics", "is_active": "true",
          "username": "robert.williams", "password": "password123"},
         {"full_name": "Linda Davis", "email": "linda.davis@hospital.com",
-         "phone": "+1-555-0105", "role": "Nurse", "department": "General", "is_active": "true",
+         "phone": "+919876543213", "role": "Nurse", "department": "General", "is_active": "true",
          "username": "linda.davis", "password": "password123"},
     ]
 

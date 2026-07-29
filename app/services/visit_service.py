@@ -92,11 +92,10 @@ class VisitService:
     @classmethod
     def create_visit(cls, form_data: dict[str, typing.Any], current_user: typing.Any) -> dict[str, typing.Any]:
         """Create a new visit record using HOGC facade and link relationship."""
-        data: dict[str, str] = {
+        raw_data: dict[str, str] = {
             "patient_lookup": form_data.get("patient_lookup", ""),
             "doctor_lookup": form_data.get("doctor_lookup", ""),
             "visit_date": form_data.get("visit_date", ""),
-            "department": form_data.get("department", ""),
             "chief_complaint": form_data.get("chief_complaint", ""),
             "symptoms": ",".join(form_data.getlist("symptoms")) if hasattr(form_data, "getlist") else form_data.get("symptoms", ""),
             "diagnosis": form_data.get("diagnosis", ""),
@@ -109,8 +108,16 @@ class VisitService:
             "notes": form_data.get("notes", ""),
         }
 
+        doctor_id = current_user.hogc_record_id if current_user.role == "Doctor" else raw_data["doctor_lookup"]
+        if doctor_id:
+            doctor_rec = _get_record(schema.USERS_MODULE_ID, doctor_id)
+            if doctor_rec and getattr(doctor_rec, "data", None) and isinstance(getattr(doctor_rec.data, "data", None), dict):
+                raw_data["department"] = doctor_rec.data.data.get("department", "")
+
+        data = {k: (v if v != "" else None) for k, v in raw_data.items()}
+
         if current_user.role == "Doctor":
-            patient_record = _get_record(schema.PATIENTS_MODULE_ID, data["patient_lookup"])
+            patient_record = _get_record(schema.PATIENTS_MODULE_ID, raw_data["patient_lookup"])
             if patient_record.data and not AuthorizationService.can_access_patient(current_user, patient_record.data):
                 return {"access_denied": True}
             data["doctor_lookup"] = current_user.hogc_record_id
@@ -131,11 +138,10 @@ class VisitService:
         if not AuthorizationService.can_access_visit(current_user, resp.data):
             return {"access_denied": True}
 
-        data: dict[str, str] = {
+        raw_data: dict[str, str] = {
             "patient_lookup": form_data.get("patient_lookup", ""),
             "doctor_lookup": form_data.get("doctor_lookup", ""),
             "visit_date": form_data.get("visit_date", ""),
-            "department": form_data.get("department", ""),
             "chief_complaint": form_data.get("chief_complaint", ""),
             "symptoms": ",".join(form_data.getlist("symptoms")) if hasattr(form_data, "getlist") else form_data.get("symptoms", ""),
             "diagnosis": form_data.get("diagnosis", ""),
@@ -148,8 +154,16 @@ class VisitService:
             "notes": form_data.get("notes", ""),
         }
 
+        doctor_id = current_user.hogc_record_id if current_user.role == "Doctor" else raw_data["doctor_lookup"]
+        if doctor_id:
+            doctor_rec = _get_record(schema.USERS_MODULE_ID, doctor_id)
+            if doctor_rec and getattr(doctor_rec, "data", None) and isinstance(getattr(doctor_rec.data, "data", None), dict):
+                raw_data["department"] = doctor_rec.data.data.get("department", "")
+
+        data = {k: (v if v != "" else None) for k, v in raw_data.items()}
+
         if current_user.role == "Doctor":
-            patient_record = _get_record(schema.PATIENTS_MODULE_ID, data["patient_lookup"])
+            patient_record = _get_record(schema.PATIENTS_MODULE_ID, raw_data["patient_lookup"])
             if patient_record.data and not AuthorizationService.can_access_patient(current_user, patient_record.data):
                 return {"access_denied": True}
             data["doctor_lookup"] = current_user.hogc_record_id
