@@ -3,7 +3,7 @@ from app.modules.routes_base import _ctx
 from hogc.lib import HOGC
 from hogc.lib.contracts.crud.requests import ListLayoutsRequest, GetLayoutRequest
 
-class LayoutServiceImpl:
+class LayoutAppService:
     """Service to handle layout operations using the HOGC CRUD engine."""
 
     @classmethod

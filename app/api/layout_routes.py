@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify
 from hogc.lib import HOGC
+from hogc.lib.contracts.crud.requests import ListLayoutsRequest
+from app.modules.routes_base import _ctx
 
 
 layout_api_bp = Blueprint("layout_api", __name__, url_prefix="/api/layouts")
@@ -8,7 +10,7 @@ layout_api_bp = Blueprint("layout_api", __name__, url_prefix="/api/layouts")
 def get_layouts(module_id: str):
     """Get the layouts for a specific module."""
     try:
-        layouts_resp = HOGC.crud.layout.list_layouts_for_module(module_id)
+        layouts_resp = HOGC.crud.layout.list(ListLayoutsRequest(context=_ctx(), module_id=module_id))
         
         items = []
         if layouts_resp and hasattr(layouts_resp, 'items'):

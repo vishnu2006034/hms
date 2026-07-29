@@ -18,4 +18,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-hogc-crud-engine = { git = "https://github.com/HOGC-IN/hogc-crud-engine.git", branch = "intern" }
+hogc-crud-engine = { git = "https://github.com/HOGC-IN/hogc-crud-engine.git" }
