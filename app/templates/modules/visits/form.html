@@ -20,13 +20,21 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const doctorSelect = document.getElementById('doctorSelect');
-    const departmentSelect = document.getElementById('departmentSelect');
+    const doctorSelect = document.querySelector('select[name="doctor_lookup"]');
+    const departmentSelect = document.querySelector('select[name="department"]');
 
     function updateDepartment() {
         if (!doctorSelect || !departmentSelect) return;
         const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
-        const dept = selectedOption.getAttribute('data-department');
+        
+        let dept = null;
+        if (selectedOption && selectedOption.value) {
+            // Extract department from the label "Name — Department"
+            const parts = selectedOption.text.split(' — ');
+            if (parts.length > 1) {
+                dept = parts[parts.length - 1].trim();
+            }
+        }
         
         if (dept) {
             for (let i = 0; i < departmentSelect.options.length; i++) {
