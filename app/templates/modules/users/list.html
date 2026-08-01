@@ -42,9 +42,9 @@
                     </td>
                     <td>{{ u.data.get('department', '-') }}</td>
                     <td>
-                        {% set active = u.data.get('is_active', 'true') %}
-                        <span class="badge {% if active == 'true' %}bg-success{% else %}bg-secondary{% endif %}">
-                            {{ 'Active' if active == 'true' else 'Inactive' }}
+                        {% set active = u.data.get('is_active', True) %}
+                        <span class="badge {% if active == 'true' or active == True %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ 'Active' if active == 'true' or active == True else 'Inactive' }}
                         </span>
                     </td>
                     <td>

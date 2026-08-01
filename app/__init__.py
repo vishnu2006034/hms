@@ -34,6 +34,21 @@ def create_app(config_name="default"):
     # Register template utility for formatting auto_number IDs
     app.jinja_env.globals["fmt_auto_id"] = _fmt_auto_id
 
+    from flask import request, jsonify
+    from hogc.lib.kernel.errors import ValidationError
+    
+    @app.errorhandler(ValidationError)
+    def handle_validation_error(e):
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest" or "application/json" in request.headers.get("Accept", ""):
+            return jsonify({
+                "success": False,
+                "errors": e.field_errors or {"_general": [e.message]}
+            }), 422
+        return jsonify({
+            "success": False,
+            "errors": e.field_errors or {"_general": [e.message]}
+        }), 422
+
     with app.app_context():
         init_crud(app.config["SQLALCHEMY_DATABASE_URI"])
 

@@ -14,7 +14,8 @@
                 {% else %}
                     <div class="col-md-{% if field.field_type.name in ('TEXT', 'MULTI_PICKLIST', 'LOOKUP', 'EMAIL') %}6{% else %}3{% endif %}">
                         <label class="form-label">{{ field.label }} {% if field.is_required %}*{% endif %}</label>
-                        {% set val = record.data.get(api_name, '') if record else '' %}
+                        {% set raw_val = record.data.get(api_name) if record else none %}
+                        {% set val = raw_val if raw_val is not none else '' %}
                         
                         {% if field.field_type.name == 'TEXT' %}
                             {% if field.max_length and field.max_length > 100 %}

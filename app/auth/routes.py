@@ -34,15 +34,18 @@ def login() -> typing.Any:
     form: LoginForm = LoginForm()
     if form.validate_on_submit():
         user: typing.Optional[AuthUser] = AuthUser.query.filter_by(username=form.username.data).first()
-        if user and user.check_password(form.password.data) and user.is_active:
-            login_user(user, remember=form.remember.data)
-            next_page: typing.Optional[str] = request.args.get("next")
-            flash("Logged in successfully!", "success")
-            if next_page:
-                return redirect(next_page)
-            return redirect(url_for("main.dashboard"))
-        
-        flash("Invalid username or password.", "danger")
+        if user and user.check_password(form.password.data):
+            if not user.is_active:
+                flash("You are inactive. Contact the admin.", "danger")
+            else:
+                login_user(user, remember=form.remember.data)
+                next_page: typing.Optional[str] = request.args.get("next")
+                flash("Logged in successfully!", "success")
+                if next_page:
+                    return redirect(next_page)
+                return redirect(url_for("main.dashboard"))
+        else:
+            flash("Invalid username or password.", "danger")
         
     return render_template("auth/login.html", form=form)
 

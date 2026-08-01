@@ -51,6 +51,12 @@ class UserService:
         role = form_data.get("role", "Doctor")
         password = form_data.get("password", "password123")
 
+        from hogc.lib.kernel.errors import ValidationError
+        if AuthUser.query.filter_by(username=username).first():
+            raise ValidationError("Username already exists.", field_errors={"username": ["Username already exists."]})
+        if AuthUser.query.filter_by(email=email).first():
+            raise ValidationError("Email already exists.", field_errors={"email": ["Email already exists."]})
+
         auth_user = AuthUser(username=username, email=email, full_name=full_name, role=role)
         auth_user.set_password(password)
         db.session.add(auth_user)
@@ -62,12 +68,13 @@ class UserService:
             "phone": form_data.get("phone", ""),
             "role": role,
             "department": form_data.get("department", ""),
-            "is_active": "true",
+            "is_active": "true" if "is_active" in form_data else "false",
         }
         resp = HOGC.crud.record.create(CreateRecordRequest(
             context=_ctx(), module_id=schema.USERS_MODULE_ID, data=data
         ))
         auth_user.hogc_record_id = resp.data.id
+        auth_user.is_active_user = (data["is_active"] == "true")
         db.session.commit()
         return {"auth_user": auth_user, "record": resp.data}
 
@@ -84,11 +91,18 @@ class UserService:
             "phone": form_data.get("phone", ""),
             "role": form_data.get("role", ""),
             "department": form_data.get("department", ""),
-            "is_active": form_data.get("is_active", "true"),
+            "is_active": "true" if "is_active" in form_data else "false",
         }
         updated = HOGC.crud.record.update(UpdateRecordRequest(
             context=_ctx(), module_id=schema.USERS_MODULE_ID, record_id=record_id, data=data
         ))
+        
+        # Sync the is_active_user status to the AuthUser model
+        auth_user = AuthUser.query.filter_by(hogc_record_id=record_id).first()
+        if auth_user:
+            auth_user.is_active_user = (data["is_active"] == "true")
+            db.session.commit()
+            
         return {"updated": updated}
 
     @classmethod
