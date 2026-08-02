@@ -27,9 +27,17 @@ class AuthorizationService:
 
     @classmethod
     def can_access_patient(cls, user, patient_record) -> bool:
-        if cls._check_doctor_ownership(user, patient_record, "assigned_doctor"):
+        """Allow access if the doctor is in the patient's assigned_doctors list, or has a related visit."""
+        if user.role != "Doctor":
             return True
-            
+
+        hogc_id = getattr(user, "hogc_record_id", None)
+        if hogc_id:
+            assigned_raw = patient_record.data.get("assigned_doctors") or ""
+            assigned_ids = [i.strip() for i in assigned_raw.split(",") if i.strip()]
+            if hogc_id in assigned_ids:
+                return True
+
         if user.role == "Doctor":
             from app.config import Config
             from app.seed import schema

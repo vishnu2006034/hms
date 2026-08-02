@@ -40,13 +40,14 @@ def patients_create() -> typing.Any:
 
     meta = get_module_metadata(schema.PATIENTS_MODULE_ID)
     doctors = PatientService.get_doctors()
-    lookup_data = {"assigned_doctor": [(d.id, d.data.get("full_name", "")) for d in doctors]}
+    lookup_data = {"assigned_doctors": [(d.id, d.data.get("full_name", "")) for d in doctors]}
     return render_template(
         "modules/patients/form.html",
         patient=None,
         record=None,
         action="create",
         lookup_data=lookup_data,
+        current_doctor_ids=[],
         **meta
     )
 
@@ -66,7 +67,7 @@ def patients_detail(record_id: str) -> typing.Any:
 
     meta = get_module_metadata(schema.PATIENTS_MODULE_ID)
     doctors = PatientService.get_doctors()
-    lookup_data = {"assigned_doctor": [(d.id, d.data.get("full_name", "")) for d in doctors]}
+    lookup_data = {"assigned_doctors": [(d.id, d.data.get("full_name", "")) for d in doctors]}
     return render_template(
         "modules/patients/detail.html",
         patient=detail["patient"],
@@ -74,6 +75,7 @@ def patients_detail(record_id: str) -> typing.Any:
         related_visits=detail["related_visits"],
         related_prescriptions=detail["related_prescriptions"],
         related_lab_tests=detail["related_lab_tests"],
+        related_doctors=detail["related_doctors"],
         lookup_data=lookup_data,
         **meta
     )
@@ -104,13 +106,14 @@ def patients_edit(record_id: str) -> typing.Any:
 
     meta = get_module_metadata(schema.PATIENTS_MODULE_ID)
     doctors = PatientService.get_doctors()
-    lookup_data = {"assigned_doctor": [(d.id, d.data.get("full_name", "")) for d in doctors]}
+    lookup_data = {"assigned_doctors": [(d.id, d.data.get("full_name", "")) for d in doctors]}
     return render_template(
         "modules/patients/form.html",
         patient=edit_data["patient"],
         record=edit_data["patient"],
         action="edit",
         lookup_data=lookup_data,
+        current_doctor_ids=edit_data.get("current_doctor_ids", []),
         **meta
     )
 

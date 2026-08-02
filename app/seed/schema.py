@@ -28,6 +28,7 @@ VISITS_LABORATORY_REL_ID = None
 PATIENTS_PRESCRIPTIONS_REL_ID = None
 PATIENTS_LABORATORY_REL_ID = None
 USERS_VISITS_REL_ID = None
+PATIENTS_DOCTORS_REL_ID = None
 
 
 def _ctx():
@@ -92,29 +93,7 @@ def _create_layout(module_id, name, field_order, is_default=False):
     return resp.data.id
 
 
-def _create_relationship(from_module_id, to_module_id, rel_type, from_field="", to_field=""):
-    session = extensions.SessionLocal()
-    try:
-        rel = RelationshipDefinition(
-            tenant_id=Config.HOGC_TENANT_ID,
-            org_id=Config.HOGC_ORG_ID,
-            from_module_id=from_module_id,
-            to_module_id=to_module_id,
-            relationship_type=rel_type,
-            from_field_name=from_field,
-            to_field_name=to_field,
-            cascade_delete=False,
-        )
-        session.add(rel)
-        session.flush()
-        rel_id = rel.id
-        session.commit()
-        return rel_id
-    except Exception:
-        session.rollback()
-        return None
-    finally:
-        session.close()
+
 
 
 def _seed_users_module():
@@ -145,7 +124,7 @@ def _seed_patients_module():
         _add_picklist(gender_id, val, lbl, order=i)
     _create_field(PATIENTS_MODULE_ID, "Phone", "phone", FieldType.PHONE, "Phone", is_required=True)
     _create_field(PATIENTS_MODULE_ID, "Email", "email", FieldType.EMAIL, "Email")
-    _create_field(PATIENTS_MODULE_ID, "Assigned Doctor", "assigned_doctor", FieldType.LOOKUP, "Assigned Doctor", lookup_module_id=USERS_MODULE_ID)
+    _create_field(PATIENTS_MODULE_ID, "Assigned Doctors", "assigned_doctors", FieldType.MULTI_LOOKUP, "Assigned Doctors", lookup_module_id=USERS_MODULE_ID)
     _create_field(PATIENTS_MODULE_ID, "Address", "address", FieldType.TEXT, "Address")
     bg_id = _create_field(PATIENTS_MODULE_ID, "Blood Group", "blood_group", FieldType.PICKLIST, "Blood Group")
     for i, (val, lbl) in enumerate([("A+", "A+"), ("A-", "A-"), ("B+", "B+"), ("B-", "B-"),
@@ -288,22 +267,14 @@ def _seed_layouts():
     global INVENTORY_MODULE_ID, PRESCRIPTIONS_MODULE_ID, LABORATORY_MODULE_ID
 
     _create_layout(USERS_MODULE_ID, "Standard Layout", ["full_name", "email", "phone", "role", "department", "is_active"], True)
-    _create_layout(PATIENTS_MODULE_ID, "Standard Layout", ["patient_id", "first_name", "last_name", "age", "date_of_birth", "gender", "phone", "email", "assigned_doctor", "address", "blood_group", "emergency_contact", "emergency_phone", "insurance_provider", "insurance_id", "medical_history", "allergies", "status"], True)
+    _create_layout(PATIENTS_MODULE_ID, "Standard Layout", ["patient_id", "first_name", "last_name", "age", "date_of_birth", "gender", "phone", "email", "assigned_doctors", "address", "blood_group", "emergency_contact", "emergency_phone", "insurance_provider", "insurance_id", "medical_history", "allergies", "status"], True)
     _create_layout(VISITS_MODULE_ID, "Standard Layout", ["visit_id", "patient_lookup", "doctor_lookup", "visit_date", "department", "chief_complaint", "diagnosis", "symptoms", "treatment", "vitals_bp", "vitals_temp", "vitals_pulse", "vitals_weight", "status", "notes"], True)
     _create_layout(INVENTORY_MODULE_ID, "Standard Layout", ["item_id", "item_name", "category", "description", "quantity", "unit", "unit_price", "supplier", "reorder_level", "expiry_date", "batch_number", "location", "status"], True)
     _create_layout(PRESCRIPTIONS_MODULE_ID, "Standard Layout", ["prescription_id", "patient_lookup", "doctor_lookup", "visit_lookup", "prescribed_date", "medication_name", "dosage", "frequency", "duration", "instructions", "refills", "status"], True)
     _create_layout(LABORATORY_MODULE_ID, "Standard Layout", ["test_id", "patient_lookup", "doctor_lookup", "visit_lookup", "test_name", "test_type", "priority", "sample_date", "result_date", "result_value", "reference_range", "status", "notes", "technician_lookup"], True)
 
 
-def _seed_relationships():
-    global PATIENTS_VISITS_REL_ID, VISITS_PRESCRIPTIONS_REL_ID, VISITS_LABORATORY_REL_ID
-    global PATIENTS_PRESCRIPTIONS_REL_ID, PATIENTS_LABORATORY_REL_ID, USERS_VISITS_REL_ID
-    PATIENTS_VISITS_REL_ID = _create_relationship(PATIENTS_MODULE_ID, VISITS_MODULE_ID, "one_to_many")
-    VISITS_PRESCRIPTIONS_REL_ID = _create_relationship(VISITS_MODULE_ID, PRESCRIPTIONS_MODULE_ID, "one_to_many")
-    VISITS_LABORATORY_REL_ID = _create_relationship(VISITS_MODULE_ID, LABORATORY_MODULE_ID, "one_to_many")
-    PATIENTS_PRESCRIPTIONS_REL_ID = _create_relationship(PATIENTS_MODULE_ID, PRESCRIPTIONS_MODULE_ID, "one_to_many")
-    PATIENTS_LABORATORY_REL_ID = _create_relationship(PATIENTS_MODULE_ID, LABORATORY_MODULE_ID, "one_to_many")
-    USERS_VISITS_REL_ID = _create_relationship(USERS_MODULE_ID, VISITS_MODULE_ID, "one_to_many")
+
 
 
 def _drop_all_hogc():
@@ -345,15 +316,16 @@ def _lookup_module_ids():
 def _lookup_relationship_ids():
     global PATIENTS_VISITS_REL_ID, VISITS_PRESCRIPTIONS_REL_ID, VISITS_LABORATORY_REL_ID
     global PATIENTS_PRESCRIPTIONS_REL_ID, PATIENTS_LABORATORY_REL_ID, USERS_VISITS_REL_ID
+    global PATIENTS_DOCTORS_REL_ID
     session = extensions.SessionLocal()
     try:
         rows = session.execute(db.text("""
-            SELECT id, from_module_id, to_module_id, relationship_type
+            SELECT id, from_module_id, to_module_id, relationship_type, from_field_name
             FROM relationship_definitions
             WHERE tenant_id = :tid AND org_id = :oid AND status = 'active'
         """), {"tid": Config.HOGC_TENANT_ID, "oid": Config.HOGC_ORG_ID}).fetchall()
         for row in rows:
-            rid, from_mid, to_mid, rtype = row
+            rid, from_mid, to_mid, rtype, from_field = row
             if from_mid == PATIENTS_MODULE_ID and to_mid == VISITS_MODULE_ID:
                 PATIENTS_VISITS_REL_ID = rid
             elif from_mid == VISITS_MODULE_ID and to_mid == PRESCRIPTIONS_MODULE_ID:
@@ -366,5 +338,7 @@ def _lookup_relationship_ids():
                 PATIENTS_LABORATORY_REL_ID = rid
             elif from_mid == USERS_MODULE_ID and to_mid == VISITS_MODULE_ID:
                 USERS_VISITS_REL_ID = rid
+            elif from_mid == PATIENTS_MODULE_ID and to_mid == USERS_MODULE_ID and rtype == "many_to_many":
+                PATIENTS_DOCTORS_REL_ID = rid
     finally:
         session.close()

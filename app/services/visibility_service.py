@@ -54,7 +54,9 @@ class VisibilityService:
             all_patients = HOGC.crud.record.list(ListRecordsRequest(context=ctx, module_id=schema.PATIENTS_MODULE_ID, page=1, page_size=1000)).items
             filtered = []
             for p in all_patients:
-                if p.data.get("assigned_doctor") == hogc_id or p.id in visit_patient_ids:
+                assigned_raw = p.data.get("assigned_doctors") or ""
+                assigned_ids = [i.strip() for i in assigned_raw.split(",") if i.strip()]
+                if hogc_id in assigned_ids or p.id in visit_patient_ids:
                     if not search or search.lower() in str(p.data.get("first_name", "")).lower() or search.lower() in str(p.data.get("last_name", "")).lower():
                         filtered.append(p)
                         
@@ -84,7 +86,9 @@ class VisibilityService:
             all_patients = HOGC.crud.record.list(ListRecordsRequest(context=ctx, module_id=schema.PATIENTS_MODULE_ID, page=1, page_size=200)).items
             filtered = []
             for p in all_patients:
-                if p.data.get("assigned_doctor") == hogc_id or p.id in visit_patient_ids:
+                assigned_raw = p.data.get("assigned_doctors") or ""
+                assigned_ids = [i.strip() for i in assigned_raw.split(",") if i.strip()]
+                if hogc_id in assigned_ids or p.id in visit_patient_ids:
                     filtered.append(p)
             return filtered
 
@@ -103,7 +107,9 @@ class VisibilityService:
             all_patients = HOGC.crud.record.list(ListRecordsRequest(context=ctx, module_id=schema.PATIENTS_MODULE_ID, page=1, page_size=200)).items
             filtered = []
             for p in all_patients:
-                if p.data.get("assigned_doctor") == current_user.hogc_record_id or p.id in visit_patient_ids:
+                assigned_raw = p.data.get("assigned_doctors") or ""
+                assigned_ids = [i.strip() for i in assigned_raw.split(",") if i.strip()]
+                if current_user.hogc_record_id in assigned_ids or p.id in visit_patient_ids:
                     filtered.append(p)
             return len(filtered)
 

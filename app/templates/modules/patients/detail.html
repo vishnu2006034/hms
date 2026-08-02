@@ -32,6 +32,27 @@
     </div>
 </div>
 
+{% if related_doctors %}
+<div class="card shadow-sm mb-3">
+    <div class="card-header bg-secondary text-white">
+        <h6 class="mb-0"><i class="bi bi-person-badge"></i> Assigned Doctors ({{ related_doctors | length }})</h6>
+    </div>
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-3">
+            {% for doc in related_doctors %}
+            <div class="d-flex align-items-center gap-2 border rounded px-3 py-2">
+                <i class="bi bi-person-circle fs-4 text-secondary"></i>
+                <div>
+                    <div class="fw-semibold">{{ doc.data.get('full_name', '-') }}</div>
+                    <small class="text-muted">{{ doc.data.get('department', '') }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
     {% if related_visits or related_prescriptions or related_lab_tests %}
     <div class="col-12 mt-3">
         <ul class="nav nav-tabs" id="relatedTabs" role="tablist">

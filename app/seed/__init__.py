@@ -5,7 +5,7 @@ from hogc.lib.contracts.crud.requests import ListModulesRequest, GetModuleReques
 from app.seed.schema import (
     _ctx, _seed_users_module, _seed_patients_module, _seed_visits_module,
     _seed_inventory_module, _seed_prescriptions_module, _seed_laboratory_module,
-    _seed_layouts, _seed_relationships, _drop_all_hogc, _lookup_module_ids,
+    _seed_layouts, _drop_all_hogc, _lookup_module_ids,
 )
 from app.seed.data import _create_default_admin, _seed_default_data
 
@@ -19,7 +19,6 @@ def _do_seed():
     _seed_prescriptions_module()
     _seed_laboratory_module()
     _seed_layouts()
-    _seed_relationships()
     _create_default_admin(schema.USERS_MODULE_ID)
     _seed_default_data({
         "users": schema.USERS_MODULE_ID,

@@ -13,6 +13,14 @@
                             {% if field.field_type.name == 'LOOKUP' %}
                                 {% set lookup_dict = dict((lookup_data|default({})).get(api_name, [])) %}
                                 {{ lookup_dict.get(val, val) }}
+                            {% elif field.field_type.name == 'MULTI_LOOKUP' %}
+                                {% set lookup_dict = dict((lookup_data|default({})).get(api_name, [])) %}
+                                {% set id_list = val.split(',') if val else [] %}
+                                {% for did in id_list %}
+                                    <span class="badge bg-info text-dark me-1">{{ lookup_dict.get(did.strip(), did.strip()) }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endfor %}
                             {% elif api_name == 'status' %}
                                 <span class="badge {% if val == 'Active' or val == 'Completed' or val == 'In-Stock' %}bg-success{% elif val == 'Cancelled' or val == 'Expired' %}bg-danger{% elif val == 'In-Progress' or val == 'Low-Stock' %}bg-warning{% else %}bg-secondary{% endif %}">{{ val }}</span>
                             {% elif field.field_type.name == 'MULTI_PICKLIST' %}
