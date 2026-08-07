@@ -48,6 +48,11 @@
                     <i class="bi bi-person-gear"></i> Staff
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link text-light {% if 'recycle_bin' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('recycle_bin.list_deleted') }}">
+                    <i class="bi bi-trash"></i> Recycle Bin
+                </a>
+            </li>
             {% endif %}
         </ul>
     </div>

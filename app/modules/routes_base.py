@@ -7,10 +7,13 @@ from hogc.lib.contracts.crud.models import RecordQuery, QueryFilter
 from hogc.lib.contracts.crud.requests import (
     CreateRecordRequest, UpdateRecordRequest, ListRecordsRequest, QueryRecordsRequest,
     ListModulesRequest, GetRecordRequest, DeleteRecordRequest,
+    RestoreRecordRequest, PermanentDeleteRecordRequest,
     ListFieldsRequest, GetPicklistOptionsRequest,
     LinkRecordsRequest, UnlinkRecordsRequest, GetRelatedRecordsRequest, ListRelationshipsForRecordRequest,
     ListLayoutsRequest,
 )
+from hogc.lib.kernel.container import resolve
+from hogc.lib.contracts.crud.services.record import RecordService
 
 from app.config import Config
 
@@ -96,6 +99,21 @@ def _get_picklist_options(module_id: str, *field_api_names: str) -> dict[str, li
     return result
 
 
+def _get_display_name_from_data(d: dict, record_id: str) -> str:
+    """Extract display name from a record's data dict."""
+    for key in ("full_name", "first_name", "item_name", "test_name", "medication_name", "name"):
+        val = d.get(key)
+        if val:
+            if key == "first_name":
+                last_name: str = d.get('last_name', '')
+                return f"{val} {last_name}"
+            return val
+    for k, v in d.items():
+        if v and isinstance(v, str) and len(v) < 100:
+            return v
+    return record_id[:8]
+
+
 def _get_record_display_name(module_id: str, record_id: str) -> str:
     """Get a human-readable display name for a record (first text field found)."""
     if not record_id:
@@ -104,17 +122,7 @@ def _get_record_display_name(module_id: str, record_id: str) -> str:
     try:
         resp = HOGC.crud.record.get(GetRecordRequest(context=ctx, module_id=module_id, record_id=record_id))
         if resp and resp.data:
-            d: dict = resp.data.data
-            for key in ("full_name", "first_name", "item_name", "test_name", "medication_name", "name"):
-                val = d.get(key)
-                if val:
-                    if key == "first_name":
-                        last_name: str = d.get('last_name', '')
-                        return f"{val} {last_name}"
-                    return val
-            for k, v in d.items():
-                if v and isinstance(v, str) and len(v) < 100:
-                    return v
+            return _get_display_name_from_data(resp.data.data, record_id)
         return record_id[:8]
     except Exception:
         return record_id[:8]
@@ -210,6 +218,56 @@ def _delete_record(module_id: str, record_id: str) -> typing.Any:
     return HOGC.crud.record.delete(DeleteRecordRequest(
         context=_ctx(), module_id=module_id, record_id=record_id
     ))
+
+
+def _restore_record(module_id: str, record_id: str) -> typing.Any:
+    """Restore a deleted record."""
+    return HOGC.crud.record.restore_record(RestoreRecordRequest(
+        context=_ctx(), module_id=module_id, record_id=record_id
+    ))
+
+
+def _permanent_delete_record(module_id: str, record_id: str) -> typing.Any:
+    """Permanently delete a record."""
+    return HOGC.crud.record.permanent_delete_record(PermanentDeleteRecordRequest(
+        context=_ctx(), module_id=module_id, record_id=record_id
+    ))
+
+
+def _get_deleted_records(module_id: str, page: int = 1, page_size: int = 20) -> typing.Any:
+    """Fetch paginated deleted records by querying the DB directly, since HOGC excludes them."""
+    from app.extensions import db
+    from sqlalchemy import select, func
+    from hogc.engines.crud.schema.record import Record
+    from hogc.engines.crud.services.record_service import make_record_dto
+    from hogc.lib.contracts.crud.responses import RecordListResponse
+    
+    ctx = _ctx()
+    svc = HOGC.crud.record._service
+    repo = svc._repo
+    
+    stmt = select(Record).where(
+        Record.tenant_id == ctx.tenant_id,
+        Record.org_id == ctx.org_id,
+        Record.module_id == module_id,
+        Record.status == "deleted",
+    )
+    
+    total = db.session.execute(select(func.count()).select_from(stmt.subquery())).scalar_one()
+    stmt = stmt.offset((page - 1) * page_size).limit(page_size)
+    rows = list(db.session.execute(stmt).scalars().all())
+    
+    field_map = repo.get_field_map(db.session, module_id)
+    items = [make_record_dto(r, field_map) for r in rows]
+    
+    return RecordListResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+        has_next=(page * page_size) < total,
+        has_prev=page > 1
+    )
 
 
 # ── Relationship helpers ──────────────────────────────────────────────

@@ -60,6 +60,7 @@ def create_app(config_name="default"):
         from app.modules.laboratory import laboratory_bp
         from app.modules.inventory import inventory_bp
         from app.modules.users import users_bp
+        from app.modules.recycle_bin import recycle_bin_bp
         from app.api.layout_routes import layout_api_bp
 
         app.register_blueprint(auth_bp)
@@ -70,6 +71,7 @@ def create_app(config_name="default"):
         app.register_blueprint(laboratory_bp)
         app.register_blueprint(inventory_bp)
         app.register_blueprint(users_bp)
+        app.register_blueprint(recycle_bin_bp)
         app.register_blueprint(layout_api_bp)
 
         from app.seed import seed_modules
