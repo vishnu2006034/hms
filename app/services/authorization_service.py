@@ -4,7 +4,23 @@ class AuthorizationService:
     """Service to handle standardized authorization logic."""
 
     @staticmethod
-    def _check_doctor_ownership(user, record, lookup_field: str) -> bool:
+    def _check_doctor_ownership(user: typing.Any, record: typing.Any, lookup_field: str) -> bool:
+        """Return whether a Doctor user owns the given record via a lookup field.
+
+        Non-Doctor roles always pass (return True).  For Doctors, the method
+        checks whether their HOGC record ID appears in the record's lookup
+        field value, which may be a list, a dict with an 'id'/'value' key,
+        or a plain string.
+
+        Args:
+            user: The AuthUser instance to check ownership for.
+            record: The HOGC record response object (must have a .data dict).
+            lookup_field: The field api_name that stores the assigned user ID
+                          (e.g. 'doctor_lookup', 'assigned_doctors').
+
+        Returns:
+            True if access is permitted, False if the doctor is not the owner.
+        """
         if user.role != "Doctor":
             return True
             
@@ -68,13 +84,40 @@ class AuthorizationService:
         return False
 
     @classmethod
-    def can_access_visit(cls, user, visit_record) -> bool:
+    def can_access_visit(cls, user: typing.Any, visit_record: typing.Any) -> bool:
+        """Return whether the user may access the given visit record.
+
+        Args:
+            user: The AuthUser instance requesting access.
+            visit_record: The HOGC visit record response object.
+
+        Returns:
+            True if the user is allowed to view or modify the visit.
+        """
         return cls._check_doctor_ownership(user, visit_record, "doctor_lookup")
 
     @classmethod
-    def can_access_prescription(cls, user, prescription_record) -> bool:
+    def can_access_prescription(cls, user: typing.Any, prescription_record: typing.Any) -> bool:
+        """Return whether the user may access the given prescription record.
+
+        Args:
+            user: The AuthUser instance requesting access.
+            prescription_record: The HOGC prescription record response object.
+
+        Returns:
+            True if the user is allowed to view or modify the prescription.
+        """
         return cls._check_doctor_ownership(user, prescription_record, "doctor_lookup")
 
     @classmethod
-    def can_access_laboratory(cls, user, lab_record) -> bool:
+    def can_access_laboratory(cls, user: typing.Any, lab_record: typing.Any) -> bool:
+        """Return whether the user may access the given laboratory record.
+
+        Args:
+            user: The AuthUser instance requesting access.
+            lab_record: The HOGC laboratory record response object.
+
+        Returns:
+            True if the user is allowed to view or modify the lab test.
+        """
         return cls._check_doctor_ownership(user, lab_record, "doctor_lookup")

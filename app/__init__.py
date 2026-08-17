@@ -24,7 +24,20 @@ def _fmt_auto_id(raw_id: str | None, prefix: str, uuid: str = "") -> str:
     return f"{prefix}-????"
 
 
-def create_app(config_name="default"):
+def create_app(config_name: str = "default") -> "Flask":
+    """Create and configure the Flask application instance.
+
+    Initialises extensions (SQLAlchemy, LoginManager), registers all
+    blueprints, seeds the HOGC schema and default data, and attaches
+    Jinja template globals.
+
+    Args:
+        config_name: Key into the ``config`` mapping (e.g. 'default',
+                     'testing', 'production').  Defaults to 'default'.
+
+    Returns:
+        The fully configured Flask application instance.
+    """
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
@@ -38,7 +51,16 @@ def create_app(config_name="default"):
     from hogc.lib.kernel.errors import ValidationError
     
     @app.errorhandler(ValidationError)
-    def handle_validation_error(e):
+    def handle_validation_error(e: "ValidationError") -> tuple:
+        """Serialize a ValidationError raised by the HOGC engine to JSON.
+
+        Args:
+            e: The ValidationError instance caught by Flask's error handler.
+
+        Returns:
+            A (response, status_code) tuple with a JSON body containing
+            ``success=False`` and a ``errors`` dict keyed by field name.
+        """
         if request.headers.get("X-Requested-With") == "XMLHttpRequest" or "application/json" in request.headers.get("Accept", ""):
             return jsonify({
                 "success": False,
@@ -61,6 +83,7 @@ def create_app(config_name="default"):
         from app.modules.inventory import inventory_bp
         from app.modules.users import users_bp
         from app.modules.recycle_bin import recycle_bin_bp
+        from app.modules.import_export import import_export_bp
         from app.api.layout_routes import layout_api_bp
 
         app.register_blueprint(auth_bp)
@@ -72,6 +95,7 @@ def create_app(config_name="default"):
         app.register_blueprint(inventory_bp)
         app.register_blueprint(users_bp)
         app.register_blueprint(recycle_bin_bp)
+        app.register_blueprint(import_export_bp)
         app.register_blueprint(layout_api_bp)
 
         from app.seed import seed_modules

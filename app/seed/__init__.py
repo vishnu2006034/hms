@@ -10,7 +10,13 @@ from app.seed.schema import (
 from app.seed.data import _create_default_admin, _seed_default_data
 
 
-def _do_seed():
+def _do_seed() -> None:
+    """Run the full seed sequence: modules → layouts → admin user → sample data → ID lookup.
+
+    Calls each seeding step in the correct dependency order so that
+    foreign-key relationships (e.g. visits depend on patients) are
+    satisfied before the data layer attempts to link records.
+    """
     from app.seed import schema
     _seed_users_module()
     _seed_patients_module()
@@ -19,6 +25,7 @@ def _do_seed():
     _seed_prescriptions_module()
     _seed_laboratory_module()
     _seed_layouts()
+    _lookup_module_ids()
     _create_default_admin(schema.USERS_MODULE_ID)
     _seed_default_data({
         "users": schema.USERS_MODULE_ID,
@@ -28,10 +35,19 @@ def _do_seed():
         "prescriptions": schema.PRESCRIPTIONS_MODULE_ID,
         "laboratory": schema.LABORATORY_MODULE_ID,
     })
-    _lookup_module_ids()
 
 
-def seed_modules(app):
+def seed_modules(app: "Flask") -> None:
+    """Ensure HOGC schema tables exist and seed default data if the database is empty.
+
+    Runs inside an application context.  On a fresh database (no modules
+    found) the full seed sequence is executed via _do_seed.  On an existing
+    database, module IDs are looked up; if any module is missing its fields
+    the database is wiped and re-seeded.
+
+    Args:
+        app: The Flask application instance used to push an application context.
+    """
     with app.app_context():
         from hogc.engines.crud import Base as HogcBase
         HogcBase.metadata.create_all(db.engine)

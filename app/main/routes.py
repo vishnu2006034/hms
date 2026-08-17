@@ -9,7 +9,13 @@ from hogc.lib.contracts.crud.requests import ListRecordsRequest
 import app.seed.schema as seed
 
 
-def _get_ctx():
+def _get_ctx() -> RequestContext:
+    """Build and return a RequestContext from the currently authenticated user.
+
+    Returns:
+        A RequestContext populated with the tenant/org config values and the
+        current user's ID and role.
+    """
     return RequestContext(
         tenant_id=Config.HOGC_TENANT_ID,
         org_id=Config.HOGC_ORG_ID,
@@ -20,7 +26,16 @@ def _get_ctx():
 
 @main_bp.route("/")
 @login_required
-def dashboard():
+def dashboard() -> str:
+    """Render the main dashboard with aggregate counts for each module.
+
+    Counts are fetched from VisibilityService for patients, visits,
+    inventory, prescriptions, and laboratory tests.  Any individual
+    count failure is silently swallowed so the dashboard always renders.
+
+    Returns:
+        The rendered 'main/dashboard.html' template string.
+    """
     ctx = _get_ctx()
     stats = {"patients": 0, "visits": 0, "inventory": 0, "lab": 0, "prescriptions": 0}
 

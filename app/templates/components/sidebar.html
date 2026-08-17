@@ -42,6 +42,11 @@
                 </a>
             </li>
             {% endif %}
+            <li class="nav-item">
+                <a class="nav-link text-light {% if 'import_export' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('import_export.hub') }}">
+                    <i class="bi bi-arrow-down-up"></i> Import & Export
+                </a>
+            </li>
             {% if role == 'Admin' %}
             <li class="nav-item">
                 <a class="nav-link text-light {% if 'users' in request.endpoint|default('') %}active{% endif %}" href="{{ url_for('users.users_list') }}">

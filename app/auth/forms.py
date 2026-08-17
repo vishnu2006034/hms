@@ -57,6 +57,7 @@ class RegisterForm(FlaskForm):
     submit = SubmitField("Register")
 
     def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+        """Initialise the form and populate role choices from the database."""
         super().__init__(*args, **kwargs)
         self.role.choices = _get_role_choices()
 

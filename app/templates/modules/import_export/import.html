@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% block title %}Import {{ config.label }}{% endblock %}
+{% block page_title %}<i class="bi bi-upload me-2 text-primary"></i>Import {{ config.label }}{% endblock %}
+
+{% block page_actions %}
+<a href="{{ url_for(module_name + '.' + module_name + '_list') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left"></i> Back to {{ config.label }}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Left Column: Upload Form and Options -->
+    <div class="col-lg-5">
+        <!-- Template Download Banner -->
+        <div class="card shadow-sm border-0 bg-dark-subtle mb-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="mb-1 fw-bold"><i class="bi bi-file-earmark-spreadsheet text-info me-2"></i>Need a Starter Template?</h6>
+                        <p class="text-secondary small mb-0">Download a pre-formatted CSV template with valid column headers and a sample row.</p>
+                    </div>
+                    <a href="{{ url_for('import_export.download_template', module_name=module_name) }}" class="btn btn-info btn-sm text-nowrap ms-3">
+                        <i class="bi bi-download me-1"></i> Download CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Form Card -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark-subtle py-3">
+                <h6 class="card-title mb-0 fw-bold"><i class="bi bi-cloud-arrow-up me-2"></i>Upload Data File</h6>
+            </div>
+            <div class="card-body">
+                <form id="importForm" method="POST" action="{{ url_for('import_export.execute_import', module_name=module_name) }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="importFile" class="form-label fw-semibold">Select CSV or JSON File <span class="text-danger">*</span></label>
+                        <input class="form-control" type="file" id="importFile" name="file" accept=".csv, .json" required>
+                        <div class="form-text">Supported file formats: <code>.csv</code> (comma-separated), <code>.json</code> (array of objects).</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="formatSelect" class="form-label fw-semibold">File Format</label>
+                        <select class="form-select" id="formatSelect" name="format">
+                            <option value="csv" selected>CSV (Comma-Separated Values)</option>
+                            <option value="json">JSON (JavaScript Object Notation)</option>
+                        </select>
+                    </div>
+
+                    {% if config.upsert_candidates %}
+                    <div class="mb-4">
+                        <label for="upsertSelect" class="form-label fw-semibold">Duplicate Handling (Upsert)</label>
+                        <select class="form-select" id="upsertSelect" name="upsert_on">
+                            <option value="" selected>Insert all rows as new records (No duplicate check)</option>
+                            {% for uf in config.upsert_candidates %}
+                            <option value="{{ uf }}">Update existing records if '{{ uf.replace('_', ' ').title() }}' matches</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Matching records will be updated with new values instead of creating duplicate entries.</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2">
+                        <button type="button" id="btnValidate" class="btn btn-outline-info flex-fill">
+                            <i class="bi bi-check2-circle me-1"></i> Validate & Preview
+                        </button>
+                        <button type="submit" id="btnSubmitImport" class="btn btn-primary flex-fill">
+                            <i class="bi bi-upload me-1"></i> Start Import
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Field Reference Helper Card -->
+        <div class="card shadow-sm border-0 bg-dark-subtle mt-4">
+            <div class="card-header py-2">
+                <small class="fw-bold text-uppercase text-secondary">Supported Columns ({{ config.fields | length }})</small>
+            </div>
+            <div class="card-body py-2">
+                <div class="d-flex flex-wrap gap-1">
+                    {% for field in config.fields %}
+                    <span class="badge {% if field in config.required_fields %}bg-danger-subtle text-danger border border-danger-subtle{% else %}bg-secondary-subtle text-secondary border border-secondary-subtle{% endif %}" style="font-family: monospace;">
+                        {{ field }}{% if field in config.required_fields %} *{% endif %}
+                    </span>
+                    {% endfor %}
+                </div>
+                <div class="mt-2">
+                    <small class="text-danger">* Required fields</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Live Validation & Preview Panel -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-dark-subtle py-3 d-flex align-items-center justify-content-between">
+                <h6 class="card-title mb-0 fw-bold"><i class="bi bi-table me-2"></i>Validation & Data Preview</h6>
+                <span id="validationStatusBadge" class="badge bg-secondary">Awaiting file</span>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div id="previewEmptyState" class="text-center text-muted my-auto py-5">
+                    <i class="bi bi-file-earmark-text fs-1 d-block mb-3 text-secondary"></i>
+                    <h6>No file validated yet</h6>
+                    <p class="small text-secondary mb-0">Select a file and click "Validate & Preview" to inspect parsed records and check for validation warnings.</p>
+                </div>
+
+                <div id="previewSpinner" class="text-center my-auto py-5 d-none">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Validating...</span>
+                    </div>
+                    <p class="small text-secondary mt-2">Parsing and validating records against CRUD schema...</p>
+                </div>
+
+                <div id="previewResultsContainer" class="d-none flex-grow-1 d-flex flex-column">
+                    <!-- Summary Stats Bar -->
+                    <div class="d-flex align-items-center justify-content-between p-2 rounded bg-dark-subtle mb-3">
+                        <div>
+                            <span class="text-muted small">Total Records Detected:</span>
+                            <strong id="previewTotalCount" class="ms-1">0</strong>
+                        </div>
+                        <div id="previewValidationSummary" class="small"></div>
+                    </div>
+
+                    <!-- Warnings / Errors Alert Box -->
+                    <div id="previewWarningsAlert" class="alert alert-warning d-none py-2 px-3 small">
+                        <strong class="d-block mb-1"><i class="bi bi-exclamation-triangle me-1"></i>Validation Warnings / Errors:</strong>
+                        <ul id="previewWarningsList" class="mb-0 ps-3"></ul>
+                    </div>
+
+                    <!-- Preview Table -->
+                    <h6 class="small fw-bold text-secondary text-uppercase mb-2">First 5 Sample Records Preview:</h6>
+                    <div class="table-responsive flex-grow-1" style="max-height: 380px;">
+                        <table class="table table-sm table-bordered table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                            <thead class="table-dark sticky-top">
+                                <tr id="previewTableHeadRow"></tr>
+                            </thead>
+                            <tbody id="previewTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const fileInput = document.getElementById("importFile");
+    const formatSelect = document.getElementById("formatSelect");
+    const btnValidate = document.getElementById("btnValidate");
+    const emptyState = document.getElementById("previewEmptyState");
+    const spinner = document.getElementById("previewSpinner");
+    const resultsContainer = document.getElementById("previewResultsContainer");
+    const statusBadge = document.getElementById("validationStatusBadge");
+    const totalCountEl = document.getElementById("previewTotalCount");
+    const validationSummaryEl = document.getElementById("previewValidationSummary");
+    const warningsAlert = document.getElementById("previewWarningsAlert");
+    const warningsList = document.getElementById("previewWarningsList");
+    const theadRow = document.getElementById("previewTableHeadRow");
+    const tbody = document.getElementById("previewTableBody");
+
+    // Auto-detect format on file change
+    fileInput.addEventListener("change", function () {
+        if (fileInput.files.length > 0) {
+            const fileName = fileInput.files[0].name.toLowerCase();
+            if (fileName.endsWith(".json")) {
+                formatSelect.value = "json";
+            } else if (fileName.endsWith(".csv")) {
+                formatSelect.value = "csv";
+            }
+        }
+    });
+
+    btnValidate.addEventListener("click", function () {
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert("Please choose a file to validate first.");
+            fileInput.focus();
+            return;
+        }
+
+        emptyState.classList.add("d-none");
+        resultsContainer.classList.add("d-none");
+        spinner.classList.remove("d-none");
+        statusBadge.className = "badge bg-info";
+        statusBadge.textContent = "Validating...";
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        formData.append("format", formatSelect.value);
+
+        fetch("{{ url_for('import_export.validate_import_file', module_name=module_name) }}", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            spinner.classList.add("d-none");
+            resultsContainer.classList.remove("d-none");
+
+            totalCountEl.textContent = data.total_rows || 0;
+
+            if (data.success) {
+                statusBadge.className = "badge bg-success";
+                statusBadge.textContent = "Ready to Import";
+                validationSummaryEl.innerHTML = `<span class="text-success fw-semibold"><i class="bi bi-check-circle me-1"></i>All records schema-compliant</span>`;
+                warningsAlert.classList.add("d-none");
+            } else {
+                statusBadge.className = "badge bg-danger";
+                statusBadge.textContent = "Validation Issues Found";
+                validationSummaryEl.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-x-circle me-1"></i>Validation errors detected</span>`;
+                
+                warningsList.innerHTML = "";
+                const warnings = data.warnings || [data.message];
+                warnings.forEach(w => {
+                    const li = document.createElement("li");
+                    li.textContent = w;
+                    warningsList.appendChild(li);
+                });
+                warningsAlert.classList.remove("d-none");
+            }
+
+            // Populate preview table headers
+            theadRow.innerHTML = "<th>#</th>";
+            const headers = data.headers || [];
+            headers.forEach(h => {
+                const th = document.createElement("th");
+                th.textContent = h;
+                theadRow.appendChild(th);
+            });
+
+            // Populate preview table rows
+            tbody.innerHTML = "";
+            const rows = data.preview_rows || [];
+            rows.forEach((row, idx) => {
+                const tr = document.createElement("tr");
+                let rowHtml = `<td><span class="badge bg-secondary">${idx + 1}</span></td>`;
+                headers.forEach(h => {
+                    const val = row[h] !== undefined && row[h] !== null ? String(row[h]) : "";
+                    rowHtml += `<td>${val.length > 50 ? val.substring(0, 47) + "..." : val || '<span class="text-muted small">-</span>'}</td>`;
+                });
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
+            });
+
+            if (rows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${headers.length + 1}" class="text-center text-muted py-3">No rows found in file.</td></tr>`;
+            }
+        })
+        .catch(err => {
+            spinner.classList.add("d-none");
+            emptyState.classList.remove("d-none");
+            statusBadge.className = "badge bg-danger";
+            statusBadge.textContent = "Error";
+            alert("Validation request failed: " + err);
+        });
+    });
+});
+</script>
+{% endblock %}

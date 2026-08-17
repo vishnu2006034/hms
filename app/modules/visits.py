@@ -33,6 +33,18 @@ def visits_list() -> typing.Any:
 
 
 def _build_lookup_data(form_ctx: dict) -> dict:
+    """Build the lookup_data dict consumed by the visit form template.
+
+    Converts each list of HOGC record objects in form_ctx into a list of
+    (record_id, display_label) tuples that can be rendered as <select> options.
+
+    Args:
+        form_ctx: Dict returned by VisitService.get_form_context(), containing
+                  'patients' and 'doctors' record lists.
+
+    Returns:
+        A dict mapping each lookup field api_name to its list of (id, label) tuples.
+    """
     return {
         "patient_lookup": [(p.id, f"{p.data.get('first_name', '')} {p.data.get('last_name', '')} — {p.data.get('phone', '')}") for p in form_ctx.get("patients", [])],
         "doctor_lookup": [(d.id, f"{d.data.get('full_name', '')} — {d.data.get('department', '')}") for d in form_ctx.get("doctors", [])]

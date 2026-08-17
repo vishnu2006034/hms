@@ -1,4 +1,5 @@
 """Seed schema — Module, field, picklist, and relationship creation helpers."""
+import typing
 from hogc.lib import HOGC
 import uuid
 from app import extensions
@@ -31,7 +32,12 @@ USERS_VISITS_REL_ID = None
 PATIENTS_DOCTORS_REL_ID = None
 
 
-def _ctx():
+def _ctx() -> RequestContext:
+    """Build a system-level RequestContext for seeding operations.
+
+    Returns:
+        A RequestContext with tenant/org from Config and the 'Admin' role.
+    """
     return RequestContext(
         tenant_id=Config.HOGC_TENANT_ID,
         org_id=Config.HOGC_ORG_ID,
@@ -40,7 +46,25 @@ def _ctx():
     )
 
 
-def _create_module(name, api_name, label, plural_label, description=""):
+def _create_module(
+    name: str,
+    api_name: str,
+    label: str,
+    plural_label: str,
+    description: str = "",
+) -> str:
+    """Create a HOGC module and return its generated UUID.
+
+    Args:
+        name: Internal machine name of the module.
+        api_name: URL-safe API identifier (e.g. 'patients').
+        label: Human-readable singular label.
+        plural_label: Human-readable plural label.
+        description: Optional description string.
+
+    Returns:
+        The UUID string of the newly created module.
+    """
     resp = HOGC.crud.module.create(CreateModuleRequest(
         context=_ctx(),
         name=name,
@@ -52,9 +76,33 @@ def _create_module(name, api_name, label, plural_label, description=""):
     return resp.data.id
 
 
-def _create_field(module_id, field_name, api_name, field_type, label="",
-                  is_required=False, is_unique=False, default_value=None,
-                  lookup_module_id=None):
+def _create_field(
+    module_id: str,
+    field_name: str,
+    api_name: str,
+    field_type: typing.Any,
+    label: str = "",
+    is_required: bool = False,
+    is_unique: bool = False,
+    default_value: typing.Optional[str] = None,
+    lookup_module_id: typing.Optional[str] = None,
+) -> str:
+    """Create a field on a HOGC module and return its generated UUID.
+
+    Args:
+        module_id: UUID of the parent module.
+        field_name: Display name of the field.
+        api_name: Snake_case API identifier for the field.
+        field_type: A FieldType enum value (e.g. FieldType.TEXT).
+        label: Human-readable label; falls back to field_name if empty.
+        is_required: Whether the field is mandatory on record creation.
+        is_unique: Whether the field must be unique across records.
+        default_value: Optional default value string.
+        lookup_module_id: For LOOKUP/MULTI_LOOKUP fields, the target module UUID.
+
+    Returns:
+        The UUID string of the newly created field.
+    """
     resp = HOGC.crud.field.create(CreateFieldRequest(
         context=_ctx(),
         module_id=module_id,    
@@ -70,7 +118,24 @@ def _create_field(module_id, field_name, api_name, field_type, label="",
     return resp.data.id
 
 
-def _add_picklist(field_id, value, label, color=None, is_default=False, order=0):
+def _add_picklist(
+    field_id: str,
+    value: str,
+    label: str,
+    color: typing.Optional[str] = None,
+    is_default: bool = False,
+    order: int = 0,
+) -> None:
+    """Add a picklist option to an existing PICKLIST or MULTI_PICKLIST field.
+
+    Args:
+        field_id: UUID of the target picklist field.
+        value: The stored value for this option (e.g. 'Active').
+        label: The display label shown to users.
+        color: Optional hex colour string for UI badging (e.g. '#28a745').
+        is_default: Whether this option is pre-selected by default.
+        order: Display order index among the picklist options.
+    """
     HOGC.crud.picklist.add_option(AddPicklistOptionRequest(
         context=_ctx(),
         field_id=field_id,
@@ -82,7 +147,23 @@ def _add_picklist(field_id, value, label, color=None, is_default=False, order=0)
     ))
 
 
-def _create_layout(module_id, name, field_order, is_default=False):
+def _create_layout(
+    module_id: str,
+    name: str,
+    field_order: list[str],
+    is_default: bool = False,
+) -> str:
+    """Create a layout for a module and return its generated UUID.
+
+    Args:
+        module_id: UUID of the parent module.
+        name: Display name for the layout (e.g. 'Standard Layout').
+        field_order: Ordered list of field api_names defining the layout columns.
+        is_default: Whether this layout is the module's default view.
+
+    Returns:
+        The UUID string of the newly created layout.
+    """
     resp = HOGC.crud.layout.create(CreateLayoutRequest(
         context=_ctx(),
         module_id=module_id,
@@ -96,7 +177,11 @@ def _create_layout(module_id, name, field_order, is_default=False):
 
 
 
-def _seed_users_module():
+def _seed_users_module() -> None:
+    """Create the 'users' module with all its fields and picklist options.
+
+    Sets the module-level USERS_MODULE_ID global after creation.
+    """
     global USERS_MODULE_ID
     USERS_MODULE_ID = _create_module("users", "users", "User", "Users", "Hospital staff and users")
     _create_field(USERS_MODULE_ID, "Full Name", "full_name", FieldType.TEXT, "Full Name", is_required=True)
@@ -111,7 +196,11 @@ def _seed_users_module():
     _create_field(USERS_MODULE_ID, "Is Active", "is_active", FieldType.BOOLEAN, "Is Active", default_value="true")
 
 
-def _seed_patients_module():
+def _seed_patients_module() -> None:
+    """Create the 'patients' module with all its fields and picklist options.
+
+    Sets the module-level PATIENTS_MODULE_ID global after creation.
+    """
     global PATIENTS_MODULE_ID
     PATIENTS_MODULE_ID = _create_module("patients", "patients", "Patient", "Patients", "Patient records")
     _create_field(PATIENTS_MODULE_ID, "Patient ID", "patient_id", FieldType.AUTO_NUMBER, "Patient ID", is_unique=True)
@@ -145,7 +234,11 @@ def _seed_patients_module():
         _add_picklist(status_id, val, lbl, is_default=(val == "Active"), order=i)
 
 
-def _seed_visits_module():
+def _seed_visits_module() -> None:
+    """Create the 'visits' module with all its fields and picklist options.
+
+    Sets the module-level VISITS_MODULE_ID global after creation.
+    """
     global VISITS_MODULE_ID
     VISITS_MODULE_ID = _create_module("visits", "visits", "Visit", "Visits", "Patient visits")
     _create_field(VISITS_MODULE_ID, "Visit ID", "visit_id", FieldType.AUTO_NUMBER, "Visit ID", is_unique=True)
@@ -177,7 +270,11 @@ def _seed_visits_module():
     _create_field(VISITS_MODULE_ID, "Notes", "notes", FieldType.TEXT, "Notes")
 
 
-def _seed_inventory_module():
+def _seed_inventory_module() -> None:
+    """Create the 'inventory' module with all its fields and picklist options.
+
+    Sets the module-level INVENTORY_MODULE_ID global after creation.
+    """
     global INVENTORY_MODULE_ID
     INVENTORY_MODULE_ID = _create_module("inventory", "inventory", "Inventory Item", "Inventory", "Hospital inventory")
     _create_field(INVENTORY_MODULE_ID, "Item ID", "item_id", FieldType.AUTO_NUMBER, "Item ID", is_unique=True)
@@ -204,7 +301,11 @@ def _seed_inventory_module():
         _add_picklist(status_id, val, lbl, is_default=(val == "In-Stock"), order=i)
 
 
-def _seed_prescriptions_module():
+def _seed_prescriptions_module() -> None:
+    """Create the 'prescriptions' module with all its fields and picklist options.
+
+    Sets the module-level PRESCRIPTIONS_MODULE_ID global after creation.
+    """
     global PRESCRIPTIONS_MODULE_ID
     PRESCRIPTIONS_MODULE_ID = _create_module("prescriptions", "prescriptions", "Prescription", "Prescriptions", "Medication prescriptions")
     _create_field(PRESCRIPTIONS_MODULE_ID, "Prescription ID", "prescription_id", FieldType.AUTO_NUMBER, "Prescription ID", is_unique=True)
@@ -230,7 +331,11 @@ def _seed_prescriptions_module():
         _add_picklist(status_id, val, lbl, is_default=(val == "Active"), order=i)
 
 
-def _seed_laboratory_module():
+def _seed_laboratory_module() -> None:
+    """Create the 'laboratory' module with all its fields and picklist options.
+
+    Sets the module-level LABORATORY_MODULE_ID global after creation.
+    """
     global LABORATORY_MODULE_ID
     LABORATORY_MODULE_ID = _create_module("laboratory", "laboratory", "Lab Test", "Laboratory", "Laboratory tests")
     _create_field(LABORATORY_MODULE_ID, "Test ID", "test_id", FieldType.AUTO_NUMBER, "Test ID", is_unique=True)
@@ -262,7 +367,11 @@ def _seed_laboratory_module():
                   lookup_module_id=USERS_MODULE_ID)
 
 
-def _seed_layouts():
+def _seed_layouts() -> None:
+    """Create the default Standard Layout for every seeded module.
+
+    Depends on all six module ID globals being set before this is called.
+    """
     global USERS_MODULE_ID, PATIENTS_MODULE_ID, VISITS_MODULE_ID
     global INVENTORY_MODULE_ID, PRESCRIPTIONS_MODULE_ID, LABORATORY_MODULE_ID
 
@@ -277,7 +386,13 @@ def _seed_layouts():
 
 
 
-def _drop_all_hogc():
+def _drop_all_hogc() -> None:
+    """Delete all HOGC records for the configured tenant, then truncate auth_users.
+
+    Executes DELETE statements for every HOGC table in dependency order so
+    that foreign-key constraints are satisfied.  Rolls back automatically on
+    any exception and always closes the session.
+    """
     session = extensions.SessionLocal()
     try:
         for table in ["related_records", "relationship_definitions",
@@ -291,7 +406,13 @@ def _drop_all_hogc():
         session.close()
 
 
-def _lookup_module_ids():
+def _lookup_module_ids() -> None:
+    """Populate the module ID globals by querying existing HOGC modules.
+
+    Reads all modules for the configured tenant and sets each of the six
+    module-level ID globals (USERS_MODULE_ID, PATIENTS_MODULE_ID, etc.).
+    Calls _lookup_relationship_ids() once all IDs are resolved.
+    """
     global USERS_MODULE_ID, PATIENTS_MODULE_ID, VISITS_MODULE_ID
     global INVENTORY_MODULE_ID, PRESCRIPTIONS_MODULE_ID, LABORATORY_MODULE_ID
     existing = HOGC.crud.module.list(ListModulesRequest(
@@ -313,7 +434,13 @@ def _lookup_module_ids():
     _lookup_relationship_ids()
 
 
-def _lookup_relationship_ids():
+def _lookup_relationship_ids() -> None:
+    """Populate relationship ID globals by querying relationship_definitions directly.
+
+    Runs a raw SQL SELECT against the relationship_definitions table to find
+    the UUIDs of the six predefined inter-module relationships and assigns
+    each to its corresponding module-level global constant.
+    """
     global PATIENTS_VISITS_REL_ID, VISITS_PRESCRIPTIONS_REL_ID, VISITS_LABORATORY_REL_ID
     global PATIENTS_PRESCRIPTIONS_REL_ID, PATIENTS_LABORATORY_REL_ID, USERS_VISITS_REL_ID
     global PATIENTS_DOCTORS_REL_ID
