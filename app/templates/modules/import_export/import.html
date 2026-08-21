@@ -35,9 +35,9 @@
             <div class="card-body">
                 <form id="importForm" method="POST" action="{{ url_for('import_export.execute_import', module_name=module_name) }}" enctype="multipart/form-data">
                     <div class="mb-3">
-                        <label for="importFile" class="form-label fw-semibold">Select CSV or JSON File <span class="text-danger">*</span></label>
-                        <input class="form-control" type="file" id="importFile" name="file" accept=".csv, .json" required>
-                        <div class="form-text">Supported file formats: <code>.csv</code> (comma-separated), <code>.json</code> (array of objects).</div>
+                        <label for="importFile" class="form-label fw-semibold">Select CSV, JSON, or Excel File <span class="text-danger">*</span></label>
+                        <input class="form-control" type="file" id="importFile" name="file" accept=".csv, .json, .xls, .xlsx" required>
+                        <div class="form-text">Supported file formats: <code>.csv</code> (comma-separated), <code>.json</code> (array of objects), <code>.xlsx, .xls</code> (Excel spreadsheet).</div>
                     </div>
 
                     <div class="mb-3">
@@ -45,6 +45,7 @@
                         <select class="form-select" id="formatSelect" name="format">
                             <option value="csv" selected>CSV (Comma-Separated Values)</option>
                             <option value="json">JSON (JavaScript Object Notation)</option>
+                            <option value="excel">Excel (.xlsx, .xls)</option>
                         </select>
                     </div>
 
@@ -172,6 +173,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 formatSelect.value = "json";
             } else if (fileName.endsWith(".csv")) {
                 formatSelect.value = "csv";
+            } else if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
+                formatSelect.value = "excel";
             }
         }
     });

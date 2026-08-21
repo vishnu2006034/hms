@@ -17,6 +17,7 @@
     <ul class="dropdown-menu dropdown-menu-end">
         <li><a class="dropdown-item" href="{{ url_for('import_export.export_data', module_name='prescriptions', format='csv', search=search) }}"><i class="bi bi-filetype-csv me-2"></i>Export to CSV</a></li>
         <li><a class="dropdown-item" href="{{ url_for('import_export.export_data', module_name='prescriptions', format='json', search=search) }}"><i class="bi bi-filetype-json me-2"></i>Export to JSON</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('import_export.export_data', module_name='prescriptions', format='excel', search=search) }}"><i class="bi bi-file-earmark-excel me-2"></i>Export to Excel</a></li>
     </ul>
 </div>
 {% if current_user.role in ('Admin', 'Doctor', 'Pharmacist') %}

@@ -37,6 +37,9 @@
                         <a href="{{ url_for('import_export.export_data', module_name=mod.name, format='json') }}" class="btn btn-outline-secondary btn-sm" title="Export full list to JSON">
                             <i class="bi bi-filetype-json me-1"></i> Export JSON
                         </a>
+                        <a href="{{ url_for('import_export.export_data', module_name=mod.name, format='excel') }}" class="btn btn-outline-secondary btn-sm" title="Export full list to Excel">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
+                        </a>
                     </div>
                     
                     <div class="d-flex gap-2">
