@@ -160,3 +160,5 @@ class _HOGCCrudWrapper:
         self.picklist = _ServiceProxy(c.picklists, "picklist")
         self.related_records = _ServiceProxy(c.related_records, "related_record")
         self.import_export = _ServiceProxy(c.import_export, "import_export")
+        self.seed_crud = c.seed_crud
+        self._svc = c

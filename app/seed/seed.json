@@ -1,0 +1,1480 @@
+{
+    "modules": [
+        {
+            "module_name": "users",
+            "module_api_name": "users",
+            "module_label": "User",
+            "module_plural_label": "Users",
+            "module_description": "Hospital staff and users",
+            "fields": [
+                {
+                    "field_name": "Full Name",
+                    "field_api_name": "full_name",
+                    "field_type": "text",
+                    "field_label": "Full Name",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Email",
+                    "field_api_name": "email",
+                    "field_type": "email",
+                    "field_label": "Email",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Phone",
+                    "field_api_name": "phone",
+                    "field_type": "phone",
+                    "field_label": "Phone",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Role",
+                    "field_api_name": "role",
+                    "field_type": "picklist",
+                    "field_label": "Role",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Department",
+                    "field_api_name": "department",
+                    "field_type": "text",
+                    "field_label": "Department",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Is Active",
+                    "field_api_name": "is_active",
+                    "field_type": "boolean",
+                    "field_label": "Is Active",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": "true"
+                }
+            ],
+            "layouts": [
+                {
+                    "layout_name": "Standard Layout",
+                    "layout_is_default": true,
+                    "layout_field_order": [
+                        "full_name",
+                        "email",
+                        "phone",
+                        "role",
+                        "department",
+                        "is_active"
+                    ]
+                }
+            ]
+        },
+        {
+            "module_name": "patients",
+            "module_api_name": "patients",
+            "module_label": "Patient",
+            "module_plural_label": "Patients",
+            "module_description": "Patient records",
+            "fields": [
+                {
+                    "field_name": "Patient ID",
+                    "field_api_name": "patient_id",
+                    "field_type": "auto_number",
+                    "field_label": "Patient ID",
+                    "field_is_required": false,
+                    "field_is_unique": true,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "First Name",
+                    "field_api_name": "first_name",
+                    "field_type": "text",
+                    "field_label": "First Name",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Last Name",
+                    "field_api_name": "last_name",
+                    "field_type": "text",
+                    "field_label": "Last Name",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Date of Birth",
+                    "field_api_name": "date_of_birth",
+                    "field_type": "date",
+                    "field_label": "Date of Birth",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Age",
+                    "field_api_name": "age",
+                    "field_type": "number",
+                    "field_label": "Age",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Gender",
+                    "field_api_name": "gender",
+                    "field_type": "picklist",
+                    "field_label": "Gender",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Phone",
+                    "field_api_name": "phone",
+                    "field_type": "phone",
+                    "field_label": "Phone",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Email",
+                    "field_api_name": "email",
+                    "field_type": "email",
+                    "field_label": "Email",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Assigned Doctors",
+                    "field_api_name": "assigned_doctors",
+                    "field_type": "multi_lookup",
+                    "field_label": "Assigned Doctors",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null,
+                    "lookup_module_api_name": "users"
+                },
+                {
+                    "field_name": "Address",
+                    "field_api_name": "address",
+                    "field_type": "text",
+                    "field_label": "Address",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Blood Group",
+                    "field_api_name": "blood_group",
+                    "field_type": "picklist",
+                    "field_label": "Blood Group",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Emergency Contact",
+                    "field_api_name": "emergency_contact",
+                    "field_type": "text",
+                    "field_label": "Emergency Contact",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Emergency Phone",
+                    "field_api_name": "emergency_phone",
+                    "field_type": "phone",
+                    "field_label": "Emergency Phone",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Insurance Provider",
+                    "field_api_name": "insurance_provider",
+                    "field_type": "text",
+                    "field_label": "Insurance Provider",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Insurance ID",
+                    "field_api_name": "insurance_id",
+                    "field_type": "text",
+                    "field_label": "Insurance ID",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Medical History",
+                    "field_api_name": "medical_history",
+                    "field_type": "text",
+                    "field_label": "Medical History",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Allergies",
+                    "field_api_name": "allergies",
+                    "field_type": "multi_picklist",
+                    "field_label": "Allergies",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Status",
+                    "field_api_name": "status",
+                    "field_type": "picklist",
+                    "field_label": "Status",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                }
+            ],
+            "layouts": [
+                {
+                    "layout_name": "Standard Layout",
+                    "layout_is_default": true,
+                    "layout_field_order": [
+                        "patient_id",
+                        "first_name",
+                        "last_name",
+                        "age",
+                        "date_of_birth",
+                        "gender",
+                        "phone",
+                        "email",
+                        "assigned_doctors",
+                        "address",
+                        "blood_group",
+                        "emergency_contact",
+                        "emergency_phone",
+                        "insurance_provider",
+                        "insurance_id",
+                        "medical_history",
+                        "allergies",
+                        "status"
+                    ]
+                }
+            ]
+        },
+        {
+            "module_name": "visits",
+            "module_api_name": "visits",
+            "module_label": "Visit",
+            "module_plural_label": "Visits",
+            "module_description": "Patient visits",
+            "fields": [
+                {
+                    "field_name": "Visit ID",
+                    "field_api_name": "visit_id",
+                    "field_type": "auto_number",
+                    "field_label": "Visit ID",
+                    "field_is_required": false,
+                    "field_is_unique": true,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Patient ID",
+                    "field_api_name": "patient_lookup",
+                    "field_type": "lookup",
+                    "field_label": "Patient",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null,
+                    "lookup_module_api_name": "patients"
+                },
+                {
+                    "field_name": "Doctor ID",
+                    "field_api_name": "doctor_lookup",
+                    "field_type": "lookup",
+                    "field_label": "Doctor",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null,
+                    "lookup_module_api_name": "users"
+                },
+                {
+                    "field_name": "Visit Date",
+                    "field_api_name": "visit_date",
+                    "field_type": "datetime",
+                    "field_label": "Visit Date",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Department",
+                    "field_api_name": "department",
+                    "field_type": "picklist",
+                    "field_label": "Department",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Chief Complaint",
+                    "field_api_name": "chief_complaint",
+                    "field_type": "text",
+                    "field_label": "Chief Complaint",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Diagnosis",
+                    "field_api_name": "diagnosis",
+                    "field_type": "text",
+                    "field_label": "Diagnosis",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Treatment",
+                    "field_api_name": "treatment",
+                    "field_type": "text",
+                    "field_label": "Treatment",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Blood Pressure",
+                    "field_api_name": "vitals_bp",
+                    "field_type": "text",
+                    "field_label": "Blood Pressure",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Temperature",
+                    "field_api_name": "vitals_temp",
+                    "field_type": "text",
+                    "field_label": "Temperature",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Pulse Rate",
+                    "field_api_name": "vitals_pulse",
+                    "field_type": "text",
+                    "field_label": "Pulse Rate",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Weight",
+                    "field_api_name": "vitals_weight",
+                    "field_type": "text",
+                    "field_label": "Weight",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Status",
+                    "field_api_name": "status",
+                    "field_type": "picklist",
+                    "field_label": "Status",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Symptoms",
+                    "field_api_name": "symptoms",
+                    "field_type": "multi_picklist",
+                    "field_label": "Symptoms",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Notes",
+                    "field_api_name": "notes",
+                    "field_type": "text",
+                    "field_label": "Notes",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                }
+            ],
+            "layouts": [
+                {
+                    "layout_name": "Standard Layout",
+                    "layout_is_default": true,
+                    "layout_field_order": [
+                        "visit_id",
+                        "patient_lookup",
+                        "doctor_lookup",
+                        "visit_date",
+                        "department",
+                        "chief_complaint",
+                        "diagnosis",
+                        "symptoms",
+                        "treatment",
+                        "vitals_bp",
+                        "vitals_temp",
+                        "vitals_pulse",
+                        "vitals_weight",
+                        "status",
+                        "notes"
+                    ]
+                }
+            ]
+        },
+        {
+            "module_name": "inventory",
+            "module_api_name": "inventory",
+            "module_label": "Inventory Item",
+            "module_plural_label": "Inventory",
+            "module_description": "Hospital inventory",
+            "fields": [
+                {
+                    "field_name": "Item ID",
+                    "field_api_name": "item_id",
+                    "field_type": "auto_number",
+                    "field_label": "Item ID",
+                    "field_is_required": false,
+                    "field_is_unique": true,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Item Name",
+                    "field_api_name": "item_name",
+                    "field_type": "text",
+                    "field_label": "Item Name",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Category",
+                    "field_api_name": "category",
+                    "field_type": "picklist",
+                    "field_label": "Category",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Description",
+                    "field_api_name": "description",
+                    "field_type": "text",
+                    "field_label": "Description",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Quantity",
+                    "field_api_name": "quantity",
+                    "field_type": "number",
+                    "field_label": "Quantity",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Unit",
+                    "field_api_name": "unit",
+                    "field_type": "picklist",
+                    "field_label": "Unit",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Unit Price",
+                    "field_api_name": "unit_price",
+                    "field_type": "currency",
+                    "field_label": "Unit Price",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Supplier",
+                    "field_api_name": "supplier",
+                    "field_type": "text",
+                    "field_label": "Supplier",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Reorder Level",
+                    "field_api_name": "reorder_level",
+                    "field_type": "number",
+                    "field_label": "Reorder Level",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Expiry Date",
+                    "field_api_name": "expiry_date",
+                    "field_type": "date",
+                    "field_label": "Expiry Date",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Batch Number",
+                    "field_api_name": "batch_number",
+                    "field_type": "text",
+                    "field_label": "Batch Number",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Location",
+                    "field_api_name": "location",
+                    "field_type": "text",
+                    "field_label": "Location",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Status",
+                    "field_api_name": "status",
+                    "field_type": "picklist",
+                    "field_label": "Status",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                }
+            ],
+            "layouts": [
+                {
+                    "layout_name": "Standard Layout",
+                    "layout_is_default": true,
+                    "layout_field_order": [
+                        "item_id",
+                        "item_name",
+                        "category",
+                        "description",
+                        "quantity",
+                        "unit",
+                        "unit_price",
+                        "supplier",
+                        "reorder_level",
+                        "expiry_date",
+                        "batch_number",
+                        "location",
+                        "status"
+                    ]
+                }
+            ]
+        },
+        {
+            "module_name": "prescriptions",
+            "module_api_name": "prescriptions",
+            "module_label": "Prescription",
+            "module_plural_label": "Prescriptions",
+            "module_description": "Medication prescriptions",
+            "fields": [
+                {
+                    "field_name": "Prescription ID",
+                    "field_api_name": "prescription_id",
+                    "field_type": "auto_number",
+                    "field_label": "Prescription ID",
+                    "field_is_required": false,
+                    "field_is_unique": true,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Patient ID",
+                    "field_api_name": "patient_lookup",
+                    "field_type": "lookup",
+                    "field_label": "Patient",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null,
+                    "lookup_module_api_name": "patients"
+                },
+                {
+                    "field_name": "Doctor ID",
+                    "field_api_name": "doctor_lookup",
+                    "field_type": "lookup",
+                    "field_label": "Doctor",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null,
+                    "lookup_module_api_name": "users"
+                },
+                {
+                    "field_name": "Visit ID",
+                    "field_api_name": "visit_lookup",
+                    "field_type": "lookup",
+                    "field_label": "Visit",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null,
+                    "lookup_module_api_name": "visits"
+                },
+                {
+                    "field_name": "Prescribed Date",
+                    "field_api_name": "prescribed_date",
+                    "field_type": "date",
+                    "field_label": "Prescribed Date",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Medication Name",
+                    "field_api_name": "medication_name",
+                    "field_type": "text",
+                    "field_label": "Medication Name",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Dosage",
+                    "field_api_name": "dosage",
+                    "field_type": "text",
+                    "field_label": "Dosage",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Frequency",
+                    "field_api_name": "frequency",
+                    "field_type": "picklist",
+                    "field_label": "Frequency",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Duration",
+                    "field_api_name": "duration",
+                    "field_type": "text",
+                    "field_label": "Duration",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Instructions",
+                    "field_api_name": "instructions",
+                    "field_type": "text",
+                    "field_label": "Instructions",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Refills",
+                    "field_api_name": "refills",
+                    "field_type": "number",
+                    "field_label": "Refills",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Status",
+                    "field_api_name": "status",
+                    "field_type": "picklist",
+                    "field_label": "Status",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                }
+            ],
+            "layouts": [
+                {
+                    "layout_name": "Standard Layout",
+                    "layout_is_default": true,
+                    "layout_field_order": [
+                        "prescription_id",
+                        "patient_lookup",
+                        "doctor_lookup",
+                        "visit_lookup",
+                        "prescribed_date",
+                        "medication_name",
+                        "dosage",
+                        "frequency",
+                        "duration",
+                        "instructions",
+                        "refills",
+                        "status"
+                    ]
+                }
+            ]
+        },
+        {
+            "module_name": "laboratory",
+            "module_api_name": "laboratory",
+            "module_label": "Lab Test",
+            "module_plural_label": "Laboratory",
+            "module_description": "Laboratory tests",
+            "fields": [
+                {
+                    "field_name": "Test ID",
+                    "field_api_name": "test_id",
+                    "field_type": "auto_number",
+                    "field_label": "Test ID",
+                    "field_is_required": false,
+                    "field_is_unique": true,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Patient ID",
+                    "field_api_name": "patient_lookup",
+                    "field_type": "lookup",
+                    "field_label": "Patient",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null,
+                    "lookup_module_api_name": "patients"
+                },
+                {
+                    "field_name": "Doctor ID",
+                    "field_api_name": "doctor_lookup",
+                    "field_type": "lookup",
+                    "field_label": "Doctor",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null,
+                    "lookup_module_api_name": "users"
+                },
+                {
+                    "field_name": "Visit ID",
+                    "field_api_name": "visit_lookup",
+                    "field_type": "lookup",
+                    "field_label": "Visit",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null,
+                    "lookup_module_api_name": "visits"
+                },
+                {
+                    "field_name": "Test Name",
+                    "field_api_name": "test_name",
+                    "field_type": "text",
+                    "field_label": "Test Name",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Test Type",
+                    "field_api_name": "test_type",
+                    "field_type": "picklist",
+                    "field_label": "Test Type",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Priority",
+                    "field_api_name": "priority",
+                    "field_type": "picklist",
+                    "field_label": "Priority",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Sample Date",
+                    "field_api_name": "sample_date",
+                    "field_type": "datetime",
+                    "field_label": "Sample Date",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Result Date",
+                    "field_api_name": "result_date",
+                    "field_type": "datetime",
+                    "field_label": "Result Date",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Result Value",
+                    "field_api_name": "result_value",
+                    "field_type": "text",
+                    "field_label": "Result Value",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Reference Range",
+                    "field_api_name": "reference_range",
+                    "field_type": "text",
+                    "field_label": "Reference Range",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Status",
+                    "field_api_name": "status",
+                    "field_type": "picklist",
+                    "field_label": "Status",
+                    "field_is_required": true,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Notes",
+                    "field_api_name": "notes",
+                    "field_type": "text",
+                    "field_label": "Notes",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null
+                },
+                {
+                    "field_name": "Technician ID",
+                    "field_api_name": "technician_lookup",
+                    "field_type": "lookup",
+                    "field_label": "Technician",
+                    "field_is_required": false,
+                    "field_is_unique": false,
+                    "field_default_value": null,
+                    "lookup_module_api_name": "users"
+                }
+            ],
+            "layouts": [
+                {
+                    "layout_name": "Standard Layout",
+                    "layout_is_default": true,
+                    "layout_field_order": [
+                        "test_id",
+                        "patient_lookup",
+                        "doctor_lookup",
+                        "visit_lookup",
+                        "test_name",
+                        "test_type",
+                        "priority",
+                        "sample_date",
+                        "result_date",
+                        "result_value",
+                        "reference_range",
+                        "status",
+                        "notes",
+                        "technician_lookup"
+                    ]
+                }
+            ]
+        }
+    ],
+    "relationships": [
+        {
+            "from_module_api_name": "patients",
+            "to_module_api_name": "users",
+            "relationship_type": "many_to_many",
+            "from_field_name": "assigned_doctors",
+            "to_field_name": ""
+        },
+        {
+            "from_module_api_name": "patients",
+            "to_module_api_name": "visits",
+            "relationship_type": "one_to_many",
+            "from_field_name": "",
+            "to_field_name": "patient_lookup"
+        },
+        {
+            "from_module_api_name": "users",
+            "to_module_api_name": "visits",
+            "relationship_type": "one_to_many",
+            "from_field_name": "",
+            "to_field_name": "doctor_lookup"
+        },
+        {
+            "from_module_api_name": "patients",
+            "to_module_api_name": "prescriptions",
+            "relationship_type": "one_to_many",
+            "from_field_name": "",
+            "to_field_name": "patient_lookup"
+        },
+        {
+            "from_module_api_name": "users",
+            "to_module_api_name": "prescriptions",
+            "relationship_type": "one_to_many",
+            "from_field_name": "",
+            "to_field_name": "doctor_lookup"
+        },
+        {
+            "from_module_api_name": "visits",
+            "to_module_api_name": "prescriptions",
+            "relationship_type": "one_to_many",
+            "from_field_name": "",
+            "to_field_name": "visit_lookup"
+        },
+        {
+            "from_module_api_name": "patients",
+            "to_module_api_name": "laboratory",
+            "relationship_type": "one_to_many",
+            "from_field_name": "",
+            "to_field_name": "patient_lookup"
+        },
+        {
+            "from_module_api_name": "users",
+            "to_module_api_name": "laboratory",
+            "relationship_type": "one_to_many",
+            "from_field_name": "",
+            "to_field_name": "doctor_lookup"
+        },
+        {
+            "from_module_api_name": "visits",
+            "to_module_api_name": "laboratory",
+            "relationship_type": "one_to_many",
+            "from_field_name": "",
+            "to_field_name": "visit_lookup"
+        },
+        {
+            "from_module_api_name": "users",
+            "to_module_api_name": "laboratory",
+            "relationship_type": "one_to_many",
+            "from_field_name": "",
+            "to_field_name": "technician_lookup"
+        }
+    ],
+    "records": [
+        {
+            "id": "dr_sarah_johnson",
+            "module_api_name": "users",
+            "data": {
+                "full_name": "Dr. Sarah Johnson",
+                "email": "sarah.johnson@hospital.com",
+                "phone": "+911234567891",
+                "role": "Doctor",
+                "department": "Cardiology",
+                "is_active": "true"
+            }
+        },
+        {
+            "id": "dr_james_patel",
+            "module_api_name": "users",
+            "data": {
+                "full_name": "Dr. James Patel",
+                "email": "james.patel@hospital.com",
+                "phone": "+919876543210",
+                "role": "Doctor",
+                "department": "Neurology",
+                "is_active": "true"
+            }
+        },
+        {
+            "id": "dr_emily_chen",
+            "module_api_name": "users",
+            "data": {
+                "full_name": "Dr. Emily Chen",
+                "email": "emily.chen@hospital.com",
+                "phone": "+919876543211",
+                "role": "Doctor",
+                "department": "Pediatrics",
+                "is_active": "true"
+            }
+        },
+        {
+            "id": "dr_robert_williams",
+            "module_api_name": "users",
+            "data": {
+                "full_name": "Dr. Robert Williams",
+                "email": "robert.williams@hospital.com",
+                "phone": "+919876543212",
+                "role": "Doctor",
+                "department": "Orthopedics",
+                "is_active": "true"
+            }
+        },
+        {
+            "id": "nurse_linda_davis",
+            "module_api_name": "users",
+            "data": {
+                "full_name": "Linda Davis",
+                "email": "linda.davis@hospital.com",
+                "phone": "+919876543213",
+                "role": "Nurse",
+                "department": "General",
+                "is_active": "true"
+            }
+        },
+        {
+            "id": "pharm_mark_evans",
+            "module_api_name": "users",
+            "data": {
+                "full_name": "Mark Evans",
+                "email": "mark.evans@hospital.com",
+                "phone": "+919876543214",
+                "role": "Pharmacist",
+                "department": "Pharmacy",
+                "is_active": "true"
+            }
+        },
+        {
+            "id": "tech_priya_sharma",
+            "module_api_name": "users",
+            "data": {
+                "full_name": "Priya Sharma",
+                "email": "priya.sharma@hospital.com",
+                "phone": "+919876543215",
+                "role": "Lab Technician",
+                "department": "Laboratory",
+                "is_active": "true"
+            }
+        },
+        {
+            "id": "recep_david_miller",
+            "module_api_name": "users",
+            "data": {
+                "full_name": "David Miller",
+                "email": "david.miller@hospital.com",
+                "phone": "+919876543216",
+                "role": "Receptionist",
+                "department": "Front Desk",
+                "is_active": "true"
+            }
+        },
+        {
+            "module_api_name": "inventory",
+            "data": {
+                "item_name": "Paracetamol 500mg",
+                "category": "Medication",
+                "description": "Fever and pain relief tablets",
+                "quantity": "500",
+                "unit": "Strip",
+                "unit_price": "25.00",
+                "supplier": "Cipla Ltd",
+                "reorder_level": "100",
+                "expiry_date": "2027-06-30",
+                "batch_number": "PCM-2026-A1",
+                "location": "Pharmacy Store A",
+                "status": "In-Stock"
+            }
+        },
+        {
+            "module_api_name": "inventory",
+            "data": {
+                "item_name": "Amoxicillin 250mg",
+                "category": "Medication",
+                "description": "Broad-spectrum antibiotic capsules",
+                "quantity": "200",
+                "unit": "Strip",
+                "unit_price": "45.00",
+                "supplier": "Sun Pharma",
+                "reorder_level": "50",
+                "expiry_date": "2027-03-15",
+                "batch_number": "AMX-2026-B3",
+                "location": "Pharmacy Store A",
+                "status": "In-Stock"
+            }
+        },
+        {
+            "module_api_name": "inventory",
+            "data": {
+                "item_name": "Surgical Gloves (Medium)",
+                "category": "Consumable",
+                "description": "Latex-free sterile surgical gloves",
+                "quantity": "50",
+                "unit": "Box",
+                "unit_price": "350.00",
+                "supplier": "MedLine Industries",
+                "reorder_level": "20",
+                "expiry_date": "2028-12-31",
+                "batch_number": "SG-2026-M1",
+                "location": "Central Store",
+                "status": "In-Stock"
+            }
+        },
+        {
+            "module_api_name": "inventory",
+            "data": {
+                "item_name": "Digital Thermometer",
+                "category": "Equipment",
+                "description": "Clinical digital thermometer with memory",
+                "quantity": "15",
+                "unit": "Piece",
+                "unit_price": "450.00",
+                "supplier": "Omron Healthcare",
+                "reorder_level": "5",
+                "expiry_date": "",
+                "batch_number": "DT-2026-01",
+                "location": "Ward Supply Room",
+                "status": "In-Stock"
+            }
+        },
+        {
+            "module_api_name": "inventory",
+            "data": {
+                "item_name": "Insulin Glargine 100IU/ml",
+                "category": "Medication",
+                "description": "Long-acting insulin for diabetes management",
+                "quantity": "30",
+                "unit": "Vial",
+                "unit_price": "1200.00",
+                "supplier": "Sanofi India",
+                "reorder_level": "10",
+                "expiry_date": "2027-01-20",
+                "batch_number": "INS-2026-G5",
+                "location": "Cold Storage",
+                "status": "In-Stock"
+            }
+        },
+        {
+            "module_api_name": "inventory",
+            "data": {
+                "item_name": "Sterile Gauze Swabs 10x10cm",
+                "category": "Consumable",
+                "description": "Individually wrapped sterile absorbent cotton gauze pads",
+                "quantity": "300",
+                "unit": "Box",
+                "unit_price": "120.00",
+                "supplier": "Johnson & Johnson MedTech",
+                "reorder_level": "60",
+                "expiry_date": "2029-05-15",
+                "batch_number": "GZ-2026-S4",
+                "location": "Central Store",
+                "status": "In-Stock"
+            }
+        },
+        {
+            "module_api_name": "inventory",
+            "data": {
+                "item_name": "Disposable Syringes 5ml",
+                "category": "Consumable",
+                "description": "Luer lock sterile single-use hypodermic syringes with needle",
+                "quantity": "450",
+                "unit": "Piece",
+                "unit_price": "12.50",
+                "supplier": "BD Healthcare",
+                "reorder_level": "100",
+                "expiry_date": "2029-01-10",
+                "batch_number": "SYR-2026-05",
+                "location": "Nursing Station Store",
+                "status": "In-Stock"
+            }
+        },
+        {
+            "module_api_name": "inventory",
+            "data": {
+                "item_name": "N95 Respirator Masks",
+                "category": "Consumable",
+                "description": "Particulate respirator face mask with adjustable nose clip",
+                "quantity": "250",
+                "unit": "Box",
+                "unit_price": "550.00",
+                "supplier": "3M India",
+                "reorder_level": "50",
+                "expiry_date": "2028-08-31",
+                "batch_number": "MSK-2026-N95",
+                "location": "Central Store",
+                "status": "In-Stock"
+            }
+        },
+        {
+            "module_api_name": "inventory",
+            "data": {
+                "item_name": "Scalpel Blades No. 10",
+                "category": "Surgical",
+                "description": "Carbon steel surgical scalpel blades, sterile foil packed",
+                "quantity": "80",
+                "unit": "Box",
+                "unit_price": "420.00",
+                "supplier": "Swann-Morton",
+                "reorder_level": "25",
+                "expiry_date": "2028-11-20",
+                "batch_number": "SCP-2026-10",
+                "location": "Operation Theatre Store",
+                "status": "In-Stock"
+            }
+        },
+        {
+            "module_api_name": "inventory",
+            "data": {
+                "item_name": "Fingertip Pulse Oximeter",
+                "category": "Equipment",
+                "description": "OLED display pulse oximeter for SpO2 and PR monitoring",
+                "quantity": "20",
+                "unit": "Piece",
+                "unit_price": "950.00",
+                "supplier": "Beurer Medical",
+                "reorder_level": "8",
+                "expiry_date": "",
+                "batch_number": "POX-2026-F1",
+                "location": "Ward Supply Room",
+                "status": "In-Stock"
+            }
+        },
+        {
+            "id": "pat_johnathan_doe",
+            "module_api_name": "patients",
+            "data": {
+                "first_name": "Johnathan",
+                "last_name": "Doe",
+                "date_of_birth": "1978-05-14",
+                "age": "48",
+                "gender": "Male",
+                "phone": "+919876543201",
+                "email": "johnathan.doe@example.com",
+                "address": "104 Greenfield Avenue, Block B, New Delhi",
+                "blood_group": "O+",
+                "emergency_contact": "Jane Doe (Wife)",
+                "emergency_phone": "+919876543202",
+                "insurance_provider": "Star Health Insurance",
+                "insurance_id": "SH-2024-9981",
+                "medical_history": "Chronic essential hypertension diagnosed 2020. Mild right knee osteoarthritis.",
+                "allergies": "Penicillin",
+                "status": "Active",
+                "assigned_doctors": "_ref:dr_sarah_johnson,_ref:dr_robert_williams"
+            }
+        },
+        {
+            "id": "pat_anita_desai",
+            "module_api_name": "patients",
+            "data": {
+                "first_name": "Anita",
+                "last_name": "Desai",
+                "date_of_birth": "1989-11-23",
+                "age": "36",
+                "gender": "Female",
+                "phone": "+919876543203",
+                "email": "anita.desai@example.com",
+                "address": "12 Lakeview Residency, Sector 14, Gurgaon",
+                "blood_group": "A+",
+                "emergency_contact": "Vikram Desai (Husband)",
+                "emergency_phone": "+919876543204",
+                "insurance_provider": "Max Bupa Health",
+                "insurance_id": "MB-883102",
+                "medical_history": "Recurrent migraine headaches with visual aura. Seasonal allergic rhinitis.",
+                "allergies": "Dust,Pollen",
+                "status": "Active",
+                "assigned_doctors": "_ref:dr_james_patel"
+            }
+        },
+        {
+            "id": "pat_marcus_vance",
+            "module_api_name": "patients",
+            "data": {
+                "first_name": "Marcus",
+                "last_name": "Vance",
+                "date_of_birth": "2018-03-15",
+                "age": "8",
+                "gender": "Male",
+                "phone": "+919876543205",
+                "email": "marcus.family@example.com",
+                "address": "45 Park Street, Flat 3A, Bangalore",
+                "blood_group": "B+",
+                "emergency_contact": "Clara Vance (Mother)",
+                "emergency_phone": "+919876543206",
+                "insurance_provider": "HDFC ERGO Health",
+                "insurance_id": "HE-774910",
+                "medical_history": "Childhood bronchial asthma diagnosed at age 4. Mild eczema.",
+                "allergies": "Peanuts",
+                "status": "Active",
+                "assigned_doctors": "_ref:dr_emily_chen"
+            }
+        },
+        {
+            "id": "pat_eleanor_wright",
+            "module_api_name": "patients",
+            "data": {
+                "first_name": "Eleanor",
+                "last_name": "Wright",
+                "date_of_birth": "1962-08-09",
+                "age": "64",
+                "gender": "Female",
+                "phone": "+919876543207",
+                "email": "eleanor.wright@example.com",
+                "address": "78 Rosewood Lane, Pune",
+                "blood_group": "AB-",
+                "emergency_contact": "Thomas Wright (Son)",
+                "emergency_phone": "+919876543208",
+                "insurance_provider": "ICICI Lombard Health",
+                "insurance_id": "IL-551920",
+                "medical_history": "Type 2 Diabetes Mellitus (managed). Total knee replacement left knee (2022).",
+                "allergies": "Latex",
+                "status": "Active",
+                "assigned_doctors": "_ref:dr_robert_williams,_ref:dr_sarah_johnson"
+            }
+        },
+        {
+            "id": "pat_rajesh_kumar",
+            "module_api_name": "patients",
+            "data": {
+                "first_name": "Rajesh",
+                "last_name": "Kumar",
+                "date_of_birth": "1995-02-17",
+                "age": "31",
+                "gender": "Male",
+                "phone": "+919876543209",
+                "email": "rajesh.k@example.com",
+                "address": "202 Cyber Heights, Hitec City, Hyderabad",
+                "blood_group": "O-",
+                "emergency_contact": "Sunita Kumar (Mother)",
+                "emergency_phone": "+919876543210",
+                "insurance_provider": "Care Health Insurance",
+                "insurance_id": "CHI-110293",
+                "medical_history": "No chronic systemic illness. Uncomplicated appendectomy in 2018.",
+                "allergies": "Other",
+                "status": "Active",
+                "assigned_doctors": "_ref:dr_sarah_johnson"
+            }
+        },
+        {
+            "id": "pat_maria_rodriguez",
+            "module_api_name": "patients",
+            "data": {
+                "first_name": "Maria",
+                "last_name": "Rodriguez",
+                "date_of_birth": "1982-07-30",
+                "age": "44",
+                "gender": "Female",
+                "phone": "+919876543211",
+                "email": "maria.rod@example.com",
+                "address": "15 Sunrise Boulevard, Chennai",
+                "blood_group": "B-",
+                "emergency_contact": "Carlos Rodriguez (Brother)",
+                "emergency_phone": "+919876543212",
+                "insurance_provider": "Bajaj Allianz General",
+                "insurance_id": "BA-339182",
+                "medical_history": "Hypothyroidism on Eltroxin therapy. Cervical spondylosis with radiculopathy.",
+                "allergies": "Dust",
+                "status": "Active",
+                "assigned_doctors": "_ref:dr_james_patel,_ref:dr_robert_williams"
+            }
+        },
+        {
+            "id": "pat_aravind_swami",
+            "module_api_name": "patients",
+            "data": {
+                "first_name": "Aravind",
+                "last_name": "Swaminathan",
+                "date_of_birth": "1955-12-04",
+                "age": "70",
+                "gender": "Male",
+                "phone": "+919876543213",
+                "email": "aravind.swamy@example.com",
+                "address": "88 Palm Grove, Kochi",
+                "blood_group": "A-",
+                "emergency_contact": "Lakshmi Swaminathan (Daughter)",
+                "emergency_phone": "+919876543214",
+                "insurance_provider": "New India Assurance",
+                "insurance_id": "NIA-991024",
+                "medical_history": "Coronary Artery Bypass Graft (CABG) in 2021. Mixed dyslipidemia. Mild peripheral edema.",
+                "allergies": "Penicillin,Latex",
+                "status": "Active",
+                "assigned_doctors": "_ref:dr_sarah_johnson"
+            }
+        },
+        {
+            "id": "pat_sophie_taylor",
+            "module_api_name": "patients",
+            "data": {
+                "first_name": "Sophie",
+                "last_name": "Taylor",
+                "date_of_birth": "2012-09-18",
+                "age": "13",
+                "gender": "Female",
+                "phone": "+919876543215",
+                "email": "sophie.family@example.com",
+                "address": "56 Oakridge Drive, Mumbai",
+                "blood_group": "O+",
+                "emergency_contact": "Karen Taylor (Mother)",
+                "emergency_phone": "+919876543216",
+                "insurance_provider": "Star Health Insurance",
+                "insurance_id": "SH-2025-4412",
+                "medical_history": "Recurrent episodes of acute streptococcal tonsillitis. Completed antibiotic course.",
+                "allergies": "Pollen",
+                "status": "Discharged",
+                "assigned_doctors": "_ref:dr_emily_chen"
+            }
+        },
+        {
+            "id": "visit_johnathan_cardio",
+            "module_api_name": "visits",
+            "data": {
+                "patient_lookup": "_ref:pat_johnathan_doe",
+                "doctor_lookup": "_ref:dr_sarah_johnson",
+                "visit_date": "2026-08-10T09:30:00",
+                "department": "Cardiology",
+                "chief_complaint": "Exertional chest tightness and shortness of breath upon climbing stairs",
+                "diagnosis": "Stable Angina Pectoris, Grade II Essential Hypertension",
+                "treatment": "Initiated Beta-blocker (Metoprolol) and ACE inhibitor (Ramipril). Ordered lipid panel and ECG.",
+                "vitals_bp": "148/92 mmHg",
+                "vitals_temp": "98.4 F",
+                "vitals_pulse": "82 bpm",
+                "vitals_weight": "84 kg",
+                "status": "Completed",
+                "symptoms": "Fatigue,Other",
+                "notes": "Patient advised on low-sodium diet and stress reduction. Follow-up scheduled in 4 weeks."
+            }
+        },
+        {
+            "id": "visit_johnathan_ortho",
+            "module_api_name": "visits",
+            "data": {
+                "patient_lookup": "_ref:pat_johnathan_doe",
+                "doctor_lookup": "_ref:dr_robert_williams",
+                "visit_date": "2026-08-12T14:00:00",
+                "department": "Orthopedics",
+                "chief_complaint": "Persistent right knee joint pain and morning stiffness",
+                "diagnosis": "Right Knee Osteoarthritis (Grade 2 Medial Compartment)",
+                "treatment": "Prescribed oral NSAID short-course, topical analgesic gel, and quadriceps strengthening physiotherapy.",
+                "vitals_bp": "138/86 mmHg",
+                "vitals_temp": "98.6 F",
+                "vitals_pulse": "76 bpm",
+                "vitals_weight": "84 kg",
+                "status": "Completed",
+                "symptoms": "Other",
+                "notes": "X-ray confirmed mild joint space narrowing. Avoid high-impact jogging."
+            }
+        },
+        {
+            "id": "visit_anita_neuro",
+            "module_api_name": "visits",
+            "data": {
+                "patient_lookup": "_ref:pat_anita_desai",
+                "doctor_lookup": "_ref:dr_james_patel",
+                "visit_date": "2026-08-11T11:00:00",
+                "department": "Neurology",
+                "chief_complaint": "Severe pulsating unilateral left-sided headache with photophobia and nausea for 2 days",
+                "diagnosis": "Acute Migraine Attack with Visual Aura",
+                "treatment": "Administered oral Sumatriptan 50mg, IV hydration fluids, and prescribed abortive triptan regimen.",
+                "vitals_bp": "118/74 mmHg",
+                "vitals_temp": "98.6 F",
+                "vitals_pulse": "72 bpm",
+                "vitals_weight": "58 kg",
+                "status": "Completed",
+                "symptoms": "Headache,Nausea",
+                "notes": "Neurological examination cranial nerves intact. Advised keeping a headache trigger diary."
+            }
+        }
+    ]
+}
